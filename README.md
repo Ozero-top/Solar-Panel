@@ -81,21 +81,15 @@ docker run -d \
 ```yaml
 services:
   solarpanel:
-    image: ovitor/solarpanel:latest      # 拉取 DockerHub 镜像；本地构建改为 build: .
+    image: ovitor/solarpanel:latest
     container_name: solarpanel
     restart: unless-stopped
     ports:
-      - "18080:18080"                     # 左侧为宿主机端口，按需修改
+      - "18080:18080"
     volumes:
-      - ./data:/app/data                  # 数据库 + 上传文件持久化
+      - ./data:/app/data
     environment:
       - TZ=Asia/Shanghai
-    healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:18080/api/install.php"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-      start_period: 10s
 ```
 
 ```bash
