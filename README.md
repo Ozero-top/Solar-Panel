@@ -92,11 +92,6 @@ services:
       - TZ=Asia/Shanghai
 ```
 
-```bash
-cd SolarPanel-Docker
-docker compose up -d
-```
-
 > 如需从源码构建镜像，将 `image: ovitor/solarpanel:latest` 改为 `build: .`，然后 `docker compose up -d --build`。
 
 ### 2. 访问
