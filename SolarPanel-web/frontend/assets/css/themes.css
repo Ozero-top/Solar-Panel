@@ -1,0 +1,1682 @@
+/* ============================================================
+   风格主题包：html[data-style] 驱动，16 种风格 × 深浅双态
+   soft（柔和浮雕）为默认基线，定义于 common.css，此处不覆盖
+   其余 15 风格各自覆盖变量 + .style-fx 装饰层（壁纸启用时隐藏）
+   深浅由 html[data-theme] 区分，两个块必须成对维护
+   ============================================================ */
+
+/* 装饰层载体（三个页面均放置 <div class="style-fx">） */
+.style-fx {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+body.has-wallpaper .style-fx {
+  display: none;
+}
+
+/* ============================================================
+   1) nature 自然拟态 —— 翡翠水色 · 有机 blob · 治愈流动
+   ============================================================ */
+:root[data-theme='light'][data-style='nature'] {
+  --bg-grad: linear-gradient(165deg, #e7f3ec 0%, #ddf0e7 40%, #e3f1f6 100%);
+  --surface: #e4f0e9;
+  --surface-2: #eaf4ee;
+  --text: #2e4a41;
+  --text-muted: #7b948a;
+  --accent: #2fa585;
+  --accent-soft: rgba(47, 165, 133, 0.15);
+  --accent-hover: #279172;
+  --danger: #d96a5f;
+  --success: #3aa877;
+  --edge: rgba(255, 255, 255, 0.66);
+  --edge-weak: rgba(46, 74, 65, 0.09);
+  --overlay: rgba(30, 60, 52, 0.35);
+  --sh-dark: rgba(140, 168, 155, 0.5);
+  --sh-light: rgba(255, 255, 255, 0.92);
+  --accent-glow: rgba(47, 165, 133, 0.3);
+  --raised-sm: 2px 2px 5px rgba(140, 168, 155, 0.45), 5px 5px 12px rgba(140, 168, 155, 0.32),
+    -2px -2px 5px rgba(255, 255, 255, 1), -5px -5px 12px rgba(255, 255, 255, 0.85),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  --raised: 4px 4px 9px rgba(140, 168, 155, 0.4), 10px 10px 24px rgba(140, 168, 155, 0.34),
+    -4px -4px 9px rgba(255, 255, 255, 1), -10px -10px 24px rgba(255, 255, 255, 0.88),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  --raised-lg: 6px 6px 14px rgba(140, 168, 155, 0.36), 18px 18px 40px rgba(140, 168, 155, 0.32),
+    -6px -6px 14px rgba(255, 255, 255, 1), -18px -18px 40px rgba(255, 255, 255, 0.92),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  --pressed-sm: inset 1px 1px 3px rgba(140, 168, 155, 0.5), inset 3px 3px 9px rgba(140, 168, 155, 0.32),
+    inset -1px -1px 3px rgba(255, 255, 255, 0.95), inset -3px -3px 9px rgba(255, 255, 255, 0.72);
+  --inset: inset 2px 2px 5px rgba(140, 168, 155, 0.46), inset 5px 5px 12px rgba(140, 168, 155, 0.3),
+    inset -2px -2px 5px rgba(255, 255, 255, 0.95), inset -5px -5px 12px rgba(255, 255, 255, 0.68);
+  --hover-bg: rgba(47, 165, 133, 0.1);
+  --scroll-thumb: rgba(140, 168, 155, 0.6);
+}
+:root[data-theme='dark'][data-style='nature'] {
+  --bg-grad: linear-gradient(165deg, #1c2b26 0%, #182420 45%, #15201e 100%);
+  --surface: #1f2d28;
+  --surface-2: #23322c;
+  --text: #d3e5dc;
+  --text-muted: #7e968c;
+  --accent: #43c39b;
+  --accent-soft: rgba(67, 195, 155, 0.16);
+  --accent-hover: #5bd3ac;
+  --danger: #e57a6e;
+  --success: #58c48e;
+  --edge: rgba(255, 255, 255, 0.06);
+  --edge-weak: rgba(255, 255, 255, 0.07);
+  --overlay: rgba(0, 0, 0, 0.55);
+  --sh-dark: rgba(0, 0, 0, 0.5);
+  --sh-light: rgba(120, 255, 200, 0.035);
+  --accent-glow: rgba(67, 195, 155, 0.26);
+  --raised-sm: 2px 2px 5px rgba(0, 0, 0, 0.5), 5px 5px 12px rgba(0, 0, 0, 0.32),
+    -2px -2px 5px rgba(255, 255, 255, 0.055), -5px -5px 12px rgba(255, 255, 255, 0.028),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --raised: 4px 4px 9px rgba(0, 0, 0, 0.45), 10px 10px 24px rgba(0, 0, 0, 0.35),
+    -4px -4px 9px rgba(255, 255, 255, 0.055), -10px -10px 24px rgba(255, 255, 255, 0.03),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --raised-lg: 6px 6px 14px rgba(0, 0, 0, 0.45), 18px 18px 40px rgba(0, 0, 0, 0.4),
+    -6px -6px 14px rgba(255, 255, 255, 0.05), -18px -18px 40px rgba(255, 255, 255, 0.03),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --pressed-sm: inset 1px 1px 3px rgba(0, 0, 0, 0.55), inset 3px 3px 9px rgba(0, 0, 0, 0.35),
+    inset -1px -1px 3px rgba(255, 255, 255, 0.05), inset -3px -3px 9px rgba(255, 255, 255, 0.02);
+  --inset: inset 2px 2px 5px rgba(0, 0, 0, 0.5), inset 5px 5px 12px rgba(0, 0, 0, 0.3),
+    inset -2px -2px 5px rgba(255, 255, 255, 0.05), inset -5px -5px 12px rgba(255, 255, 255, 0.02);
+  --hover-bg: rgba(67, 195, 155, 0.12);
+  --scroll-thumb: rgba(0, 0, 0, 0.45);
+}
+/* nature 装饰：两枚缓呼吸变形的有机 blob */
+[data-style='nature'] .style-fx::before,
+[data-style='nature'] .style-fx::after {
+  content: '';
+  position: absolute;
+  filter: blur(70px);
+  border-radius: 58% 42% 38% 62% / 55% 48% 52% 45%;
+  animation: fx-blob-a 18s ease-in-out infinite;
+}
+[data-style='nature'] .style-fx::before {
+  width: 46vw;
+  height: 46vw;
+  left: -12vw;
+  top: -14vw;
+  background: radial-gradient(circle at 40% 40%, rgba(47, 165, 133, 0.5), transparent 65%);
+  opacity: 0.55;
+}
+[data-style='nature'] .style-fx::after {
+  width: 52vw;
+  height: 52vw;
+  right: -16vw;
+  bottom: -18vw;
+  background: radial-gradient(circle at 55% 45%, rgba(90, 167, 214, 0.4), transparent 62%);
+  border-radius: 42% 58% 60% 40% / 48% 56% 44% 52%;
+  animation: fx-blob-b 22s ease-in-out infinite;
+  opacity: 0.45;
+}
+:root[data-theme='dark'][data-style='nature'] .style-fx::before { opacity: 0.32; }
+:root[data-theme='dark'][data-style='nature'] .style-fx::after { opacity: 0.26; }
+/* nature 组件：更大圆角的有机形态 */
+[data-style='nature'] .card,
+[data-style='nature'] .btn {
+  border-radius: 22px;
+}
+[data-style='nature'] .card .icon {
+  border-radius: 17px;
+}
+@keyframes fx-blob-a {
+  0%, 100% { border-radius: 58% 42% 38% 62% / 55% 48% 52% 45%; transform: translate(0, 0) rotate(0deg); }
+  33% { border-radius: 44% 56% 62% 38% / 48% 60% 40% 52%; transform: translate(3vw, 2vw) rotate(6deg); }
+  66% { border-radius: 62% 38% 46% 54% / 58% 42% 58% 42%; transform: translate(-2vw, 3vw) rotate(-5deg); }
+}
+@keyframes fx-blob-b {
+  0%, 100% { border-radius: 42% 58% 60% 40% / 48% 56% 44% 52%; transform: translate(0, 0) rotate(0deg); }
+  50% { border-radius: 58% 42% 40% 60% / 54% 46% 54% 46%; transform: translate(-3vw, -2vw) rotate(7deg); }
+}
+
+/* ============================================================
+   2) natural 自然大地 —— 苔绿/沙米/岩灰/湖蓝 · 温暖纸感
+   ============================================================ */
+:root[data-theme='light'][data-style='natural'] {
+  --bg-grad: linear-gradient(170deg, #f3efe4 0%, #ede7d8 45%, #e7e2d3 100%);
+  --surface: #efeadb;
+  --surface-2: #f3efe3;
+  --text: #423d31;
+  --text-muted: #8f8875;
+  --accent: #6f8f5a;
+  --accent-soft: rgba(111, 143, 90, 0.16);
+  --accent-hover: #5e7c4b;
+  --danger: #c26a52;
+  --success: #5c8a4f;
+  --edge: rgba(255, 255, 255, 0.6);
+  --edge-weak: rgba(66, 61, 49, 0.1);
+  --overlay: rgba(60, 55, 42, 0.35);
+  --sh-dark: rgba(168, 158, 132, 0.5);
+  --sh-light: rgba(255, 255, 255, 0.9);
+  --accent-glow: rgba(111, 143, 90, 0.3);
+  --raised-sm: 2px 2px 5px rgba(168, 158, 132, 0.46), 5px 5px 12px rgba(168, 158, 132, 0.32),
+    -2px -2px 5px rgba(255, 255, 255, 1), -5px -5px 12px rgba(255, 255, 255, 0.82),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  --raised: 4px 4px 9px rgba(168, 158, 132, 0.42), 10px 10px 24px rgba(168, 158, 132, 0.34),
+    -4px -4px 9px rgba(255, 255, 255, 1), -10px -10px 24px rgba(255, 255, 255, 0.85),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  --raised-lg: 6px 6px 14px rgba(168, 158, 132, 0.38), 18px 18px 40px rgba(168, 158, 132, 0.32),
+    -6px -6px 14px rgba(255, 255, 255, 1), -18px -18px 40px rgba(255, 255, 255, 0.88),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  --pressed-sm: inset 1px 1px 3px rgba(168, 158, 132, 0.52), inset 3px 3px 9px rgba(168, 158, 132, 0.34),
+    inset -1px -1px 3px rgba(255, 255, 255, 0.92), inset -3px -3px 9px rgba(255, 255, 255, 0.66);
+  --inset: inset 2px 2px 5px rgba(168, 158, 132, 0.48), inset 5px 5px 12px rgba(168, 158, 132, 0.3),
+    inset -2px -2px 5px rgba(255, 255, 255, 0.92), inset -5px -5px 12px rgba(255, 255, 255, 0.62);
+  --hover-bg: rgba(111, 143, 90, 0.1);
+  --scroll-thumb: rgba(168, 158, 132, 0.6);
+}
+:root[data-theme='dark'][data-style='natural'] {
+  --bg-grad: linear-gradient(170deg, #262521 0%, #211f1c 45%, #1d1c19 100%);
+  --surface: #26241f;
+  --surface-2: #2b2924;
+  --text: #e4ded0;
+  --text-muted: #998f7c;
+  --accent: #8fae76;
+  --accent-soft: rgba(143, 174, 118, 0.16);
+  --accent-hover: #9fbe86;
+  --danger: #d98066;
+  --success: #79a862;
+  --edge: rgba(255, 255, 255, 0.055);
+  --edge-weak: rgba(255, 255, 255, 0.06);
+  --overlay: rgba(0, 0, 0, 0.55);
+  --sh-dark: rgba(0, 0, 0, 0.5);
+  --sh-light: rgba(255, 240, 210, 0.03);
+  --accent-glow: rgba(143, 174, 118, 0.25);
+  --raised-sm: 2px 2px 5px rgba(0, 0, 0, 0.5), 5px 5px 12px rgba(0, 0, 0, 0.32),
+    -2px -2px 5px rgba(255, 255, 255, 0.05), -5px -5px 12px rgba(255, 255, 255, 0.025),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --raised: 4px 4px 9px rgba(0, 0, 0, 0.45), 10px 10px 24px rgba(0, 0, 0, 0.35),
+    -4px -4px 9px rgba(255, 255, 255, 0.05), -10px -10px 24px rgba(255, 255, 255, 0.028),
+    inset 0 1px 0 rgba(255, 255, 255, 0.055);
+  --raised-lg: 6px 6px 14px rgba(0, 0, 0, 0.45), 18px 18px 40px rgba(0, 0, 0, 0.4),
+    -6px -6px 14px rgba(255, 255, 255, 0.045), -18px -18px 40px rgba(255, 255, 255, 0.028),
+    inset 0 1px 0 rgba(255, 255, 255, 0.055);
+  --pressed-sm: inset 1px 1px 3px rgba(0, 0, 0, 0.55), inset 3px 3px 9px rgba(0, 0, 0, 0.35),
+    inset -1px -1px 3px rgba(255, 255, 255, 0.05), inset -3px -3px 9px rgba(255, 255, 255, 0.02);
+  --inset: inset 2px 2px 5px rgba(0, 0, 0, 0.5), inset 5px 5px 12px rgba(0, 0, 0, 0.3),
+    inset -2px -2px 5px rgba(255, 255, 255, 0.05), inset -5px -5px 12px rgba(255, 255, 255, 0.02);
+  --hover-bg: rgba(143, 174, 118, 0.12);
+  --scroll-thumb: rgba(0, 0, 0, 0.45);
+}
+/* natural 装饰：右上暖阳光斑 + 左下湖蓝水汽，极缓慢漂移 */
+[data-style='natural'] .style-fx::before,
+[data-style='natural'] .style-fx::after {
+  content: '';
+  position: absolute;
+  filter: blur(80px);
+  border-radius: 50%;
+}
+[data-style='natural'] .style-fx::before {
+  width: 55vw;
+  height: 55vw;
+  right: -14vw;
+  top: -20vw;
+  background: radial-gradient(circle, rgba(245, 217, 168, 0.55), transparent 62%);
+  animation: fx-drift-a 30s ease-in-out infinite;
+}
+[data-style='natural'] .style-fx::after {
+  width: 44vw;
+  height: 44vw;
+  left: -12vw;
+  bottom: -16vw;
+  background: radial-gradient(circle, rgba(125, 158, 178, 0.35), transparent 60%);
+  animation: fx-drift-b 26s ease-in-out infinite;
+}
+:root[data-theme='dark'][data-style='natural'] .style-fx::before { opacity: 0.4; }
+:root[data-theme='dark'][data-style='natural'] .style-fx::after { opacity: 0.3; }
+@keyframes fx-drift-a {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(-4vw, 3vw); }
+}
+@keyframes fx-drift-b {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(3vw, -2vw); }
+}
+
+/* ============================================================
+   3) holo 全息渐变 —— 粉紫青虹彩膜 · 流动高光 + 噪点
+   ============================================================ */
+:root[data-theme='light'][data-style='holo'] {
+  --bg-grad: linear-gradient(160deg, #f6f2fa 0%, #eef0fa 50%, #eef6f8 100%);
+  --surface: rgba(255, 255, 255, 0.72);
+  --surface-2: rgba(255, 255, 255, 0.6);
+  --text: #3a3450;
+  --text-muted: #8d87a3;
+  --accent: #8b5cf6;
+  --accent-soft: rgba(139, 92, 246, 0.14);
+  --accent-hover: #7c4ee6;
+  --danger: #e05a8a;
+  --success: #2fb39b;
+  --edge: rgba(255, 255, 255, 0.75);
+  --edge-weak: rgba(58, 52, 80, 0.09);
+  --overlay: rgba(40, 32, 70, 0.35);
+  --sh-dark: rgba(150, 140, 180, 0.42);
+  --sh-light: rgba(255, 255, 255, 0.85);
+  --accent-glow: rgba(139, 92, 246, 0.3);
+  --raised-sm: 2px 2px 5px rgba(150, 140, 180, 0.4), 5px 5px 12px rgba(150, 140, 180, 0.28),
+    -2px -2px 5px rgba(255, 255, 255, 0.95), -5px -5px 12px rgba(255, 255, 255, 0.75),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  --raised: 4px 4px 9px rgba(150, 140, 180, 0.36), 10px 10px 24px rgba(150, 140, 180, 0.3),
+    -4px -4px 9px rgba(255, 255, 255, 0.95), -10px -10px 24px rgba(255, 255, 255, 0.78),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  --raised-lg: 6px 6px 14px rgba(150, 140, 180, 0.32), 18px 18px 40px rgba(150, 140, 180, 0.28),
+    -6px -6px 14px rgba(255, 255, 255, 0.95), -18px -18px 40px rgba(255, 255, 255, 0.8),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  --pressed-sm: inset 1px 1px 3px rgba(150, 140, 180, 0.45), inset 3px 3px 9px rgba(150, 140, 180, 0.3),
+    inset -1px -1px 3px rgba(255, 255, 255, 0.88), inset -3px -3px 9px rgba(255, 255, 255, 0.6);
+  --inset: inset 2px 2px 5px rgba(150, 140, 180, 0.42), inset 5px 5px 12px rgba(150, 140, 180, 0.26),
+    inset -2px -2px 5px rgba(255, 255, 255, 0.88), inset -5px -5px 12px rgba(255, 255, 255, 0.58);
+  --hover-bg: rgba(139, 92, 246, 0.08);
+  --scroll-thumb: rgba(150, 140, 180, 0.6);
+}
+:root[data-theme='dark'][data-style='holo'] {
+  --bg-grad: linear-gradient(160deg, #191425 0%, #141020 50%, #101321 100%);
+  --surface: rgba(40, 34, 60, 0.62);
+  --surface-2: rgba(46, 38, 68, 0.55);
+  --text: #ece7f8;
+  --text-muted: #9b93b5;
+  --accent: #b48cff;
+  --accent-soft: rgba(180, 140, 255, 0.16);
+  --accent-hover: #c5a3ff;
+  --danger: #ef6f9c;
+  --success: #45c9ae;
+  --edge: rgba(255, 255, 255, 0.08);
+  --edge-weak: rgba(255, 255, 255, 0.07);
+  --overlay: rgba(0, 0, 0, 0.55);
+  --sh-dark: rgba(0, 0, 0, 0.5);
+  --sh-light: rgba(200, 170, 255, 0.05);
+  --accent-glow: rgba(180, 140, 255, 0.3);
+  --raised-sm: 2px 2px 5px rgba(0, 0, 0, 0.5), 5px 5px 12px rgba(0, 0, 0, 0.32),
+    -2px -2px 5px rgba(255, 255, 255, 0.06), -5px -5px 12px rgba(255, 255, 255, 0.03),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --raised: 4px 4px 9px rgba(0, 0, 0, 0.45), 10px 10px 24px rgba(0, 0, 0, 0.35),
+    -4px -4px 9px rgba(255, 255, 255, 0.06), -10px -10px 24px rgba(255, 255, 255, 0.032),
+    inset 0 1px 0 rgba(255, 255, 255, 0.065);
+  --raised-lg: 6px 6px 14px rgba(0, 0, 0, 0.45), 18px 18px 40px rgba(0, 0, 0, 0.4),
+    -6px -6px 14px rgba(255, 255, 255, 0.055), -18px -18px 40px rgba(255, 255, 255, 0.032),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  --pressed-sm: inset 1px 1px 3px rgba(0, 0, 0, 0.55), inset 3px 3px 9px rgba(0, 0, 0, 0.35),
+    inset -1px -1px 3px rgba(255, 255, 255, 0.05), inset -3px -3px 9px rgba(255, 255, 255, 0.02);
+  --inset: inset 2px 2px 5px rgba(0, 0, 0, 0.5), inset 5px 5px 12px rgba(0, 0, 0, 0.3),
+    inset -2px -2px 5px rgba(255, 255, 255, 0.05), inset -5px -5px 12px rgba(255, 255, 255, 0.02);
+  --hover-bg: rgba(180, 140, 255, 0.12);
+  --scroll-thumb: rgba(0, 0, 0, 0.45);
+}
+/* holo 装饰：虹彩渐变膜流动 + 细噪点防 banding */
+[data-style='holo'] .style-fx::before {
+  content: '';
+  position: absolute;
+  inset: -20%;
+  background: linear-gradient(120deg,
+    rgba(255, 138, 216, 0.3) 0%, rgba(139, 92, 246, 0.24) 28%,
+    rgba(86, 200, 245, 0.26) 55%, rgba(255, 190, 140, 0.2) 78%, rgba(255, 138, 216, 0.28) 100%);
+  background-size: 220% 220%;
+  filter: blur(46px);
+  animation: fx-iridescent 18s linear infinite;
+  opacity: 0.75;
+}
+[data-style='holo'] .style-fx::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");
+  opacity: 0.05;
+}
+:root[data-theme='dark'][data-style='holo'] .style-fx::before { opacity: 0.55; }
+:root[data-theme='dark'][data-style='holo'] .style-fx::after { opacity: 0.07; }
+/* holo 组件：玻璃卡片 + 悬停虹彩描边 */
+[data-style='holo'] .card,
+[data-style='holo'] .glass {
+  backdrop-filter: blur(14px) saturate(1.3);
+  -webkit-backdrop-filter: blur(14px) saturate(1.3);
+}
+[data-style='holo'] .card:hover {
+  border-color: rgba(180, 140, 255, 0.45);
+  box-shadow: var(--raised), 0 0 0 1px rgba(180, 140, 255, 0.22), 0 8px 30px var(--accent-glow);
+}
+@keyframes fx-iridescent {
+  0% { background-position: 0% 40%; }
+  50% { background-position: 100% 60%; }
+  100% { background-position: 0% 40%; }
+}
+
+/* ============================================================
+   4) gradient 渐变 —— 靛蓝-紫-青大光晕 · 简约通透
+   ============================================================ */
+:root[data-theme='light'][data-style='gradient'] {
+  --bg-grad: linear-gradient(150deg, #e9edfb 0%, #f2e9f5 45%, #e4f1ef 100%);
+  --surface: #edeffa;
+  --surface-2: #f1f3fb;
+  --text: #333a55;
+  --text-muted: #8189a6;
+  --accent: #5f6cf1;
+  --accent-soft: rgba(95, 108, 241, 0.15);
+  --accent-hover: #4f5ce4;
+  --danger: #e05d5d;
+  --success: #3aa887;
+  --edge: rgba(255, 255, 255, 0.65);
+  --edge-weak: rgba(51, 58, 85, 0.09);
+  --overlay: rgba(40, 45, 80, 0.35);
+  --sh-dark: rgba(155, 160, 195, 0.5);
+  --sh-light: rgba(255, 255, 255, 0.92);
+  --accent-glow: rgba(95, 108, 241, 0.3);
+  --raised-sm: 2px 2px 5px rgba(155, 160, 195, 0.44), 5px 5px 12px rgba(155, 160, 195, 0.3),
+    -2px -2px 5px rgba(255, 255, 255, 1), -5px -5px 12px rgba(255, 255, 255, 0.84),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  --raised: 4px 4px 9px rgba(155, 160, 195, 0.4), 10px 10px 24px rgba(155, 160, 195, 0.32),
+    -4px -4px 9px rgba(255, 255, 255, 1), -10px -10px 24px rgba(255, 255, 255, 0.86),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  --raised-lg: 6px 6px 14px rgba(155, 160, 195, 0.36), 18px 18px 40px rgba(155, 160, 195, 0.3),
+    -6px -6px 14px rgba(255, 255, 255, 1), -18px -18px 40px rgba(255, 255, 255, 0.9),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  --pressed-sm: inset 1px 1px 3px rgba(155, 160, 195, 0.48), inset 3px 3px 9px rgba(155, 160, 195, 0.3),
+    inset -1px -1px 3px rgba(255, 255, 255, 0.94), inset -3px -3px 9px rgba(255, 255, 255, 0.68);
+  --inset: inset 2px 2px 5px rgba(155, 160, 195, 0.46), inset 5px 5px 12px rgba(155, 160, 195, 0.28),
+    inset -2px -2px 5px rgba(255, 255, 255, 0.94), inset -5px -5px 12px rgba(255, 255, 255, 0.64);
+  --hover-bg: rgba(95, 108, 241, 0.09);
+  --scroll-thumb: rgba(155, 160, 195, 0.6);
+}
+:root[data-theme='dark'][data-style='gradient'] {
+  --bg-grad: linear-gradient(150deg, #232a4d 0%, #1e2340 45%, #191f38 100%);
+  --surface: #252b49;
+  --surface-2: #2a3050;
+  --text: #dde1f5;
+  --text-muted: #8a92b8;
+  --accent: #8b96ff;
+  --accent-soft: rgba(139, 150, 255, 0.16);
+  --accent-hover: #a3abff;
+  --danger: #ef7068;
+  --success: #52bd92;
+  --edge: rgba(255, 255, 255, 0.07);
+  --edge-weak: rgba(255, 255, 255, 0.065);
+  --overlay: rgba(0, 0, 0, 0.55);
+  --sh-dark: rgba(0, 0, 0, 0.5);
+  --sh-light: rgba(255, 255, 255, 0.05);
+  --accent-glow: rgba(139, 150, 255, 0.3);
+  --raised-sm: 2px 2px 5px rgba(0, 0, 0, 0.5), 5px 5px 12px rgba(0, 0, 0, 0.32),
+    -2px -2px 5px rgba(255, 255, 255, 0.06), -5px -5px 12px rgba(255, 255, 255, 0.03),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --raised: 4px 4px 9px rgba(0, 0, 0, 0.45), 10px 10px 24px rgba(0, 0, 0, 0.35),
+    -4px -4px 9px rgba(255, 255, 255, 0.06), -10px -10px 24px rgba(255, 255, 255, 0.032),
+    inset 0 1px 0 rgba(255, 255, 255, 0.065);
+  --raised-lg: 6px 6px 14px rgba(0, 0, 0, 0.45), 18px 18px 40px rgba(0, 0, 0, 0.4),
+    -6px -6px 14px rgba(255, 255, 255, 0.055), -18px -18px 40px rgba(255, 255, 255, 0.032),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  --pressed-sm: inset 1px 1px 3px rgba(0, 0, 0, 0.55), inset 3px 3px 9px rgba(0, 0, 0, 0.35),
+    inset -1px -1px 3px rgba(255, 255, 255, 0.05), inset -3px -3px 9px rgba(255, 255, 255, 0.02);
+  --inset: inset 2px 2px 5px rgba(0, 0, 0, 0.5), inset 5px 5px 12px rgba(0, 0, 0, 0.3),
+    inset -2px -2px 5px rgba(255, 255, 255, 0.05), inset -5px -5px 12px rgba(255, 255, 255, 0.02);
+  --hover-bg: rgba(139, 150, 255, 0.12);
+  --scroll-thumb: rgba(0, 0, 0, 0.45);
+}
+/* gradient 装饰：双大光晕缓慢漂移 */
+[data-style='gradient'] .style-fx::before,
+[data-style='gradient'] .style-fx::after {
+  content: '';
+  position: absolute;
+  filter: blur(60px);
+  border-radius: 50%;
+}
+[data-style='gradient'] .style-fx::before {
+  width: 58vw;
+  height: 58vw;
+  left: -14vw;
+  top: -20vw;
+  background: radial-gradient(circle, rgba(124, 108, 255, 0.4), transparent 62%);
+  animation: fx-drift-b 26s ease-in-out infinite;
+}
+[data-style='gradient'] .style-fx::after {
+  width: 50vw;
+  height: 50vw;
+  right: -14vw;
+  bottom: -18vw;
+  background: radial-gradient(circle, rgba(79, 209, 197, 0.35), transparent 60%);
+  animation: fx-drift-a 30s ease-in-out infinite;
+}
+:root[data-theme='dark'][data-style='gradient'] .style-fx::before { opacity: 0.5; }
+:root[data-theme='dark'][data-style='gradient'] .style-fx::after { opacity: 0.4; }
+
+/* ============================================================
+   5) material Material —— 纸张层级 · 平面阴影 · 去浮雕
+   ============================================================ */
+:root[data-theme='light'][data-style='material'] {
+  --bg-grad: none;
+  --surface: #f3f4f8;
+  --surface-2: #ffffff;
+  --text: #1d2130;
+  --text-muted: #5f6470;
+  --accent: #6750a4;
+  --accent-soft: rgba(103, 80, 164, 0.12);
+  --accent-hover: #5a4594;
+  --danger: #b3261e;
+  --success: #2e7d5b;
+  --edge: rgba(0, 0, 0, 0.08);
+  --edge-weak: rgba(0, 0, 0, 0.06);
+  --overlay: rgba(0, 0, 0, 0.4);
+  --sh-dark: rgba(0, 0, 0, 0.2);
+  --sh-light: rgba(255, 255, 255, 0.6);
+  --accent-glow: rgba(103, 80, 164, 0.25);
+  --raised-sm: 0 1px 2px rgba(0, 0, 0, 0.13), 0 2px 8px rgba(0, 0, 0, 0.08);
+  --raised: 0 2px 6px rgba(0, 0, 0, 0.13), 0 8px 22px rgba(0, 0, 0, 0.12);
+  --raised-lg: 0 4px 10px rgba(0, 0, 0, 0.15), 0 14px 36px rgba(0, 0, 0, 0.16);
+  --pressed-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --inset: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --hover-bg: rgba(103, 80, 164, 0.08);
+  --scroll-thumb: rgba(0, 0, 0, 0.28);
+}
+:root[data-theme='dark'][data-style='material'] {
+  --bg-grad: none;
+  --surface: #131318;
+  --surface-2: #1d1d24;
+  --text: #e5e1ec;
+  --text-muted: #9a94a8;
+  --accent: #d0bcff;
+  --accent-soft: rgba(208, 188, 255, 0.14);
+  --accent-hover: #e2d4ff;
+  --danger: #f2b8b5;
+  --success: #7ddbaf;
+  --edge: rgba(255, 255, 255, 0.1);
+  --edge-weak: rgba(255, 255, 255, 0.08);
+  --overlay: rgba(0, 0, 0, 0.6);
+  --sh-dark: rgba(0, 0, 0, 0.55);
+  --sh-light: rgba(255, 255, 255, 0.02);
+  --accent-glow: rgba(208, 188, 255, 0.22);
+  --raised-sm: 0 1px 2px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.4);
+  --raised: 0 2px 6px rgba(0, 0, 0, 0.5), 0 8px 22px rgba(0, 0, 0, 0.45);
+  --raised-lg: 0 4px 10px rgba(0, 0, 0, 0.55), 0 14px 36px rgba(0, 0, 0, 0.5);
+  --pressed-sm: 0 1px 2px rgba(0, 0, 0, 0.6);
+  --inset: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --hover-bg: rgba(208, 188, 255, 0.1);
+  --scroll-thumb: rgba(255, 255, 255, 0.2);
+}
+/* material 组件：收敛圆角为克制的小圆角 */
+[data-style='material'] .card,
+[data-style='material'] .glass,
+[data-style='material'] .btn {
+  border-radius: 14px;
+}
+[data-style='material'] .topbar {
+  border-radius: 18px;
+}
+[data-style='material'] .card .icon {
+  border-radius: 10px;
+}
+
+/* ============================================================
+   6) fabric 织物纹理 —— 亚麻编织 · 暖陶点缀 · 缝线描边
+   ============================================================ */
+:root[data-theme='light'][data-style='fabric'] {
+  --bg-grad: linear-gradient(175deg, #ebe4d6 0%, #e4dccb 50%, #ded5c2 100%);
+  --surface: #efe9dc;
+  --surface-2: #f3eee3;
+  --text: #46403a;
+  --text-muted: #918a7d;
+  --accent: #b0713e;
+  --accent-soft: rgba(176, 113, 62, 0.15);
+  --accent-hover: #9c6134;
+  --danger: #b8544a;
+  --success: #7a8a52;
+  --edge: rgba(255, 255, 255, 0.55);
+  --edge-weak: rgba(70, 64, 58, 0.12);
+  --overlay: rgba(50, 44, 36, 0.4);
+  --sh-dark: rgba(160, 148, 126, 0.5);
+  --sh-light: rgba(255, 255, 255, 0.85);
+  --accent-glow: rgba(176, 113, 62, 0.3);
+  --raised-sm: 2px 2px 5px rgba(160, 148, 126, 0.46), 5px 5px 12px rgba(160, 148, 126, 0.32),
+    -2px -2px 5px rgba(255, 255, 255, 0.95), -5px -5px 12px rgba(255, 255, 255, 0.78),
+    inset 0 1px 0 rgba(255, 255, 255, 0.75);
+  --raised: 4px 4px 9px rgba(160, 148, 126, 0.42), 10px 10px 24px rgba(160, 148, 126, 0.34),
+    -4px -4px 9px rgba(255, 255, 255, 0.95), -10px -10px 24px rgba(255, 255, 255, 0.8),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  --raised-lg: 6px 6px 14px rgba(160, 148, 126, 0.38), 18px 18px 40px rgba(160, 148, 126, 0.32),
+    -6px -6px 14px rgba(255, 255, 255, 0.95), -18px -18px 40px rgba(255, 255, 255, 0.84),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  --pressed-sm: inset 1px 1px 3px rgba(160, 148, 126, 0.52), inset 3px 3px 9px rgba(160, 148, 126, 0.34),
+    inset -1px -1px 3px rgba(255, 255, 255, 0.88), inset -3px -3px 9px rgba(255, 255, 255, 0.62);
+  --inset: inset 2px 2px 5px rgba(160, 148, 126, 0.48), inset 5px 5px 12px rgba(160, 148, 126, 0.3),
+    inset -2px -2px 5px rgba(255, 255, 255, 0.88), inset -5px -5px 12px rgba(255, 255, 255, 0.58);
+  --hover-bg: rgba(176, 113, 62, 0.09);
+  --scroll-thumb: rgba(160, 148, 126, 0.6);
+}
+:root[data-theme='dark'][data-style='fabric'] {
+  --bg-grad: linear-gradient(175deg, #282420 0%, #232019 50%, #1e1b17 100%);
+  --surface: #2a2620;
+  --surface-2: #2f2b24;
+  --text: #e9e2d5;
+  --text-muted: #9b9284;
+  --accent: #c98d5c;
+  --accent-soft: rgba(201, 141, 92, 0.16);
+  --accent-hover: #dba070;
+  --danger: #d9796e;
+  --success: #97a86c;
+  --edge: rgba(255, 255, 255, 0.06);
+  --edge-weak: rgba(255, 255, 255, 0.07);
+  --overlay: rgba(0, 0, 0, 0.55);
+  --sh-dark: rgba(0, 0, 0, 0.5);
+  --sh-light: rgba(255, 235, 205, 0.04);
+  --accent-glow: rgba(201, 141, 92, 0.28);
+  --raised-sm: 2px 2px 5px rgba(0, 0, 0, 0.5), 5px 5px 12px rgba(0, 0, 0, 0.32),
+    -2px -2px 5px rgba(255, 255, 255, 0.05), -5px -5px 12px rgba(255, 255, 255, 0.025),
+    inset 0 1px 0 rgba(255, 255, 255, 0.045);
+  --raised: 4px 4px 9px rgba(0, 0, 0, 0.45), 10px 10px 24px rgba(0, 0, 0, 0.35),
+    -4px -4px 9px rgba(255, 255, 255, 0.05), -10px -10px 24px rgba(255, 255, 255, 0.028),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --raised-lg: 6px 6px 14px rgba(0, 0, 0, 0.45), 18px 18px 40px rgba(0, 0, 0, 0.4),
+    -6px -6px 14px rgba(255, 255, 255, 0.045), -18px -18px 40px rgba(255, 255, 255, 0.028),
+    inset 0 1px 0 rgba(255, 255, 255, 0.055);
+  --pressed-sm: inset 1px 1px 3px rgba(0, 0, 0, 0.55), inset 3px 3px 9px rgba(0, 0, 0, 0.35),
+    inset -1px -1px 3px rgba(255, 255, 255, 0.05), inset -3px -3px 9px rgba(255, 255, 255, 0.02);
+  --inset: inset 2px 2px 5px rgba(0, 0, 0, 0.5), inset 5px 5px 12px rgba(0, 0, 0, 0.3),
+    inset -2px -2px 5px rgba(255, 255, 255, 0.05), inset -5px -5px 12px rgba(255, 255, 255, 0.02);
+  --hover-bg: rgba(201, 141, 92, 0.12);
+  --scroll-thumb: rgba(0, 0, 0, 0.45);
+}
+/* fabric 装饰：经纬编织纹理（静态，无动画） */
+[data-style='fabric'] .style-fx::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(0deg, rgba(120, 105, 85, 0.05) 0 1px, transparent 1px 4px),
+    repeating-linear-gradient(90deg, rgba(120, 105, 85, 0.05) 0 1px, transparent 1px 4px);
+}
+:root[data-theme='dark'][data-style='fabric'] .style-fx::before {
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 240, 210, 0.025) 0 1px, transparent 1px 4px),
+    repeating-linear-gradient(90deg, rgba(255, 240, 210, 0.025) 0 1px, transparent 1px 4px);
+}
+/* fabric 组件：缝线虚线描边 */
+[data-style='fabric'] .card {
+  border: 1px dashed rgba(120, 105, 85, 0.4);
+  border-radius: 12px;
+}
+[data-style='fabric'] .card:hover {
+  border-color: rgba(176, 113, 62, 0.55);
+}
+[data-style='fabric'] .glass {
+  border: 1px dashed rgba(120, 105, 85, 0.35);
+}
+:root[data-theme='dark'][data-style='fabric'] .card {
+  border-color: rgba(255, 235, 205, 0.14);
+}
+:root[data-theme='dark'][data-style='fabric'] .card:hover {
+  border-color: rgba(201, 141, 92, 0.45);
+}
+:root[data-theme='dark'][data-style='fabric'] .glass {
+  border-color: rgba(255, 235, 205, 0.12);
+}
+
+/* ============================================================
+   7) aurora 极光玻璃 —— 深空海军青 · 流动光带 · 毛玻璃
+   ============================================================ */
+:root[data-theme='light'][data-style='aurora'] {
+  --bg-grad: linear-gradient(170deg, #e9f2f6 0%, #e3eef5 50%, #e7ecf7 100%);
+  --surface: rgba(255, 255, 255, 0.66);
+  --surface-2: rgba(255, 255, 255, 0.5);
+  --text: #1f3242;
+  --text-muted: #6c8294;
+  --accent: #0e9488;
+  --accent-soft: rgba(14, 148, 136, 0.13);
+  --accent-hover: #0b7f75;
+  --danger: #d95b6a;
+  --success: #12a67c;
+  --edge: rgba(255, 255, 255, 0.75);
+  --edge-weak: rgba(31, 50, 66, 0.09);
+  --overlay: rgba(15, 35, 50, 0.35);
+  --sh-dark: rgba(120, 150, 170, 0.42);
+  --sh-light: rgba(255, 255, 255, 0.9);
+  --accent-glow: rgba(14, 148, 136, 0.3);
+  --raised-sm: 2px 2px 5px rgba(120, 150, 170, 0.4), 5px 5px 12px rgba(120, 150, 170, 0.28),
+    -2px -2px 5px rgba(255, 255, 255, 0.95), -5px -5px 12px rgba(255, 255, 255, 0.8),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  --raised: 4px 4px 9px rgba(120, 150, 170, 0.36), 10px 10px 24px rgba(120, 150, 170, 0.3),
+    -4px -4px 9px rgba(255, 255, 255, 0.95), -10px -10px 24px rgba(255, 255, 255, 0.84),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  --raised-lg: 6px 6px 14px rgba(120, 150, 170, 0.34), 18px 18px 40px rgba(120, 150, 170, 0.28),
+    -6px -6px 14px rgba(255, 255, 255, 0.95), -18px -18px 40px rgba(255, 255, 255, 0.88),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  --pressed-sm: inset 1px 1px 3px rgba(120, 150, 170, 0.44), inset 3px 3px 9px rgba(120, 150, 170, 0.28),
+    inset -1px -1px 3px rgba(255, 255, 255, 0.9), inset -3px -3px 9px rgba(255, 255, 255, 0.64);
+  --inset: inset 2px 2px 5px rgba(120, 150, 170, 0.42), inset 5px 5px 12px rgba(120, 150, 170, 0.26),
+    inset -2px -2px 5px rgba(255, 255, 255, 0.9), inset -5px -5px 12px rgba(255, 255, 255, 0.6);
+  --hover-bg: rgba(14, 148, 136, 0.08);
+  --scroll-thumb: rgba(120, 150, 170, 0.6);
+}
+:root[data-theme='dark'][data-style='aurora'] {
+  --bg-grad: linear-gradient(170deg, #0c1322 0%, #0a101d 50%, #0b1120 100%);
+  --surface: rgba(21, 30, 50, 0.55);
+  --surface-2: rgba(26, 36, 58, 0.5);
+  --text: #dce8f2;
+  --text-muted: #7e93a8;
+  --accent: #5eead4;
+  --accent-soft: rgba(94, 234, 212, 0.13);
+  --accent-hover: #8cf5e3;
+  --danger: #f87e8c;
+  --success: #4ade80;
+  --edge: rgba(140, 200, 230, 0.1);
+  --edge-weak: rgba(140, 200, 230, 0.08);
+  --overlay: rgba(0, 0, 0, 0.6);
+  --sh-dark: rgba(0, 0, 0, 0.55);
+  --sh-light: rgba(120, 220, 255, 0.05);
+  --accent-glow: rgba(94, 234, 212, 0.25);
+  --raised-sm: 2px 2px 5px rgba(0, 0, 0, 0.5), 5px 5px 12px rgba(0, 0, 0, 0.32),
+    -2px -2px 5px rgba(140, 200, 230, 0.07), -5px -5px 12px rgba(140, 200, 230, 0.035),
+    inset 0 1px 0 rgba(140, 220, 255, 0.06);
+  --raised: 4px 4px 9px rgba(0, 0, 0, 0.45), 10px 10px 24px rgba(0, 0, 0, 0.35),
+    -4px -4px 9px rgba(140, 200, 230, 0.07), -10px -10px 24px rgba(140, 200, 230, 0.04),
+    inset 0 1px 0 rgba(140, 220, 255, 0.07);
+  --raised-lg: 6px 6px 14px rgba(0, 0, 0, 0.45), 18px 18px 40px rgba(0, 0, 0, 0.4),
+    -6px -6px 14px rgba(140, 200, 230, 0.065), -18px -18px 40px rgba(140, 200, 230, 0.04),
+    inset 0 1px 0 rgba(140, 220, 255, 0.075);
+  --pressed-sm: inset 1px 1px 3px rgba(0, 0, 0, 0.55), inset 3px 3px 9px rgba(0, 0, 0, 0.35),
+    inset -1px -1px 3px rgba(140, 200, 230, 0.06), inset -3px -3px 9px rgba(140, 200, 230, 0.025);
+  --inset: inset 2px 2px 5px rgba(0, 0, 0, 0.5), inset 5px 5px 12px rgba(0, 0, 0, 0.3),
+    inset -2px -2px 5px rgba(140, 200, 230, 0.06), inset -5px -5px 12px rgba(140, 200, 230, 0.025);
+  --hover-bg: rgba(94, 234, 212, 0.1);
+  --scroll-thumb: rgba(0, 0, 0, 0.45);
+}
+/* aurora 装饰：两条流动极光带 */
+[data-style='aurora'] .style-fx::before,
+[data-style='aurora'] .style-fx::after {
+  content: '';
+  position: absolute;
+  left: -10%;
+  width: 120%;
+  filter: blur(50px);
+}
+[data-style='aurora'] .style-fx::before {
+  height: 42%;
+  top: -6%;
+  transform: skewY(-7deg);
+  background: linear-gradient(105deg,
+    transparent 8%, rgba(52, 211, 153, 0.5) 30%, rgba(56, 189, 248, 0.42) 50%,
+    rgba(167, 139, 250, 0.42) 68%, transparent 92%);
+  animation: fx-aurora-a 16s ease-in-out infinite;
+}
+[data-style='aurora'] .style-fx::after {
+  height: 34%;
+  bottom: 2%;
+  transform: skewY(6deg);
+  background: linear-gradient(80deg,
+    transparent 10%, rgba(94, 234, 212, 0.34) 35%, rgba(129, 140, 248, 0.3) 60%, transparent 90%);
+  animation: fx-aurora-b 21s ease-in-out infinite;
+}
+:root[data-theme='light'][data-style='aurora'] .style-fx::before { opacity: 0.4; }
+:root[data-theme='light'][data-style='aurora'] .style-fx::after { opacity: 0.32; }
+:root[data-theme='dark'][data-style='aurora'] .style-fx::before { opacity: 0.55; }
+:root[data-theme='dark'][data-style='aurora'] .style-fx::after { opacity: 0.45; }
+/* aurora 组件：真·毛玻璃卡片 */
+[data-style='aurora'] .card,
+[data-style='aurora'] .glass,
+[data-style='aurora'] .search-box {
+  backdrop-filter: blur(16px) saturate(1.35);
+  -webkit-backdrop-filter: blur(16px) saturate(1.35);
+}
+@keyframes fx-aurora-a {
+  0%, 100% { transform: skewY(-7deg) translateX(-4%); opacity: 0.85; }
+  50% { transform: skewY(-5deg) translateX(5%); opacity: 1; }
+}
+@keyframes fx-aurora-b {
+  0%, 100% { transform: skewY(6deg) translateX(4%); opacity: 0.8; }
+  50% { transform: skewY(4deg) translateX(-5%); opacity: 1; }
+}
+
+/* ============================================================
+   9) scandi 斯堪的纳维亚 —— 纸感极简 · 雾蓝主色 · 柔和多彩点缀
+   像整理良好的北欧公寓：大量留白、轻阴影、柔和圆角、克制而温暖的色彩
+   点缀色取自北欧调色板：雾蓝 · 鼠尾草绿 · 陶土红 · 暖沙黄 · 柔粉 · 雾紫
+   ============================================================ */
+:root[data-theme='light'][data-style='scandi'] {
+  --bg-grad: linear-gradient(170deg, #fcfbf9 0%, #f7f5f0 45%, #f3f0ea 100%);
+  --surface: #faf9f6;
+  --surface-2: #f2efe9;
+  --text: #33363b;
+  --text-muted: #8f949b;
+  --accent: #6b93a8;
+  --accent-soft: rgba(107, 147, 168, 0.13);
+  --accent-hover: #5a8298;
+  --danger: #c97c6e;
+  --success: #7da88a;
+  --edge: rgba(51, 54, 59, 0.1);
+  --edge-weak: rgba(51, 54, 59, 0.07);
+  --overlay: rgba(40, 44, 48, 0.4);
+  --sh-dark: rgba(60, 64, 70, 0.12);
+  --sh-light: rgba(255, 255, 255, 0.88);
+  --accent-glow: rgba(107, 147, 168, 0.18);
+  --raised-sm: 1px 2px 4px rgba(60, 64, 70, 0.06), 3px 4px 9px rgba(60, 64, 70, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  --raised: 2px 3px 7px rgba(60, 64, 70, 0.06), 7px 9px 18px rgba(60, 64, 70, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.82);
+  --raised-lg: 3px 5px 10px rgba(60, 64, 70, 0.05), 12px 16px 30px rgba(60, 64, 70, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.86);
+  --pressed-sm: inset 1px 2px 4px rgba(60, 64, 70, 0.11), inset -1px -1px 3px rgba(255, 255, 255, 0.8);
+  --inset: inset 1px 2px 4px rgba(60, 64, 70, 0.09), inset -1px -1px 3px rgba(255, 255, 255, 0.72);
+  --hover-bg: rgba(107, 147, 168, 0.08);
+  --scroll-thumb: rgba(60, 64, 70, 0.26);
+}
+:root[data-theme='dark'][data-style='scandi'] {
+  --bg-grad: linear-gradient(170deg, #26292e 0%, #212429 45%, #1d2024 100%);
+  --surface: #272a30;
+  --surface-2: #2e3239;
+  --text: #dcdde1;
+  --text-muted: #8e939a;
+  --accent: #8fb4c7;
+  --accent-soft: rgba(143, 180, 199, 0.16);
+  --accent-hover: #a5c4d4;
+  --danger: #d99588;
+  --success: #8fbea0;
+  --edge: rgba(255, 255, 255, 0.08);
+  --edge-weak: rgba(255, 255, 255, 0.07);
+  --overlay: rgba(0, 0, 0, 0.5);
+  --sh-dark: rgba(0, 0, 0, 0.38);
+  --sh-light: rgba(255, 255, 255, 0.04);
+  --accent-glow: rgba(143, 180, 199, 0.16);
+  --raised-sm: 1px 2px 4px rgba(0, 0, 0, 0.28), 3px 4px 9px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --raised: 2px 3px 7px rgba(0, 0, 0, 0.28), 7px 9px 18px rgba(0, 0, 0, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.055);
+  --raised-lg: 3px 5px 10px rgba(0, 0, 0, 0.28), 12px 16px 30px rgba(0, 0, 0, 0.26),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --pressed-sm: inset 1px 2px 4px rgba(0, 0, 0, 0.38), inset -1px -1px 3px rgba(255, 255, 255, 0.03);
+  --inset: inset 1px 2px 4px rgba(0, 0, 0, 0.33), inset -1px -1px 3px rgba(255, 255, 255, 0.03);
+  --hover-bg: rgba(143, 180, 199, 0.1);
+  --scroll-thumb: rgba(0, 0, 0, 0.42);
+}
+/* scandi 装饰：北欧调色板柔和色块（暖沙黄+柔粉 / 鼠尾草绿+雾蓝），
+   大模糊半径 + 低不透明度，像透过磨砂玻璃的阳光与靠垫 */
+[data-style='scandi'] .style-fx::before,
+[data-style='scandi'] .style-fx::after {
+  content: '';
+  position: absolute;
+  filter: blur(64px);
+}
+[data-style='scandi'] .style-fx::before {
+  width: 36vw;
+  height: 36vw;
+  left: -10vw;
+  top: -12vw;
+  border-radius: 30% 70% 62% 38% / 38% 32% 68% 62%;
+  background: radial-gradient(circle at 42% 42%, rgba(232, 201, 138, 0.32), transparent 60%),
+    radial-gradient(circle at 70% 65%, rgba(224, 179, 179, 0.26), transparent 58%);
+  opacity: 0.5;
+  animation: fx-scandi-a 32s ease-in-out infinite;
+}
+[data-style='scandi'] .style-fx::after {
+  width: 40vw;
+  height: 30vw;
+  right: -11vw;
+  bottom: -9vw;
+  border-radius: 48% 52% 54% 46% / 60% 46% 54% 40%;
+  background: radial-gradient(circle at 48% 48%, rgba(125, 168, 138, 0.28), transparent 60%),
+    radial-gradient(circle at 72% 30%, rgba(158, 192, 204, 0.24), transparent 56%);
+  opacity: 0.45;
+  animation: fx-scandi-b 38s ease-in-out infinite;
+}
+:root[data-theme='dark'][data-style='scandi'] .style-fx::before { opacity: 0.22; }
+:root[data-theme='dark'][data-style='scandi'] .style-fx::after { opacity: 0.19; }
+/* scandi 组件：柔和圆角、纸感平面（克制，不追求浮雕厚度） */
+[data-style='scandi'] .card,
+[data-style='scandi'] .btn {
+  border-radius: 14px;
+}
+[data-style='scandi'] .card .icon {
+  border-radius: 10px;
+}
+@keyframes fx-scandi-a {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(2.8vw, 2.2vw) rotate(5deg); }
+}
+@keyframes fx-scandi-b {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(-2.8vw, -1.8vw) rotate(-4deg); }
+}
+
+/* ============================================================
+   10) clay 黏土形态 —— 马卡龙粉彩 · 蓬软立体 · 可触摸感
+   Claymorphism：哑光黏土表面，外部双重投影（深色遮挡 + 环境光）
+   与内部高光 / 厚度倒角（inset）共同营造充气般的圆胖体量；
+   交互模拟物理按压——按下时外部投影塌陷、内部阴影加深（--pressed-sm）
+   ============================================================ */
+:root[data-theme='light'][data-style='clay'] {
+  --bg-grad: linear-gradient(165deg, #f9edea 0%, #f5e5e4 45%, #f2e3ea 100%);
+  --surface: #f8ebe8;
+  --surface-2: #f3e1e1;
+  --text: #5c4744;
+  --text-muted: #a38884;
+  --accent: #ee8f7d;
+  --accent-soft: rgba(238, 143, 125, 0.16);
+  --accent-hover: #e67d68;
+  --danger: #d96f5f;
+  --success: #7cb98a;
+  --edge: rgba(255, 255, 255, 0.7);
+  --edge-weak: rgba(92, 71, 68, 0.08);
+  --overlay: rgba(90, 60, 55, 0.35);
+  --sh-dark: rgba(184, 124, 116, 0.42);
+  --sh-light: rgba(255, 255, 255, 0.92);
+  --accent-glow: rgba(238, 143, 125, 0.3);
+  --raised-sm: 0 2px 4px rgba(184, 124, 116, 0.32), 0 5px 10px rgba(196, 146, 140, 0.3),
+    inset 0 2px 0 rgba(255, 255, 255, 0.8), inset 0 -3px 6px rgba(184, 124, 116, 0.2);
+  --raised: 0 4px 8px rgba(184, 124, 116, 0.3), 0 12px 24px rgba(196, 146, 140, 0.32),
+    inset 0 2px 0 rgba(255, 255, 255, 0.85), inset 0 -4px 8px rgba(184, 124, 116, 0.2);
+  --raised-lg: 0 6px 12px rgba(184, 124, 116, 0.28), 0 20px 40px rgba(196, 146, 140, 0.34),
+    inset 0 2px 0 rgba(255, 255, 255, 0.9), inset 0 -5px 10px rgba(184, 124, 116, 0.18);
+  --pressed-sm: inset 0 3px 6px rgba(184, 124, 116, 0.4), inset 0 6px 12px rgba(196, 146, 140, 0.3),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.6);
+  --inset: inset 0 3px 6px rgba(184, 124, 116, 0.34), inset 0 8px 16px rgba(196, 146, 140, 0.26),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.55);
+  --hover-bg: rgba(238, 143, 125, 0.12);
+  --scroll-thumb: rgba(184, 124, 116, 0.55);
+}
+:root[data-theme='dark'][data-style='clay'] {
+  --bg-grad: linear-gradient(165deg, #2e2427 0%, #2a2125 45%, #261e22 100%);
+  --surface: #342930;
+  --surface-2: #3a2e36;
+  --text: #f0e2dd;
+  --text-muted: #a89390;
+  --accent: #f0a08c;
+  --accent-soft: rgba(240, 160, 140, 0.16);
+  --accent-hover: #f5b19f;
+  --danger: #e58272;
+  --success: #8fc79a;
+  --edge: rgba(255, 255, 255, 0.07);
+  --edge-weak: rgba(255, 255, 255, 0.06);
+  --overlay: rgba(0, 0, 0, 0.55);
+  --sh-dark: rgba(0, 0, 0, 0.5);
+  --sh-light: rgba(255, 190, 170, 0.05);
+  --accent-glow: rgba(240, 160, 140, 0.26);
+  --raised-sm: 0 2px 4px rgba(0, 0, 0, 0.4), 0 5px 10px rgba(0, 0, 0, 0.32),
+    inset 0 2px 0 rgba(255, 255, 255, 0.07), inset 0 -3px 6px rgba(0, 0, 0, 0.35);
+  --raised: 0 4px 8px rgba(0, 0, 0, 0.4), 0 12px 24px rgba(0, 0, 0, 0.36),
+    inset 0 2px 0 rgba(255, 255, 255, 0.075), inset 0 -4px 8px rgba(0, 0, 0, 0.35);
+  --raised-lg: 0 6px 12px rgba(0, 0, 0, 0.4), 0 20px 40px rgba(0, 0, 0, 0.4),
+    inset 0 2px 0 rgba(255, 255, 255, 0.08), inset 0 -5px 10px rgba(0, 0, 0, 0.32);
+  --pressed-sm: inset 0 3px 6px rgba(0, 0, 0, 0.5), inset 0 6px 12px rgba(0, 0, 0, 0.4),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+  --inset: inset 0 3px 6px rgba(0, 0, 0, 0.45), inset 0 8px 16px rgba(0, 0, 0, 0.35),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.04);
+  --hover-bg: rgba(240, 160, 140, 0.12);
+  --scroll-thumb: rgba(0, 0, 0, 0.45);
+}
+/* clay 装饰：两颗柔焦黏土球，缓慢漂浮（像捏好的橡皮泥球散落在桌面上） */
+[data-style='clay'] .style-fx::before,
+[data-style='clay'] .style-fx::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(46px);
+  animation: fx-clay-a 26s ease-in-out infinite;
+}
+[data-style='clay'] .style-fx::before {
+  width: 34vw;
+  height: 34vw;
+  left: -8vw;
+  top: -10vw;
+  background: radial-gradient(circle at 38% 32%, rgba(255, 255, 255, 0.55), rgba(238, 143, 125, 0.42) 55%, transparent 72%);
+  opacity: 0.5;
+}
+[data-style='clay'] .style-fx::after {
+  width: 40vw;
+  height: 40vw;
+  right: -13vw;
+  bottom: -14vw;
+  background: radial-gradient(circle at 42% 36%, rgba(255, 235, 230, 0.5), rgba(186, 152, 214, 0.36) 55%, transparent 72%);
+  border-radius: 52% 48% 56% 44% / 48% 54% 46% 52%;
+  animation: fx-clay-b 32s ease-in-out infinite;
+  opacity: 0.45;
+}
+:root[data-theme='dark'][data-style='clay'] .style-fx::before { opacity: 0.3; }
+:root[data-theme='dark'][data-style='clay'] .style-fx::after { opacity: 0.26; }
+/* clay 组件：极致圆润的大圆角，凸显「捏出来」的软胖体量 */
+[data-style='clay'] .card,
+[data-style='clay'] .admin-panel {
+  border-radius: 28px;
+}
+[data-style='clay'] .card .icon {
+  border-radius: 19px;
+}
+[data-style='clay'] .input,
+[data-style='clay'] .textarea,
+[data-style='clay'] .select {
+  border-radius: 16px;
+}
+@keyframes fx-clay-a {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(1.6vw, 2.2vw) scale(1.06); }
+}
+@keyframes fx-clay-b {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-1.8vw, -1.6vw) scale(0.96); }
+}
+
+/* ============================================================
+   11) spotlight 舞台聚光 —— 暗场对比 · 锥形光束 · 尘粒空气感
+   聚焦光束自顶部中央打下，主内容置于光斑中心，四周逐级变暗；
+   辅助信息以细描边（--edge）与次级光带分层。悬停提升光强
+   （box-shadow 叠加 accent-glow 光晕），按下压缩并加深阴影；
+   动效 180ms 平滑曲线；淡噪点（SVG feTurbulence）增加空气感
+   ============================================================ */
+:root[data-theme='light'][data-style='spotlight'] {
+  --bg-grad: linear-gradient(180deg, #efece7 0%, #e9e5df 50%, #e2ded7 100%);
+  --surface: #f0ece6;
+  --surface-2: #e7e2da;
+  --text: #2f2a24;
+  --text-muted: #8a8177;
+  --accent: #c98f3d;
+  --accent-soft: rgba(201, 143, 61, 0.15);
+  --accent-hover: #b57e2f;
+  --danger: #c05f4e;
+  --success: #5f9c6b;
+  --edge: rgba(255, 255, 255, 0.65);
+  --edge-weak: rgba(47, 42, 36, 0.08);
+  --overlay: rgba(20, 16, 12, 0.45);
+  --sh-dark: rgba(120, 100, 75, 0.35);
+  --sh-light: rgba(255, 255, 255, 0.9);
+  --accent-glow: rgba(201, 143, 61, 0.32);
+  --raised-sm: 0 1px 3px rgba(120, 100, 75, 0.28), 0 4px 10px rgba(120, 100, 75, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85), inset 0 -2px 5px rgba(120, 100, 75, 0.14);
+  --raised: 0 2px 6px rgba(120, 100, 75, 0.26), 0 10px 22px rgba(120, 100, 75, 0.26),
+    inset 0 1px 0 rgba(255, 255, 255, 0.88), inset 0 -3px 7px rgba(120, 100, 75, 0.14);
+  --raised-lg: 0 4px 10px rgba(120, 100, 75, 0.24), 0 18px 38px rgba(120, 100, 75, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.92), inset 0 -4px 9px rgba(120, 100, 75, 0.12);
+  --pressed-sm: inset 1px 1px 4px rgba(120, 100, 75, 0.4), inset 3px 3px 9px rgba(120, 100, 75, 0.26),
+    inset -1px -1px 3px rgba(255, 255, 255, 0.7);
+  --inset: inset 2px 2px 5px rgba(120, 100, 75, 0.34), inset 5px 5px 12px rgba(120, 100, 75, 0.22),
+    inset -2px -2px 5px rgba(255, 255, 255, 0.75);
+  --hover-bg: rgba(201, 143, 61, 0.1);
+  --scroll-thumb: rgba(120, 100, 75, 0.5);
+}
+:root[data-theme='dark'][data-style='spotlight'] {
+  --bg-grad: linear-gradient(180deg, #191418 0%, #141014 50%, #100d10 100%);
+  --surface: #201a1f;
+  --surface-2: #272025;
+  --text: #f2ebe2;
+  --text-muted: #97897d;
+  --accent: #e6b25e;
+  --accent-soft: rgba(230, 178, 94, 0.16);
+  --accent-hover: #f0c276;
+  --danger: #e07a66;
+  --success: #7cbf8a;
+  --edge: rgba(255, 235, 200, 0.08);
+  --edge-weak: rgba(255, 235, 200, 0.06);
+  --overlay: rgba(0, 0, 0, 0.6);
+  --sh-dark: rgba(0, 0, 0, 0.55);
+  --sh-light: rgba(255, 214, 150, 0.05);
+  --accent-glow: rgba(230, 178, 94, 0.3);
+  --raised-sm: 0 1px 3px rgba(0, 0, 0, 0.5), 0 4px 10px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 235, 200, 0.06), inset 0 -2px 5px rgba(0, 0, 0, 0.4);
+  --raised: 0 2px 6px rgba(0, 0, 0, 0.5), 0 10px 22px rgba(0, 0, 0, 0.42),
+    inset 0 1px 0 rgba(255, 235, 200, 0.07), inset 0 -3px 7px rgba(0, 0, 0, 0.42);
+  --raised-lg: 0 4px 10px rgba(0, 0, 0, 0.5), 0 18px 38px rgba(0, 0, 0, 0.46),
+    inset 0 1px 0 rgba(255, 235, 200, 0.075), inset 0 -4px 9px rgba(0, 0, 0, 0.4);
+  --pressed-sm: inset 1px 1px 4px rgba(0, 0, 0, 0.6), inset 3px 3px 9px rgba(0, 0, 0, 0.45),
+    inset -1px -1px 3px rgba(255, 235, 200, 0.04);
+  --inset: inset 2px 2px 5px rgba(0, 0, 0, 0.55), inset 5px 5px 12px rgba(0, 0, 0, 0.4),
+    inset -2px -2px 5px rgba(255, 235, 200, 0.04);
+  --hover-bg: rgba(230, 178, 94, 0.12);
+  --scroll-thumb: rgba(0, 0, 0, 0.5);
+}
+/* spotlight 装饰：顶部锥形光束（缓慢摆动）+ 中央光晕 + 尘粒 + 淡噪点 */
+[data-style='spotlight'] .style-fx::before {
+  content: '';
+  position: absolute;
+  inset: -10% -20% 0;
+  background:
+    /* 尘粒两层（重复平铺的微光点） */
+    radial-gradient(2px 2px at 12% 30%, rgba(255, 236, 200, 0.5), transparent 100%),
+    radial-gradient(1.5px 1.5px at 64% 18%, rgba(255, 236, 200, 0.42), transparent 100%),
+    radial-gradient(1.5px 1.5px at 34% 52%, rgba(255, 236, 200, 0.34), transparent 100%),
+    radial-gradient(2px 2px at 82% 44%, rgba(255, 236, 200, 0.4), transparent 100%),
+    radial-gradient(1px 1px at 48% 38%, rgba(255, 236, 200, 0.46), transparent 100%),
+    radial-gradient(ellipse 58vw 52vh at 50% -12vh, rgba(255, 214, 150, 0.2), rgba(255, 214, 150, 0.07) 46%, transparent 70%);
+  transform-origin: 50% -12vh;
+  animation: fx-spot-beam 12s ease-in-out infinite;
+  background-size: 46vw 34vh, 38vw 30vh, 52vw 40vh, 44vw 36vh, 60vw 46vh, 100% 100%;
+}
+[data-style='spotlight'] .style-fx::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E"),
+    radial-gradient(ellipse 52vw 34vh at 50% 32vh, rgba(255, 214, 150, 0.12), rgba(255, 214, 150, 0.04) 52%, transparent 74%);
+  background-size: 140px 140px, 100% 100%;
+  opacity: 0.55;
+}
+:root[data-theme='light'][data-style='spotlight'] .style-fx::before {
+  background:
+    radial-gradient(2px 2px at 12% 30%, rgba(255, 252, 240, 0.9), transparent 100%),
+    radial-gradient(1.5px 1.5px at 64% 18%, rgba(255, 252, 240, 0.8), transparent 100%),
+    radial-gradient(1.5px 1.5px at 34% 52%, rgba(255, 252, 240, 0.66), transparent 100%),
+    radial-gradient(2px 2px at 82% 44%, rgba(255, 252, 240, 0.78), transparent 100%),
+    radial-gradient(1px 1px at 48% 38%, rgba(255, 252, 240, 0.85), transparent 100%),
+    radial-gradient(ellipse 58vw 52vh at 50% -12vh, rgba(255, 248, 228, 0.55), rgba(255, 248, 228, 0.18) 46%, transparent 70%);
+  opacity: 0.75;
+}
+:root[data-theme='light'][data-style='spotlight'] .style-fx::after { opacity: 0.3; }
+/* spotlight 组件：悬停提升光强（叠光晕），过渡 180ms 平滑 */
+[data-style='spotlight'] .btn {
+  transition: all 180ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+[data-style='spotlight'] .btn:hover {
+  box-shadow: var(--raised-sm), 0 0 20px var(--accent-glow);
+}
+[data-style='spotlight'] .card {
+  transition: box-shadow 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+[data-style='spotlight'] .card:hover {
+  box-shadow: var(--raised), 0 0 26px var(--accent-glow);
+}
+@keyframes fx-spot-beam {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(1.6deg); }
+}
+
+/* ============================================================
+   12) neumorphism 新拟物派 —— 双光影浮雕 · 同色系软塑
+   固定光源：左上亮阴影 (-X,-Y) / 右下暗阴影 (+X,+Y)，双色成对；
+   元素与背景同色系，凸起表示可交互，凹陷表示输入区 / 已激活。
+   交互三定律：Hover Shadowing（悬停阴影缩小，禁止增大）
+   · Extrude to Intrude（按下外凸转内凹，禁止 translate 位移）
+   · 输入框 focus 内阴影变浅（通道打开而非加压）。
+   过渡统一 300ms ease-in-out（Smooth Molding 软塑料韧性）
+   ============================================================ */
+:root[data-theme='light'][data-style='neumorphism'] {
+  --bg-grad: linear-gradient(160deg, #e0e5ec 0%, #e0e5ec 50%, #dde2e9 100%);
+  --surface: #e0e5ec;
+  --surface-2: #e9edf2;
+  --text: #333333;
+  --text-muted: #6b7280;
+  --accent: #6d5dfc;
+  --accent-soft: rgba(109, 93, 252, 0.16);
+  --accent-hover: #5a49eb;
+  --danger: #e05d5d;
+  --success: #3db8a8;
+  --edge: rgba(255, 255, 255, 0.4);
+  --edge-weak: rgba(184, 188, 194, 0.28);
+  --overlay: rgba(80, 86, 100, 0.4);
+  --sh-dark: #b8bcc2;
+  --sh-light: #ffffff;
+  --accent-glow: rgba(109, 93, 252, 0.24);
+  --raised-sm: 4px 4px 8px #b8bcc2, -4px -4px 8px #ffffff;
+  --raised: 6px 6px 12px #b8bcc2, -6px -6px 12px #ffffff;
+  --raised-lg: 10px 10px 20px #b8bcc2, -10px -10px 20px #ffffff;
+  --pressed-sm: inset 4px 4px 8px #b8bcc2, inset -4px -4px 8px #ffffff;
+  --inset: inset 5px 5px 10px #b8bcc2, inset -5px -5px 10px #ffffff;
+  --hover-bg: rgba(109, 93, 252, 0.08);
+  --scroll-thumb: #c2c7cf;
+  --tr: 300ms;
+  --ease: ease-in-out;
+  --neu-hover: 3px 3px 6px #b8bcc2, -3px -3px 6px #ffffff;
+  --neu-focus: inset 2px 2px 4px #b8bcc2, inset -2px -2px 4px #ffffff;
+}
+:root[data-theme='dark'][data-style='neumorphism'] {
+  --bg-grad: linear-gradient(160deg, #2b2f37 0%, #2b2f37 50%, #292d34 100%);
+  --surface: #2b2f37;
+  --surface-2: #333843;
+  --text: #d9dde5;
+  --text-muted: #8d93a0;
+  --accent: #8a7cff;
+  --accent-soft: rgba(138, 124, 255, 0.18);
+  --accent-hover: #9c8fff;
+  --danger: #ef7a7a;
+  --success: #55cfc0;
+  --edge: rgba(255, 255, 255, 0.06);
+  --edge-weak: rgba(0, 0, 0, 0.3);
+  --overlay: rgba(0, 0, 0, 0.6);
+  --sh-dark: #1e222a;
+  --sh-light: #383f4a;
+  --accent-glow: rgba(138, 124, 255, 0.25);
+  --raised-sm: 4px 4px 8px #1e222a, -4px -4px 8px #383f4a;
+  --raised: 6px 6px 12px #1e222a, -6px -6px 12px #383f4a;
+  --raised-lg: 10px 10px 20px #1e222a, -10px -10px 20px #383f4a;
+  --pressed-sm: inset 4px 4px 8px #1e222a, inset -4px -4px 8px #383f4a;
+  --inset: inset 5px 5px 10px #1e222a, inset -5px -5px 10px #383f4a;
+  --hover-bg: rgba(138, 124, 255, 0.1);
+  --scroll-thumb: #444b58;
+  --tr: 300ms;
+  --ease: ease-in-out;
+  --neu-hover: 3px 3px 6px #1e222a, -3px -3px 6px #383f4a;
+  --neu-focus: inset 2px 2px 4px #1e222a, inset -2px -2px 4px #383f4a;
+}
+/* 新拟物克制装饰：无背景装饰层（同色系表面即全部层次） */
+[data-style='neumorphism'] .style-fx {
+  display: none;
+}
+/* 按钮：hover 阴影缩小且禁止位移；active 外凸转内凹 */
+[data-style='neumorphism'] .btn:hover {
+  transform: none;
+  box-shadow: var(--neu-hover);
+}
+[data-style='neumorphism'] .btn:active {
+  transform: none;
+}
+[data-style='neumorphism'] .btn-primary {
+  box-shadow: 4px 4px 8px var(--sh-dark), -4px -4px 8px var(--sh-light);
+}
+[data-style='neumorphism'] .btn-primary:hover {
+  transform: none;
+  box-shadow: 2px 2px 4px var(--sh-dark), -2px -2px 4px var(--sh-light);
+}
+[data-style='neumorphism'] .btn-primary:active {
+  transform: none;
+  box-shadow: inset 3px 3px 6px var(--sh-dark), inset -3px -3px 6px var(--sh-light);
+}
+/* 输入框：focus 时内阴影变浅（通道开放） */
+[data-style='neumorphism'] .input:focus,
+[data-style='neumorphism'] .select:focus,
+[data-style='neumorphism'] .textarea:focus {
+  box-shadow: var(--neu-focus);
+}
+[data-style='neumorphism'] .card,
+[data-style='neumorphism'] .admin-panel {
+  border-radius: 22px;
+}
+
+/* ============================================================
+   13) skeuomorphism 拟物设计 —— 真实材质 · 逼真光影 · 物理按压
+   皮革棕 / 木材米 / 纸张白自然材质色系；表面用纵向渐变造立体，
+   元素统一「顶部高光 + 底部暗边」inset 细节（光源恒定来自上方），
+   阴影为多层柔焦（禁硬边阴影）。交互：hover 1px 上浮且阴影加深
+   （Tactile Resistance），active 1px 下压 + 更紧凑阴影，模拟按键
+   阻尼，无弹跳放大；输入焦点加深外阴影（非外发光）。200ms ease-out
+   ============================================================ */
+:root[data-theme='light'][data-style='skeuomorphism'] {
+  --bg-grad: linear-gradient(180deg, #e8dfd1 0%, #d4c4a8 100%);
+  --surface: #e8dfd1;
+  --surface-2: #f0e9da;
+  --text: #3a2f22;
+  --text-muted: #8b7355;
+  --accent: #8b7355;
+  --accent-soft: rgba(139, 115, 85, 0.16);
+  --accent-hover: #6b5b45;
+  --danger: #b85c4e;
+  --success: #6f8f5f;
+  --edge: #a89880;
+  --edge-weak: rgba(168, 152, 128, 0.5);
+  --overlay: rgba(58, 47, 34, 0.45);
+  --sh-dark: rgba(58, 47, 34, 0.4);
+  --sh-light: rgba(255, 255, 255, 0.75);
+  --accent-glow: rgba(139, 115, 85, 0.3);
+  --raised-sm: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8), inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+  --raised: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8), inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+  --raised-lg: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8), inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+  --pressed-sm: 0 1px 2px rgba(0, 0, 0, 0.24), inset 0 2px 4px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(0, 0, 0, 0.12);
+  --inset: inset 2px 2px 5px rgba(0, 0, 0, 0.14), inset -1px -1px 2px rgba(255, 255, 255, 0.6);
+  --hover-bg: rgba(139, 115, 85, 0.1);
+  --scroll-thumb: #a89880;
+  --tr: 200ms;
+  --ease: ease-out;
+  --skeu-hover: 0 6px 12px rgba(0, 0, 0, 0.2), 0 4px 8px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85), inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+}
+:root[data-theme='dark'][data-style='skeuomorphism'] {
+  --bg-grad: linear-gradient(180deg, #2a251d 0%, #221e18 100%);
+  --surface: #2e2921;
+  --surface-2: #383126;
+  --text: #f0e9da;
+  --text-muted: #b8a88a;
+  --accent: #c9a86a;
+  --accent-soft: rgba(201, 168, 106, 0.18);
+  --accent-hover: #d9bb80;
+  --danger: #d97a6a;
+  --success: #8faf7e;
+  --edge: rgba(184, 168, 138, 0.35);
+  --edge-weak: rgba(0, 0, 0, 0.35);
+  --overlay: rgba(0, 0, 0, 0.6);
+  --sh-dark: rgba(0, 0, 0, 0.5);
+  --sh-light: rgba(255, 244, 214, 0.08);
+  --accent-glow: rgba(201, 168, 106, 0.28);
+  --raised-sm: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 244, 214, 0.14), inset 0 -1px 0 rgba(0, 0, 0, 0.4);
+  --raised: 0 3px 6px rgba(0, 0, 0, 0.45), 0 3px 6px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 244, 214, 0.14), inset 0 -1px 0 rgba(0, 0, 0, 0.4);
+  --raised-lg: 0 10px 20px rgba(0, 0, 0, 0.5), 0 6px 6px rgba(0, 0, 0, 0.42),
+    inset 0 1px 0 rgba(255, 244, 214, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.38);
+  --pressed-sm: 0 1px 2px rgba(0, 0, 0, 0.45), inset 0 2px 4px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(0, 0, 0, 0.45);
+  --inset: inset 2px 2px 5px rgba(0, 0, 0, 0.45), inset -1px -1px 2px rgba(255, 244, 214, 0.05);
+  --hover-bg: rgba(201, 168, 106, 0.12);
+  --scroll-thumb: #4a4232;
+  --tr: 200ms;
+  --ease: ease-out;
+  --skeu-hover: 0 6px 12px rgba(0, 0, 0, 0.5), 0 4px 8px rgba(0, 0, 0, 0.42),
+    inset 0 1px 0 rgba(255, 244, 214, 0.16), inset 0 -1px 0 rgba(0, 0, 0, 0.38);
+}
+/* skeuomorphism 装饰：极淡织物纹理缓慢受光位移（Texture Shimmer） */
+[data-style='skeuomorphism'] .style-fx::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    115deg,
+    rgba(255, 255, 255, 0.035) 0px,
+    rgba(255, 255, 255, 0.035) 1px,
+    transparent 1px,
+    transparent 4px,
+    rgba(0, 0, 0, 0.02) 4px,
+    rgba(0, 0, 0, 0.02) 5px,
+    transparent 5px,
+    transparent 9px
+  );
+  animation: fx-skeu-weave 26s ease-in-out infinite alternate;
+}
+[data-style='skeuomorphism'] .style-fx::after { content: none; }
+/* skeuomorphism 表面：面板用纵向渐变模拟受光立体（卡面 + 主按钮皮革渐变） */
+[data-style='skeuomorphism'] .glass,
+[data-style='skeuomorphism'] .glass-strong {
+  background: linear-gradient(180deg, var(--surface), var(--surface-2));
+}
+[data-style='skeuomorphism'] .card {
+  border-radius: 12px;
+}
+[data-style='skeuomorphism'] .btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--skeu-hover);
+}
+[data-style='skeuomorphism'] .btn:active {
+  transform: translateY(1px);
+}
+[data-style='skeuomorphism'] .btn-primary {
+  background: linear-gradient(180deg, #b8a88a, #8b7355);
+  border-color: #a89880;
+}
+[data-style='skeuomorphism'] .btn-primary:hover {
+  transform: translateY(-1px);
+  background: linear-gradient(180deg, #c2b294, #94805f);
+  box-shadow: var(--skeu-hover);
+}
+[data-style='skeuomorphism'] .btn-primary:active {
+  transform: translateY(1px);
+}
+/* 输入焦点：外阴影加深（Embossed Focus，非外发光轮廓），纸面材质 */
+[data-style='skeuomorphism'] .input,
+[data-style='skeuomorphism'] .select,
+[data-style='skeuomorphism'] .textarea {
+  background: #f5efe6;
+}
+:root[data-theme='dark'][data-style='skeuomorphism'] .input,
+:root[data-theme='dark'][data-style='skeuomorphism'] .select,
+:root[data-theme='dark'][data-style='skeuomorphism'] .textarea {
+  background: #24201a;
+}
+[data-style='skeuomorphism'] .input:focus,
+[data-style='skeuomorphism'] .select:focus,
+[data-style='skeuomorphism'] .textarea:focus {
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+}
+@keyframes fx-skeu-weave {
+  from { background-position: 0 0; }
+  to { background-position: 44px 30px; }
+}
+
+/* ============================================================
+   14) immersive-photo 沉浸摄影 —— 图即内容 · 磨砂玻璃 · 琥珀金
+   墨色 #0C0D10 / 纸色 #F4F1EA 双态，唯一强调色琥珀金 #E8B04B
+   （从照片暖光取样，仅用于关键 CTA 与高亮）。UI 全面退后：
+   磨砂玻璃面板（backdrop-blur）+ 白系细描边，阴影为黑系大模糊
+   慢节拍。交互：hover 仅阴影加深（无位移无缩放），active 轻缩
+   （scale .98），300ms ease-out 电影感慢过渡；启用壁纸时装饰层
+   自动隐藏（has-wallpaper），壁纸即成为全幅主角——正合「图即
+   内容」信条
+   ============================================================ */
+:root[data-theme='light'][data-style='immersive-photo'] {
+  --bg-grad: linear-gradient(160deg, #f4f1ea 0%, #f4f1ea 55%, #eae6dc 100%);
+  --surface: rgba(255, 255, 255, 0.66);
+  --surface-2: rgba(255, 255, 255, 0.82);
+  --text: #16181d;
+  --text-muted: #5c6068;
+  --accent: #d99a2b;
+  --accent-soft: rgba(217, 154, 43, 0.18);
+  --accent-hover: #c4891d;
+  --danger: #c05548;
+  --success: #4f8f68;
+  --edge: rgba(255, 255, 255, 0.7);
+  --edge-weak: rgba(12, 13, 16, 0.1);
+  --overlay: rgba(12, 13, 16, 0.5);
+  --sh-dark: rgba(0, 0, 0, 0.28);
+  --sh-light: rgba(0, 0, 0, 0.12);
+  --accent-glow: rgba(217, 154, 43, 0.32);
+  --raised-sm: 0 2px 8px rgba(0, 0, 0, 0.22);
+  --raised: 0 8px 28px rgba(0, 0, 0, 0.28);
+  --raised-lg: 0 24px 60px rgba(0, 0, 0, 0.34);
+  --pressed-sm: inset 0 1px 2px rgba(0, 0, 0, 0.22);
+  --inset: inset 0 1px 3px rgba(0, 0, 0, 0.18);
+  --hover-bg: rgba(255, 255, 255, 0.55);
+  --scroll-thumb: rgba(12, 13, 16, 0.3);
+  --tr: 300ms;
+  --ease: ease-out;
+}
+:root[data-theme='dark'][data-style='immersive-photo'] {
+  --bg-grad: linear-gradient(160deg, #0c0d10 0%, #0c0d10 55%, #131519 100%);
+  --surface: rgba(255, 255, 255, 0.08);
+  --surface-2: rgba(255, 255, 255, 0.12);
+  --text: #ffffff;
+  --text-muted: rgba(255, 255, 255, 0.64);
+  --accent: #e8b04b;
+  --accent-soft: rgba(232, 176, 75, 0.2);
+  --accent-hover: #f2bc5f;
+  --danger: #e07a6c;
+  --success: #63b98a;
+  --edge: rgba(255, 255, 255, 0.28);
+  --edge-weak: rgba(255, 255, 255, 0.18);
+  --overlay: rgba(0, 0, 0, 0.7);
+  --sh-dark: rgba(0, 0, 0, 0.5);
+  --sh-light: rgba(0, 0, 0, 0.2);
+  --accent-glow: rgba(232, 176, 75, 0.35);
+  --raised-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --raised: 0 8px 28px rgba(0, 0, 0, 0.4);
+  --raised-lg: 0 24px 60px rgba(0, 0, 0, 0.5);
+  --pressed-sm: inset 0 1px 2px rgba(0, 0, 0, 0.35);
+  --inset: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+  --hover-bg: rgba(255, 255, 255, 0.2);
+  --scroll-thumb: rgba(255, 255, 255, 0.3);
+  --tr: 300ms;
+  --ease: ease-out;
+}
+/* immersive-photo 装饰：暗角 scrim（文字压图可读性纪律的无图版） */
+[data-style='immersive-photo'] .style-fx::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.16), transparent 40%),
+    radial-gradient(ellipse 120vw 90vh at 50% 40%, transparent 62%, rgba(0, 0, 0, 0.14) 100%);
+}
+[data-style='immersive-photo'] .style-fx::after { content: none; }
+:root[data-theme='light'][data-style='immersive-photo'] .style-fx::before {
+  background: radial-gradient(ellipse 120vw 90vh at 50% 40%, transparent 64%, rgba(12, 13, 16, 0.07) 100%);
+}
+/* immersive-photo 表面：磨砂玻璃让 UI 浮于任意影像之上 */
+[data-style='immersive-photo'] .glass,
+[data-style='immersive-photo'] .glass-strong {
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+[data-style='immersive-photo'] .card {
+  border-radius: 18px;
+}
+[data-style='immersive-photo'] .btn:hover {
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.32);
+}
+[data-style='immersive-photo'] .btn:active {
+  transform: scale(0.98);
+}
+[data-style='immersive-photo'] .btn-primary {
+  background: var(--accent);
+  color: #0c0d10;
+}
+[data-style='immersive-photo'] .btn-primary:hover {
+  background: var(--accent-hover);
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.32);
+}
+[data-style='immersive-photo'] .input,
+[data-style='immersive-photo'] .select,
+[data-style='immersive-photo'] .textarea {
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+[data-style='immersive-photo'] .input:focus,
+[data-style='immersive-photo'] .select:focus,
+[data-style='immersive-photo'] .textarea:focus {
+  box-shadow: 0 0 0 2px var(--edge), var(--raised);
+}
+
+/* ============================================================
+   15) ghibli 吉卜力 —— 手绘水彩 · 治愈自然 · 微风动效
+   天空蓝→奶油→草绿梦幻渐变背景，鼠尾草绿为交互主色；阴影是
+   本体色的水彩扩散（绿系，绝不用厚重黑影破坏水彩质地）；圆角
+   rounded-2xl 级、细描边 hand-drawn 感。交互：Gentle Breeze
+   （hover 轻微胀大 1.02）、Soft Cushion（active 温和按压 0.98）、
+   300ms ease-out 从容节奏。装饰：多朵柔焦白云缓缓漂移 + 晨光
+   光晕（自然元素：云）
+   ============================================================ */
+:root[data-theme='light'][data-style='ghibli'] {
+  --bg-grad: linear-gradient(180deg, #d8ecf3 0%, #f4e4bc 55%, #cfe8d8 100%);
+  --surface: #f6ead0;
+  --surface-2: #faf1dd;
+  --text: #3a3226;
+  --text-muted: #8a7a6a;
+  --accent: #7cb9a8;
+  --accent-soft: rgba(124, 185, 168, 0.2);
+  --accent-hover: #67a794;
+  --danger: #cf7a6a;
+  --success: #8fb996;
+  --edge: rgba(124, 185, 168, 0.4);
+  --edge-weak: rgba(124, 185, 168, 0.25);
+  --overlay: rgba(90, 74, 58, 0.45);
+  --sh-dark: rgba(124, 185, 168, 0.3);
+  --sh-light: rgba(255, 252, 240, 0.8);
+  --accent-glow: rgba(124, 185, 168, 0.35);
+  --raised-sm: 0 2px 8px rgba(124, 185, 168, 0.15);
+  --raised: 0 4px 16px rgba(124, 185, 168, 0.2);
+  --raised-lg: 0 8px 32px rgba(124, 185, 168, 0.25);
+  --pressed-sm: 0 2px 8px rgba(124, 185, 168, 0.18), inset 0 1px 2px rgba(90, 74, 58, 0.08);
+  --inset: inset 1px 2px 4px rgba(124, 185, 168, 0.25);
+  --hover-bg: rgba(124, 185, 168, 0.12);
+  --scroll-thumb: rgba(124, 185, 168, 0.55);
+  --tr: 300ms;
+  --ease: ease-out;
+  --gh-hover: 0 8px 24px rgba(124, 185, 168, 0.3);
+}
+:root[data-theme='dark'][data-style='ghibli'] {
+  --bg-grad: linear-gradient(180deg, #1c2b33 0%, #23383f 50%, #2e4038 100%);
+  --surface: #2c3e3d;
+  --surface-2: #354a47;
+  --text: #f2ecdc;
+  --text-muted: #a8b5a0;
+  --accent: #8fcab9;
+  --accent-soft: rgba(143, 202, 185, 0.18);
+  --accent-hover: #a5d8c8;
+  --danger: #e0917f;
+  --success: #9cc7a3;
+  --edge: rgba(143, 202, 185, 0.3);
+  --edge-weak: rgba(143, 202, 185, 0.18);
+  --overlay: rgba(10, 20, 18, 0.6);
+  --sh-dark: rgba(14, 26, 24, 0.5);
+  --sh-light: rgba(255, 244, 200, 0.06);
+  --accent-glow: rgba(143, 202, 185, 0.3);
+  --raised-sm: 0 2px 8px rgba(14, 26, 24, 0.4);
+  --raised: 0 4px 16px rgba(14, 26, 24, 0.45);
+  --raised-lg: 0 8px 32px rgba(14, 26, 24, 0.5);
+  --pressed-sm: 0 2px 8px rgba(14, 26, 24, 0.42), inset 0 1px 2px rgba(0, 0, 0, 0.25);
+  --inset: inset 1px 2px 4px rgba(0, 0, 0, 0.3);
+  --hover-bg: rgba(143, 202, 185, 0.12);
+  --scroll-thumb: rgba(143, 202, 185, 0.4);
+  --tr: 300ms;
+  --ease: ease-out;
+  --gh-hover: 0 8px 24px rgba(14, 26, 24, 0.55);
+}
+/* ghibli 装饰：柔焦云朵缓缓漂移（Gentle Breeze）+ 晨光光晕 */
+[data-style='ghibli'] .style-fx::before {
+  content: '';
+  position: absolute;
+  inset: -6% -10%;
+  background:
+    radial-gradient(56px 22px at 12% 22%, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0) 72%),
+    radial-gradient(40px 16px at 16% 19%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0) 72%),
+    radial-gradient(70px 26px at 66% 14%, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0) 72%),
+    radial-gradient(48px 18px at 72% 11%, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0) 72%),
+    radial-gradient(60px 22px at 42% 30%, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0) 72%),
+    radial-gradient(38px 15px at 88% 26%, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 72%);
+  animation: fx-ghibli-drift 22s ease-in-out infinite alternate;
+}
+[data-style='ghibli'] .style-fx::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 60vw 40vh at 70% 10%, rgba(255, 224, 160, 0.2), transparent 70%);
+}
+:root[data-theme='dark'][data-style='ghibli'] .style-fx::before {
+  background:
+    radial-gradient(56px 22px at 12% 22%, rgba(220, 240, 235, 0.14), rgba(220, 240, 235, 0) 72%),
+    radial-gradient(40px 16px at 16% 19%, rgba(220, 240, 235, 0.16), rgba(220, 240, 235, 0) 72%),
+    radial-gradient(70px 26px at 66% 14%, rgba(220, 240, 235, 0.12), rgba(220, 240, 235, 0) 72%),
+    radial-gradient(48px 18px at 72% 11%, rgba(220, 240, 235, 0.13), rgba(220, 240, 235, 0) 72%),
+    radial-gradient(60px 22px at 42% 30%, rgba(220, 240, 235, 0.1), rgba(220, 240, 235, 0) 72%),
+    radial-gradient(38px 15px at 88% 26%, rgba(220, 240, 235, 0.09), rgba(220, 240, 235, 0) 72%);
+}
+:root[data-theme='dark'][data-style='ghibli'] .style-fx::after {
+  background: radial-gradient(ellipse 60vw 40vh at 70% 10%, rgba(190, 225, 255, 0.08), transparent 70%);
+}
+/* ghibli 组件：hover 轻胀 1.02（非位移），active 温和按压 0.98 */
+[data-style='ghibli'] .btn:hover {
+  transform: scale(1.02);
+  box-shadow: var(--gh-hover);
+}
+[data-style='ghibli'] .btn:active {
+  transform: scale(0.98);
+}
+[data-style='ghibli'] .card {
+  border-radius: 18px;
+}
+[data-style='ghibli'] .card:hover {
+  box-shadow: var(--gh-hover);
+}
+[data-style='ghibli'] .input,
+[data-style='ghibli'] .select,
+[data-style='ghibli'] .textarea {
+  background: #faf5eb;
+}
+:root[data-theme='dark'][data-style='ghibli'] .input,
+:root[data-theme='dark'][data-style='ghibli'] .select,
+:root[data-theme='dark'][data-style='ghibli'] .textarea {
+  background: #263633;
+}
+[data-style='ghibli'] .card,
+[data-style='ghibli'] .admin-panel {
+  border-radius: 18px;
+}
+@keyframes fx-ghibli-drift {
+  from { transform: translateX(-1.5%); }
+  to { transform: translateX(1.5%); }
+}
+
+/* ============================================================
+   16) fluent 流利设计 —— 微软蓝 · 亚克力 · Reveal 光效
+   Windows 11 式克制的深度与光效：亚克力面板（半透明白 + 大半径
+   blur + 饱和度提升），柔和分层双层阴影（大模糊 + 近距贴影），
+   圆角克制（8-10px）。交互：卡片 hover Z 轴上浮 4px + 阴影扩张
+   + Reveal（背景 white/70→white/85 提亮）；按钮 hover 上浮 2px，
+   active:scale(0.97) + 贴面（阴影归零）物理按压；全部可交互
+   元素 focus ring-2 + offset（焦点永不缺席）；150/200ms ease-out
+   利落节奏，绝不漂移
+   ============================================================ */
+:root[data-theme='light'][data-style='fluent'] {
+  --bg-grad: linear-gradient(180deg, #f3f2f1 0%, #eef1f4 100%);
+  --surface: rgba(255, 255, 255, 0.7);
+  --surface-2: #ffffff;
+  --text: #323130;
+  --text-muted: #605e5c;
+  --accent: #0078d4;
+  --accent-soft: rgba(0, 120, 212, 0.12);
+  --accent-hover: #106ebe;
+  --danger: #e81123;
+  --success: #00cc6a;
+  --edge: #e1e1e1;
+  --edge-weak: rgba(225, 225, 225, 0.6);
+  --overlay: rgba(0, 0, 0, 0.42);
+  --sh-dark: rgba(0, 0, 0, 0.16);
+  --sh-light: rgba(255, 255, 255, 0.9);
+  --accent-glow: rgba(0, 120, 212, 0.25);
+  --raised-sm: 0 1.6px 3.6px rgba(0, 0, 0, 0.13), 0 0.3px 0.9px rgba(0, 0, 0, 0.1);
+  --raised: 0 3.2px 7.2px rgba(0, 0, 0, 0.13), 0 0.6px 1.8px rgba(0, 0, 0, 0.1);
+  --raised-lg: 0 6.4px 14.4px rgba(0, 0, 0, 0.13), 0 1.2px 3.6px rgba(0, 0, 0, 0.1);
+  --pressed-sm: inset 0 0.6px 1.8px rgba(0, 0, 0, 0.16), 0 0 0 1px rgba(0, 0, 0, 0.04);
+  --inset: inset 0 1px 2px rgba(0, 0, 0, 0.08);
+  --hover-bg: rgba(0, 0, 0, 0.04);
+  --scroll-thumb: #c8c6c4;
+  --tr: 150ms;
+  --ease: ease-out;
+  --ring-offset: #ffffff;
+}
+:root[data-theme='dark'][data-style='fluent'] {
+  --bg-grad: linear-gradient(180deg, #1f1f1f 0%, #1b1b1b 100%);
+  --surface: rgba(45, 45, 45, 0.72);
+  --surface-2: rgba(58, 58, 58, 0.88);
+  --text: #ffffff;
+  --text-muted: #c8c6c4;
+  --accent: #0078d4;
+  --accent-soft: rgba(0, 120, 212, 0.22);
+  --accent-hover: #106ebe;
+  --danger: #f2545b;
+  --success: #26d07c;
+  --edge: #3d3d3d;
+  --edge-weak: rgba(255, 255, 255, 0.06);
+  --overlay: rgba(0, 0, 0, 0.6);
+  --sh-dark: rgba(0, 0, 0, 0.45);
+  --sh-light: rgba(255, 255, 255, 0.06);
+  --accent-glow: rgba(0, 120, 212, 0.3);
+  --raised-sm: 0 1.6px 3.6px rgba(0, 0, 0, 0.35), 0 0.3px 0.9px rgba(0, 0, 0, 0.3);
+  --raised: 0 3.2px 7.2px rgba(0, 0, 0, 0.4), 0 0.6px 1.8px rgba(0, 0, 0, 0.3);
+  --raised-lg: 0 6.4px 14.4px rgba(0, 0, 0, 0.45), 0 1.2px 3.6px rgba(0, 0, 0, 0.35);
+  --pressed-sm: inset 0 0.6px 1.8px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  --inset: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+  --hover-bg: rgba(255, 255, 255, 0.06);
+  --scroll-thumb: #4a4a4a;
+  --tr: 150ms;
+  --ease: ease-out;
+  --ring-offset: #1f1f1f;
+}
+/* fluent 装饰：顶部 Mica 微光（克制的光效元素） */
+[data-style='fluent'] .style-fx::before { content: none; }
+[data-style='fluent'] .style-fx::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 70vw 34vh at 50% -6vh, rgba(0, 120, 212, 0.07), transparent 70%);
+}
+/* fluent 表面：亚克力面板（有选择地用于玻璃面板，不滥用于全部元素） */
+[data-style='fluent'] .glass,
+[data-style='fluent'] .glass-strong {
+  backdrop-filter: blur(24px) saturate(1.25);
+  -webkit-backdrop-filter: blur(24px) saturate(1.25);
+}
+[data-style='fluent'] .card {
+  border-radius: 10px;
+  transition: all 200ms ease-out;
+}
+[data-style='fluent'] .card:hover {
+  transform: translateY(-4px);
+  background: var(--surface-2);
+  box-shadow: 0 6.4px 14.4px rgba(0, 0, 0, 0.18), 0 1.2px 3.6px rgba(0, 0, 0, 0.14);
+}
+/* fluent 按钮：hover 上浮 2px 阴影增强；active scale 0.97 贴面按压 */
+[data-style='fluent'] .btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 3.2px 7.2px rgba(0, 0, 0, 0.18), 0 0.6px 1.8px rgba(0, 0, 0, 0.12);
+}
+[data-style='fluent'] .btn:active {
+  transform: scale(0.97) translateY(0);
+  box-shadow: none;
+}
+[data-style='fluent'] .btn-primary:active {
+  background: #005a9e;
+}
+/* fluent 焦点：ring-2 + offset-2（焦点状态永不缺席） */
+[data-style='fluent'] .input:focus,
+[data-style='fluent'] .select:focus,
+[data-style='fluent'] .textarea:focus {
+  border-color: #0078d4;
+  box-shadow: 0 0 0 2px var(--ring-offset), 0 0 0 4px #0078d4;
+}
+[data-style='fluent'] .btn:focus-visible {
+  outline: 2px solid #0078d4;
+  outline-offset: 2px;
+}
+
+/* ============================================================
+   可访问性：偏好减少动效时停用所有装饰动画
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .style-fx::before,
+  .style-fx::after {
+    animation: none !important;
+  }
+}

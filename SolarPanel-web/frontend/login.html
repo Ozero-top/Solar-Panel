@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>登录 - SolarPanel</title>
+  <link rel="icon" href="../favicon.ico?v=20260915" type="image/x-icon">
+  <link rel="stylesheet" href="assets/css/common.css?v=20260906">
+  <link rel="stylesheet" href="assets/css/auth-admin.css?v=20260969">
+  <link rel="stylesheet" href="assets/css/themes.css?v=20260924">
+</head>
+<body class="login-body">
+  <div class="style-fx" aria-hidden="true"></div>
+  <div class="login-card glass-strong">
+    <h1>SolarPanel</h1>
+    <div class="sub">登录管理后台</div>
+    <div class="login-error" id="loginError"></div>
+    <form id="loginForm">
+      <div class="form-item">
+        <label for="username">账号</label>
+        <input class="input" id="username" name="username" type="text" autocomplete="username" required>
+      </div>
+      <div class="form-item">
+        <label for="password">密码</label>
+        <input class="input" id="password" name="password" type="password" autocomplete="current-password" required>
+      </div>
+      <button class="btn btn-primary" id="loginBtn" type="submit">登 录</button>
+    </form>
+    <div class="login-back"><a href="../index.html">← 返回主页</a></div>
+  </div>
+
+  <script src="assets/js/api.js?v=20260983"></script>
+  <script src="assets/js/login.js?v=20260905"></script>
+</body>
+</html>
