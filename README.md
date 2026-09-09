@@ -60,7 +60,7 @@ SolarPanel-go/
     └── tools/build_upgrade.php # 升级包生成工具
 ```
 
-## Docker 版部署
+## Docker 版部署-【已适配x86/ARM】
 
 单容器镜像，内置数据库，开箱即用，无需额外安装数据库服务。
 
