@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>SolarPanel</title>
+  <link rel="icon" href="favicon.ico?v=20260915" type="image/x-icon">
+  <link rel="stylesheet" href="frontend/assets/css/common.css?v=20260906">
+  <link rel="stylesheet" href="frontend/assets/css/index.css?v=20260939">
+  <link rel="stylesheet" href="frontend/assets/css/themes.css?v=20260924">
+</head>
+<body>
+  <div class="bg-layer" id="bgLayer"></div>
+  <div class="style-fx" aria-hidden="true"></div>
+  <div class="bg-mask" id="bgMask"></div>
+
+  <!-- 左侧分组目录条（点击快速跳转；自动隐藏，滚动时自动显示） -->
+  <nav class="group-nav glass" id="groupNav" hidden aria-label="分组目录"></nav>
+  <button class="gn-toggle" id="gnToggle" hidden aria-label="展开分组目录" title="展开分组目录"></button>
+
+  <div class="page">
+    <!-- 顶栏：内容由后端设置 -->
+    <header class="topbar glass">
+      <div class="brand">
+        <img id="logoImg" alt="" hidden>
+        <span class="title" id="siteTitle">SolarPanel</span>
+      </div>
+      <div class="top-actions">
+        <span class="ann-pill" id="annBar" hidden title=""></span>
+        <button class="icon-btn" id="themeBtn" title="切换主题">🌙</button>
+      </div>
+    </header>
+
+    <!-- 时钟 + 天气（横向并排） -->
+    <section class="clock-area" id="clockArea">
+      <div class="cw-row">
+        <div class="clock-stack">
+          <div class="clock-time" id="clockTime">00:00:00</div>
+          <div class="clock-date" id="clockDate"></div>
+        </div>
+        <div class="weather" id="weatherArea" hidden></div>
+      </div>
+    </section>
+
+    <!-- 搜索框 -->
+    <section class="search-box glass" id="searchBox" hidden>
+      <div class="engine-select" id="engineSelect">
+        <button type="button" class="engine-btn" id="engineBtn" title="选择搜索引擎">
+          <img class="engine-logo" id="engineCurLogo" alt="" hidden>
+          <span id="engineCurName"></span>
+          <span class="engine-caret">▾</span>
+        </button>
+        <div class="engine-menu" id="engineMenu" hidden></div>
+      </div>
+      <span class="divider"></span>
+      <div class="search-input-wrap">
+        <input id="searchInput" type="text" placeholder="输入关键词搜索…" autocomplete="off">
+        <div class="search-history-dropdown" id="searchHistoryDropdown" hidden>
+          <div class="sh-section" id="shFavSection" hidden>
+            <div class="sh-section-head">
+              <span class="sh-section-title">⭐ 常用搜索</span>
+              <button class="sh-section-clear" id="shClearFav" type="button">清空</button>
+            </div>
+            <div class="sh-tags" id="shFavTags"></div>
+          </div>
+          <div class="sh-section" id="shRecentSection" hidden>
+            <div class="sh-section-head">
+              <span class="sh-section-title">🕐 搜索历史</span>
+              <button class="sh-section-clear" id="shClearRecent" type="button">清空</button>
+            </div>
+            <div class="sh-tags" id="shRecentTags"></div>
+          </div>
+          <div class="sh-empty" id="shEmptyTip" hidden>暂无搜索记录</div>
+        </div>
+      </div>
+      <button class="search-btn" id="searchBtn">搜索</button>
+    </section>
+
+    <!-- 视图切换：导航站 / 热点新闻 -->
+    <nav class="view-switch glass" id="viewSwitch" hidden aria-label="视图切换">
+      <button class="vs-btn active" id="vsNav" type="button">🧭 导航站</button>
+      <button class="vs-btn" id="vsNews" type="button">📰 热点新闻</button>
+    </nav>
+
+    <!-- 分组与卡片（全部由后端数据渲染） -->
+    <main id="groupsWrap"></main>
+
+    <!-- 热点新闻视图（参考 NewsNow：多数据源卡片聚合） -->
+    <section id="newsView" hidden></section>
+
+    <footer class="footer" id="footer" hidden>
+      <span id="footerText"></span>
+      <span class="sep" id="footerSep" hidden></span>
+      <a id="adminLink" href="frontend/login.html">管理面板</a><span class="app-ver" id="footerVer" title="查看更新日志"></span>
+      <div class="footer-beian" id="footerBeian" hidden></div>
+    </footer>
+  </div>
+
+  <!-- 更新日志弹窗 -->
+  <div class="modal" id="changelogModal">
+    <div class="modal-box glass-strong changelog-box">
+      <div class="modal-head">
+        <h3>📋 更新日志</h3>
+        <button class="modal-close" id="changelogClose" type="button" aria-label="关闭">✕</button>
+      </div>
+      <div class="changelog-body" id="changelogBody"></div>
+    </div>
+  </div>
+
+  <!-- iframe 弹层（打开方式=弹层 时使用） -->
+  <div class="modal iframe-modal" id="iframeModal">
+    <div class="modal-box glass-strong">
+      <div class="iframe-head">
+        <span class="t" id="iframeTitle"></span>
+        <div style="display:flex;gap:8px">
+          <a class="btn btn-sm" id="iframeNewTab" target="_blank" rel="noopener">新窗口打开</a>
+          <button class="btn btn-sm" id="iframeClose">关闭</button>
+        </div>
+      </div>
+      <iframe id="iframeWin" src="about:blank" referrerpolicy="no-referrer"></iframe>
+      <div class="iframe-tip">若页面空白，说明该站点禁止内嵌（X-Frame-Options），请使用「新窗口打开」。</div>
+    </div>
+  </div>
+
+  <!-- 排序模式下有未保存更改时的拦截弹窗 -->
+  <div class="modal" id="orderGuardModal">
+    <div class="modal-box glass-strong" style="max-width:440px">
+      <div class="modal-head"><h3>卡片排序尚未保存</h3></div>
+      <p style="margin:0;color:var(--text-muted);font-size:13.5px;line-height:1.7">当前分组卡片顺序已调整但还未保存。保存后再离开将保留新顺序；放弃则恢复为已保存的顺序。</p>
+      <div class="modal-foot">
+        <button class="btn btn-sm" id="guardStayBtn" type="button">继续排序</button>
+        <button class="btn btn-sm" id="guardDiscardBtn" type="button">放弃并离开</button>
+        <button class="btn btn-sm btn-primary" id="guardSaveBtn" type="button">💾 保存并离开</button>
+      </div>
+    </div>
+  </div>
+
+  <button id="backTop" class="back-top" aria-label="返回顶部" title="返回顶部">
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>
+  </button>
+
+  <script src="frontend/assets/js/api.js?v=20260983"></script>
+  <script src="frontend/assets/js/index.js?v=20260941"></script>
+</body>
+</html>
