@@ -2,7 +2,7 @@
 
 > 一款可自托管的个人导航 / 起始页面板。前端与后端完全分离，主页显示的**一切内容均由后台设置**——站点标题、Logo、壁纸、公告、时钟、天气、搜索引擎、分组与卡片，全部无需改动一行代码即可配置。
 
-![版本](https://img.shields.io/badge/version-v1.0.003-blue)
+![版本](https://img.shields.io/badge/version-v2.0.01-blue)
 ![PHP](https://img.shields.io/badge/PHP-%E2%89%A5%207.4-777bb4)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
@@ -10,10 +10,10 @@
 
 | 版本 | 技术栈 | 部署方式 | 适用场景 |
 | --- | --- | --- | --- |
-| **Web 版** | PHP + MySQL，原生 PDO，无框架 / Composer 依赖 | 宝塔 / 1Panel / 虚拟主机 / 自建 Web 服务器 | 已有 PHP+MySQL 环境的主机 |
-| **Docker 版** | 单容器镜像，内置数据库 | `docker compose up -d` 一条命令 | 快速部署、NAS、服务器、个人电脑 |
+| **Web版** | PHP + MySQL，原生 PDO，无框架 / Composer 依赖 | 宝塔 / 1Panel / 虚拟主机 / 自建 Web 服务器 | 已有 PHP+MySQL 环境的主机 |
+| **Docker版** | 单容器镜像，内置数据库 | `docker compose up -d` 一条命令 | 快速部署、NAS、服务器、个人电脑 |
 
-- **风格**：**16 种风格主题**后台可切（Soft 柔和浮雕 / Nature 自然拟态 / Natural 自然大地 / Holo 全息渐变 / Gradient 渐变光晕 / Material 纸张层级 / Fabric 织物纹理 / Aurora 极光玻璃 / Scandi 斯堪的纳维亚 / Clay 黏土形态 / Spotlight 舞台聚光 / Neumorphism 新拟物 / Skeuomorphism 拟物设计 / Immersive Photo 沉浸摄影 / Ghibli 吉卜力 / Fluent 流利设计），每种均适配浅色 / 深色 / 跟随系统三态
+- **风格**：**17 种风格主题**后台可切（Soft 柔和浮雕 / Nature 自然拟态 / Natural 自然大地 / Holo 全息渐变 / Gradient 渐变光晕 / Material 纸张层级 / Fabric 织物纹理 / Aurora 极光玻璃 / Scandi 斯堪的纳维亚 / Clay 黏土形态 / Spotlight 舞台聚光 / Neumorphism 新拟物 / Skeuomorphism 拟物设计 / Immersive Photo 沉浸摄影 / Ghibli 吉卜力 / Fluent 流利设计 / Warm Dashboard 暖色仪表盘），每种均适配浅色 / 深色 / 跟随系统三态
 
 ---
 
@@ -43,7 +43,7 @@
 | 天气 | 城市可后台指定，open-meteo 主源 + wttr.in 兜底定位，扩展天气代码映射 |
 | 权限系统 | 三种角色：**管理员**（全部权限）/ **编辑者**（分组、卡片、上传；不能改设置与账号）/ **只读**（仅查看，不可修改显示名称）；最后一个管理员保护 |
 | 账号安全 | 会话登录鉴权、Cookie HttpOnly + SameSite、登录失败计数防爆破、**CSRF 令牌校验**（全部写接口）、多账号管理（增删 / 改密 / 改角色） |
-| 在线升级 | 后台上传升级包（.zip）一键完成版本升级：自动校验并预览变更清单，确认后原子替换生效，数据库数据不受影响；被替换的原文件自动备份，可手动回滚 |
+| 在线升级 | **进后台自动检测新版本**（每小时最多一次），发现后顶栏出现「🆕 可更新」徽标，点「一键下载并升级」即可完成：完整包（full）覆盖任意旧版本直升、校验通过后原子替换、升级后自动刷新 OPcache；任何文件失败**自动回滚**，站点不受影响。同时保留手动上传升级包（.zip）作为兜底 |
 
 ## 目录结构
 
@@ -54,13 +54,13 @@ SolarPanel-go/
     ├── backend/
     │   ├── config.php          # 数据库配置（安装向导自动写入）
     │   ├── lib/                # 公共类库（db / auth / response / security / http / settings / sort / upgrade / news_sources）
-    │   └── api/                # 13 个 API 端点
+    │   └── api/                # 14 个 API 端点（含 version.php 在线更新检测 / 下载）
     ├── frontend/               # 前端（纯静态）
     ├── sql/init.sql            # 手动建表脚本（可选）
     └── tools/build_upgrade.php # 升级包生成工具
 ```
 
-## Docker 版部署-【已适配x86/ARM】
+## Docker 版部署
 
 单容器镜像，内置数据库，开箱即用，无需额外安装数据库服务。
 
@@ -92,6 +92,11 @@ services:
       - TZ=Asia/Shanghai
 ```
 
+```bash
+cd SolarPanel-Docker
+docker compose up -d
+```
+
 > 如需从源码构建镜像，将 `image: ovitor/solarpanel:latest` 改为 `build: .`，然后 `docker compose up -d --build`。
 
 ### 2. 访问
@@ -100,7 +105,18 @@ services:
 - 后台：`http://服务器IP:18080/admin.html`
 - 默认管理员账号：`admin` / `admin123`
 
-> ⚠️ **安全提示**：首次登录后**必须立即**在「账号管理」中修改默认密码。若服务器暴露在公网，建议同时修改默认端口并配置 HTTPS 反向代理。
+> 🚨 **【必做】默认密码安全警告**
+>
+> 镜像内置默认密码 **`admin` / `admin123`**，任何人都知道。**首次登录后必须立刻**在「账号管理 → 修改密码」中改为强密码，否则面板可被任何人直接接管。
+>
+> 若服务暴露在公网，**务必同时**做到：
+>
+> 1. **不要用默认端口 18080**，映射为其他随机端口（如 `-p 49215:18080`）；
+> 2. 前置 Nginx / Caddy 并启用 **HTTPS**；
+> 3. 有条件的话限制来源 IP（防火墙 / 安全组只放行自己的 IP）；
+> 4. 修改密码前不要开放公网访问。
+>
+> 未改默认密码导致的面板被入侵、数据被删改，属于部署配置问题。
 
 ### 3. 数据持久化
 
@@ -114,6 +130,15 @@ cd SolarPanel-Docker
 docker compose up -d --build
 ```
 
+### 5. 版本升级
+
+Docker 版通过拉取新镜像升级（数据在挂载卷中，不受影响）：
+
+```bash
+docker compose pull
+docker compose up -d
+```
+
 ---
 
 ## Web 版部署（PHP + MySQL）
@@ -123,6 +148,7 @@ docker compose up -d --build
 - PHP **7.4 及以上**（推荐 8.x），必须启用 `pdo_mysql` 扩展
   - `curl` 推荐：站点信息 / 图标 / 热榜 / 天气出站抓取
   - `fileinfo` 推荐：上传文件 MIME 真实类型复核
+  - `zlib` 推荐：在线升级解压升级包（一键下载升级需要）
 - MySQL **5.7 及以上**（推荐 8.0）
 - Nginx / Apache / OpenResty 任意 Web 服务器
 
@@ -137,11 +163,11 @@ docker compose up -d --build
 
 ### 宝塔面板部署
 
-1. 安装 Nginx、MySQL 5.7/8.0、PHP 7.4+（启用 `pdo_mysql`、`curl`、`fileinfo`）
+1. 安装 Nginx、MySQL 5.7/8.0、PHP 7.4+（启用 `pdo_mysql`、`curl`、`fileinfo`、`zlib`）
 2. 创建数据库（字符集 utf8mb4）
 3. 添加站点，上传 `SolarPanel-web/` 全部内容到根目录
 4. 访问 `http://域名/backend/api/install.php` 完成安装
-5. 设置 `frontend/uploads` 目录权限为 755，所有者 `www`
+5. 权限设置：站点目录所有者设为 `www`（**递归应用到子目录**），目录 755 / 文件 644——`frontend/uploads` 用于上传，整站可写是在线一键升级的前提（升级失败时页面会列出不可写的具体目录）
 
 ### 1Panel 部署
 
@@ -179,7 +205,8 @@ API 路径与响应格式：
 | `upload.php` | — | 管理员 / 编辑者 | 图标 / Logo / 壁纸上传 |
 | `gallery.php` | `list` / `delete` | 管理员 / 编辑者 | 壁纸图库 |
 | `backup.php` | `export` / `import` / `reset` | 仅管理员 | 配置与文件备份 / 恢复 / 恢复初始状态 |
-| `upgrade.php` | `check` / `apply` / `cancel` | 仅管理员 | 在线升级 |
+| `upgrade.php` | `check` / `apply` / `cancel` | 仅管理员 | 手动上传升级包的校验 / 应用 / 取消 |
+| `version.php` | `check` / `download` | 仅管理员 | 新版本自动检测与升级包下载（一键升级） |
 | `weather.php` | `current` | 无 | 天气查询 |
 | `news.php` | `meta` / `all` / `source` | 无 | 热点新闻 |
 
@@ -195,20 +222,41 @@ API 路径与响应格式：
 
 ## 系统升级
 
-新版本发布后，下载升级包（.zip）在后台一键完成升级，数据库数据不受影响。
+### Web 版：自动检测 + 一键升级（推荐）
 
-### 后台在线升级（推荐）
+1. 登录后台后系统**自动静默检测新版本**（进后台时检测，每小时最多一次；也可在「💾 备份与更新」点「🔍 检查更新」立即检测）；
+2. 发现新版本后，顶栏出现呼吸动效的「🆕 可更新」徽标，备份与更新页展示版本号、包大小与更新日志；
+3. 点「**一键下载并升级**」：系统自动从更新源下载**完整包（full）**、校验 MD5 与 manifest、预览变更清单后原子替换；
+4. 升级完成后自动刷新 OPcache 并重启后台页面，`Ctrl+F5` 强刷浏览器缓存即可。
 
-1. 登录管理员，进入「💾 备份与更新 → 🚀 在线升级」，上传升级包；
-2. 系统自动校验升级包（版本链、路径合法性、完整性）并预览变更清单，点击「确认升级」；
-3. 原文件自动备份到服务器上传目录，可手动回滚；
-4. 升级完成后 `Ctrl+F5` 强制刷新浏览器缓存。
+完整包机制：每个发布版本都是全量包（`from: v0.0.0`），**任意旧版本都能一步直升最新版**，无需逐版升级。数据库数据与 `backend/config.php` 不受影响，数据库结构有变更时自动迁移。
 
-升级安全机制：`from` 版本必须与当前版本一致（跨版本逐版升级）；路径白名单校验（仅允许授权路径）；单文件 64MB 上限；升级会话 1 小时未应用自动清理。
+升级安全机制：
 
-### 手动覆盖（Web 版）
+- 动文件前先**写权限预检**（真实探测目标目录，不可写时直接提示 PHP 运行用户与不可写目录清单）；
+- 路径白名单校验：仅允许授权路径，硬拒 `backend/config.php`、`backend/api/install.php`，并自动跳过面板环境文件（如宝塔 `.user.ini`）；
+- 替换的原文件先备份，**任何一个文件失败即自动回滚**到原版本，站点不受影响；
+- 升级成功自动 `opcache_reset()`，避免 OPcache 缓存旧代码；
+- 服务器异常会返回具体错误信息（文件 + 行号 / 失败文件清单），不再出现空白 500；
+- 单文件 64MB 上限；升级会话 1 小时未应用自动清理。
 
-下载完整包解压覆盖站点根目录（**切勿覆盖 `backend/config.php`**），`Ctrl+F5` 强刷缓存。数据库结构有变更时系统自动迁移。
+> 前置条件：站点目录对 PHP 运行用户可写（宝塔：属主 `www` 并递归应用，目录 755 / 文件 644）；PHP 启用 `zlib` 扩展。
+
+### Web 版：手动上传升级包（兜底）
+
+一键下载受限时，可在「💾 备份与更新 → 🚀 在线升级」手动上传升级包（.zip）：自动校验（版本链、路径合法性、完整性）并预览变更清单，确认后原子替换生效，失败同样自动回滚。
+
+### Web 版：手动覆盖
+
+下载完整包解压覆盖站点根目录（**切勿覆盖 `backend/config.php`**），重启 PHP（清 OPcache）后 `Ctrl+F5` 强刷缓存。
+
+### Docker 版
+
+拉取新镜像后重建容器即可，数据在挂载卷中不受影响：
+
+```bash
+docker compose pull && docker compose up -d
+```
 
 ## 安全说明
 
@@ -223,7 +271,7 @@ API 路径与响应格式：
 ## 常见问题
 
 **Q：默认管理员账号密码？**
-Web 版安装向导中自行设置（至少 6 位）；Docker 版默认 `admin` / `admin123`，**首次登录后必须立即修改**，公网部署请务必更改默认端口并配置 HTTPS。
+Web 版在安装向导中自行设置（至少 6 位）；**Docker 版为默认 `admin` / `admin123`——这是公开镜像里人人皆知的密码，首次登录后必须立刻修改**。公网部署还必须：改用非默认端口、配置 HTTPS、建议限制来源 IP，且改密码前不要开放公网访问（详见上文「🚨 默认密码安全警告」）。
 
 **Q：主页空白或数据加载失败？**
 直接访问 `/backend/api/public.php` 查看，多数是未执行安装或数据库配置错误。
@@ -240,9 +288,9 @@ Web 版安装向导中自行设置（至少 6 位）；Docker 版默认 `admin` 
 **Q：忘记管理员密码？**
 通过数据库管理工具直接更新 `users` 表中的管理员密码字段即可。
 
-**Q：在线升级提示版本不匹配？**
-升级包只能从标注版本（`from`）升到目标版本（`to`）。确认当前版本后按顺序逐版升级；跨版本过多时下载完整包覆盖。
+**Q：在线升级提示失败 / 版本不匹配？**
+v2.0 起发布的都是**完整包**，任意旧版本可一步直升，无需逐版升级。若一键升级失败，页面会直接显示原因（不可写目录、失败文件清单或具体错误行）：权限问题请将站点目录属主递归设为 PHP 运行用户（宝塔为 `www`，目录 755 / 文件 644）；也可改用「手动上传升级包」或下载完整包解压覆盖（勿覆盖 `backend/config.php`）。
 
 ---
 
-SolarPanel —— 柔软精致的个人导航面板，数据完全自持。
+SolarPanel —— 柔软而精致的个人导航面板，数据完全自持。
