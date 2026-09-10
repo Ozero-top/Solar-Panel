@@ -180,12 +180,17 @@ docker compose up -d
 ### Nginx 安全加固（推荐）
 
 ```nginx
+# 请求体大小上限：Nginx 默认仅 1MB，导入配置 / 上传壁纸 / 升级包都会超限（413）
+client_max_body_size 512m;
+
 # 禁止访问后端内部类库与 SQL 目录
 location ^~ /backend/lib/ { deny all; }
 location ^~ /sql/         { deny all; }
 # 上传目录禁止执行脚本
 location ~* ^/frontend/uploads/.*\.(php|phtml|pht|phps|phar|cgi|pl|py|jsp|asp|aspx)$ { deny all; }
 ```
+
+> 宝塔面板：站点设置 → 配置文件，在 `server { }` 块内加入 `client_max_body_size 512m;` 后保存（自动重载 Nginx）。同时确认 PHP 的 `post_max_size` / `upload_max_filesize` 不小于备份体积（软件商店 → PHP 设置 → 配置修改）。
 
 ---
 
