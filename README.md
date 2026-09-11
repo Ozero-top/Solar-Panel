@@ -1,5 +1,7 @@
 # SolarPanel
 
+[SolarPanel演示站](https://test.ozero.top/)
+
 > 一款可自托管的个人导航 / 起始页面板。前端与后端完全分离，主页显示的**一切内容均由后台设置**——站点标题、Logo、壁纸、公告、时钟、天气、搜索引擎、分组与卡片，全部无需改动一行代码即可配置。
 
 ![版本](https://img.shields.io/badge/version-v2.0.01-blue)
