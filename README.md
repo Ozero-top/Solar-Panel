@@ -88,10 +88,12 @@ services:
     restart: unless-stopped
     ports:
       - "18080:18080"
+      - "18443:18443"
     volumes:
       - ./data:/app/data
     environment:
       - TZ=Asia/Shanghai
+      - HTTPS_PORT=18443
 ```
 
 ```bash
