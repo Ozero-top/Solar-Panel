@@ -5,8 +5,8 @@
 
 > 一款可自托管的个人导航 / 起始页面板。前端与后端完全分离，主页显示的**一切内容均由后台设置**——站点标题、Logo、壁纸、公告、时钟、天气、搜索引擎、分组与卡片，全部无需改动一行代码即可配置。
 
-![版本](https://img.shields.io/badge/version-v2.0.11-blue)
-![后端](https://img.shields.io/badge/go-1.22%2B-blue)
+![版本](https://img.shields.io/badge/version-v2.1.00-blue)
+![后端](https://img.shields.io/badge/go-1.21%2B-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 本项目同时提供 **Docker 镜像版** 与 **PHP 版**，功能一致，可根据部署环境任选其一：
@@ -24,18 +24,19 @@
 
 | 模块 | 说明 |
 | --- | --- |
-| 主页导航 | 壁纸（含模糊 / 遮罩调节）、Logo、站点标题、时钟、天气（纯文字随主题）、多引擎搜索框（下拉带站点 logo）、公告胶囊、页脚版本号；左侧分组目录条（滚动自动显示、停止后自动收起）、右下角常驻返回顶部按钮 |
+| 主页导航 | 壁纸（含模糊 / 遮罩调节）、Logo、站点标题、时钟、天气（纯文字随主题）、多引擎搜索框（下拉带站点 logo）、公告胶囊、页脚版本号；**顶栏向下滚动自动隐藏、到顶才恢复**；左侧分组目录条（滚动自动显示、停止后自动收起）、右下角常驻返回顶部按钮 |
 | 视图切换 | 主页搜索框下方一键切换「🧭 导航站 / 📰 热点新闻」同页双视图，后台可选默认显示二者 / 仅导航 / 仅新闻 |
-| 分组管理 | 多分组、名称与描述、后台拖拽排序、**前端显示 / 隐藏**（隐藏后仅登录管理员可见，访客与其他角色不可见） |
-| 卡片管理 | 标题 / 链接 / 描述、图标（站点 favicon 服务端自动抓取并缓存、本地上传、文字色块）、内网地址、三种打开方式（当前页 / 新窗口 / iframe 弹层）、上下排序；**主页分组内拖拽排序**（管理员在主页直接拖动卡片，保存 / 取消有守卫确认） |
-| 站点设置 | 二级导航 4 个分区独立保存：🧭 基础信息（含时钟与天气）/ 🎨 外观布局（含 Logo 与壁纸）/ 🔍 搜索引擎 / 📰 热点新闻；壁纸图库弹窗选用（内置系统预置壁纸，不可删除）、分目录上传；搜索引擎预置 13 个（百度 / Google / Bing / DuckDuckGo / Yandex / GitHub / 搜狗 / 360搜索 / 神马 / 夸克 / 头条搜索 / 中国搜索 / 抖音），支持增删 |
-| 备份与更新 | 独立一级导航：配置与文件备份导出 / 导入、恢复初始状态、**在线升级**、更新日志（仅管理员） |
+| 分组管理 | 多分组、名称与描述、后台拖拽排序、**前端显示 / 隐藏**（隐藏后仅登录管理员可见，访客与其他角色不可见）；分组 header 排序按钮后新增「+」快速添加卡片按钮 |
+| 卡片管理 | 标题 / 链接 / 描述、图标（站点 favicon 服务端自动抓取并缓存、本地上传、文字色块）、内网地址、三种打开方式（当前页 / 新窗口 / iframe 弹层）、上下排序；**主页分组内拖拽排序**（管理员在主页直接拖动卡片，保存 / 取消有守卫确认）；**排序态卡片常驻红色 × 删除按钮**，编辑者登录态下卡片 hover 也显 |
+| 快速添加 | 主页直接点「+」弹出快速添加卡片弹窗（与后台 itemModal 1:1 对齐）：三种图标类型 + 实时预览 + 颜色面板 + fetch_meta 自动获取站点信息与图标，无需进后台即可添加 |
+| 站点设置 | 二级导航 4 个分区独立保存：🧭 基础信息（含时钟与天气）/ 🎨 外观布局（含 Logo 与壁纸、**搜索栏显隐开关、卡片筛选显隐开关**）/ 🔍 搜索引擎 / 📰 热点新闻；壁纸图库弹窗选用（内置系统预置壁纸，不可删除）、分目录上传；搜索引擎预置 13 个（百度 / Google / Bing / DuckDuckGo / Yandex / GitHub / 搜狗 / 360搜索 / 神马 / 夸克 / 头条搜索 / 中国搜索 / 抖音），支持增删；原生 confirm 已全部替换为主题化 uiConfirm 弹窗 |
+| 备份与更新 | 独立一级导航：配置与文件备份导出 / 导入、恢复初始状态、**PHP 版在线升级**（Docker 版通过拉取镜像升级）、更新日志（仅管理员） |
 
 ### 安全与权限
 
 | 模块 | 说明 |
 | --- | --- |
-| 三种角色 | **管理员**（全部权限）/ **编辑者**（分组、卡片、上传；不能改设置与账号）/ **只读 / 访客**（仅查看，所有后台控件灰色禁用，仅历史更新按钮可点击） |
+| 四种角色 | **管理员**（全部权限）/ **编辑者**（分组、卡片、上传；不能改设置与账号）/ **只读**（仅查看，后台控件灰色禁用）/ **访客**（需访客密码登录才能查看主页） |
 | 访客密码锁 | 后台可开启，未登录访问主页时需输入密码；**连续 8 次失败自动临时锁定 15 分钟** |
 | 两步验证 (TOTP) | 管理员可在账号管理卡片为自己/他人开启 6 位动态码（Google Authenticator / 微软 Authenticator 等兼容），登录时追加校验 |
 | 账号安全 | 会话登录鉴权、Cookie HttpOnly + SameSite、登录失败计数防爆破、**CSRF 令牌校验**（全部写接口）、多账号管理（增删 / 改密 / 改角色）、最后一个管理员保护 |
@@ -64,14 +65,14 @@
 
 | 模块 | 说明 |
 | --- | --- |
-| 卡片快速筛选 | 首页搜索框下实时按**标题 / URL / 描述**过滤，空分组自动隐藏，Esc 一键清除 |
+| 卡片快速筛选 | 首页搜索框下实时按**标题 / URL / 描述**过滤，空分组自动隐藏，Esc 一键清除；**后台可隐藏筛选栏**（卡片筛选显隐开关） |
 | 浏览器书签导入 | 支持 Netscape 格式 HTML（Chrome / Edge / Firefox 导出格式），自动识别 H3 分组与 DT>A 卡片结构，导入后进入待审核状态 |
 | 最近常用 | 本地 frecency 排序（访问次数 DESC + 最近时间 DESC），上限 80 存 / 展示 12 |
 | 键盘快捷键 | `/` 或 `Ctrl+K` 搜索、`f` 筛选、`t` 主题切换、`n`/`b`/`h` 视图切换、`g` 分组目录、`?` 帮助、`Esc` 逐级降级 |
 
 ### 视觉
 
-**17 种风格主题**后台可切（Soft 柔和浮雕 / Nature 自然拟态 / Natural 自然大地 / Holo 全息渐变 / Gradient 渐变光晕 / Material 纸张层级 / Fabric 织物纹理 / Aurora 极光玻璃 / Scandi 斯堪的纳维亚 / Clay 黏土形态 / Spotlight 舞台聚光 / Neumorphism 新拟物 / Skeuomorphism 拟物设计 / Immersive Photo 沉浸摄影 / Ghibli 吉卜力 / Fluent 流利设计 / Warm Dashboard 暖色仪表盘），每种均适配浅色 / 深色 / 跟随系统三态。
+**18 种风格主题**后台可切（Soft 柔和浮雕 / Nature 自然拟态 / Natural 自然大地 / Holo 全息渐变 / Gradient 渐变光晕 / Material 纸张层级 / Fabric 织物纹理 / Aurora 极光玻璃 / Scandi 斯堪的纳维亚 / Clay 黏土形态 / Spotlight 舞台聚光 / Neumorphism 新拟物 / Skeuomorphism 拟物设计 / Immersive Photo 沉浸摄影 / Ghibli 吉卜力 / Fluent 流利设计 / Warm Dashboard 暖色仪表盘 / **Blueprint 工程蓝图**），每种均适配浅色 / 深色 / 跟随系统三态；Blueprint 额外提供网格背景、等宽字体、虚线辅助线、工程橙标注、全局禁圆角等工程制图细节。
 
 ### 在线升级
 
@@ -79,7 +80,7 @@
 - 一键下载完整包（full）、校验 MD5 + manifest、预览变更清单后原子替换
 - 升级失败**自动回滚**（替换前备份原文件），站点不受影响
 - 数据库结构有变更时自动迁移
-- 同时保留手动上传升级包 / 导入配置文件 / 恢复初始状态作为兜底
+- 同时保留 / 导入配置文件 / 恢复初始状态作为兜底
 
 ---
 
@@ -89,25 +90,27 @@
 SolarPanel-go/
 ├── SolarPanel-Docker/           # Docker / Go 版（主入口，推荐）
 │   ├── main.go                  # HTTP 路由 + HTTPS 双端口监听 + 自签名证书生成
-│   ├── config.go                # 配置加载（SERVER_PORT / HTTPS_PORT / CERT_FILE / KEY_FILE）
-│   ├── handler/                 # 20+ API handler（auth / groups / items / settings / backup / version / weather / news / wallpaper ...）
-│   ├── middleware/              # 鉴权 / CSRF / 限流（DB 持久化滑动窗口）
-│   ├── models/                  # GORM 数据模型
-│   ├── frontend/                # 前端静态资源（embed 内嵌）
-│   ├── Dockerfile               # 单阶段构建，46MB 多架构镜像（amd64 / arm64 / arm/v7）
+│   ├── go.mod / go.sum          # Go 模块
+│   ├── internal/
+│   │   ├── config/config.go     # 配置加载
+│   │   ├── auth/                # 会话管理 / CSRF 校验 / 限流/ TOTP / 审计
+│   │   ├── db/db.go             # SQLite 初始化 + 首次安装默认数据 + 版本迁移
+│   │   ├── model/models.go      # GORM 数据模型
+│   │   └── handler/             # 16 个业务 handler
+│   ├── frontend/                # 前端静态资源
+│   ├── Dockerfile               # 多阶段构建，三架构镜像
 │   └── docker-compose.yml
 │
 └── SolarPanel-web/              # PHP 版（宝塔 / 1Panel）
     ├── index.html               # 主页
-    ├── manifest.json            # PWA 清单（同时含升级格式）
+    ├── manifest.json            # PWA 清单
     ├── sw.js                    # Service Worker
     ├── backend/
     │   ├── config.php           # 数据库配置（安装向导自动写入）
-    │   ├── lib/                 # 公共类库（db / auth / response / security / http / settings / sort / upgrade / news_sources）
-    │   └── api/                 # 14 个 API 端点（含 version.php 在线更新检测 / 下载）
-    ├── frontend/                # 前端（纯静态）
-    ├── sql/init.sql             # 手动建表脚本（可选）
-    └── tools/build_upgrade.php  # 升级包生成工具
+    │   ├── lib/                 # 公共类库
+    │   └── api/                 # 18 个 API 端点（含 version.php 在线更新检测 / 下载、upgrade.php 手动升级）
+    ├── frontend/                # 前端（纯静态，两版共用同一套 HTML/CSS/JS）
+    └── sql/init.sql             # 手动建表脚本（可选）
 ```
 
 ---
@@ -247,8 +250,6 @@ Docker 版通过拉取新镜像升级（数据在挂载卷中，不受影响）�
 docker compose pull && docker compose up -d
 ```
 
-或在后台「💾 备份与更新 → 🔍 检查更新」一键升级（需 v2.0.05+）。
-
 ### 从源码构建
 
 ```bash
@@ -323,24 +324,28 @@ location ~* ^/frontend/uploads/.*\.(php|phtml|pht|phps|phar|cgi|pl|py|jsp|asp|as
 
 ## 后端 API 一览
 
-API 路径与响应格式：
+PHP 版端点（SolarPanel-web/backend/api/*.php）与 Docker 版路径对齐，Docker 版通过 Gin 路由 `/api/<endpoint>` 分发到对应 handler。下表标注两版共有与 PHP 独有。
 
-| 端点 | 主要 action | 鉴权 | 说明 |
-| --- | --- | --- | --- |
-| `install.php` | GET 状态 / POST 安装 | 无 | 安装向导（安装后自删除） |
-| `public.php` | — | 无 | 主页全部公开数据（隐藏分组对非管理员过滤） |
-| `auth.php` | `me` / `login` / `logout` | 部分需要 | 会话检测 / 登录 / 登出 |
-| `groups.php` | `list` / `edit` / `delete` / `sort` / `sort_batch` / `visible` | 登录 | 分组管理与前端显隐 |
-| `items.php` | `list` / `edit` / `delete` / `sort` / `sort_batch` / `favicon` / `fetch_meta` | 登录 | 卡片管理、站点信息与图标抓取 |
-| `settings.php` | `list` / `save` | 登录（保存仅管理员） | 站点设置（26 项白名单 + 分区保存） |
-| `user.php` | `me` / `list` / `create` / `update` / `change_password` / `delete` | 登录（账号管理仅管理员） | 账号与权限 / 2FA 绑定 |
-| `upload.php` | — | 管理员 / 编辑者 | 图标 / Logo / 壁纸上传 |
-| `gallery.php` | `list` / `delete` | 管理员 / 编辑者 | 壁纸图库 |
-| `backup.php` | `export` / `import` / `reset` | 仅管理员 | 配置与文件备份 / 恢复 / 恢复初始状态 |
-| `upgrade.php` | `check` / `apply` / `cancel` | 仅管理员 | 手动上传升级包的校验 / 应用 / 取消 |
-| `version.php` | `check` / `download` | 仅管理员 | 新版本自动检测与升级包下载（一键升级） |
-| `weather.php` | `current` | 无 | 天气查询 |
-| `news.php` | `meta` / `all` / `source` | 无 | 热点新闻 / 自定义 RSS |
+| 端点 | 主要 action | 鉴权 | 版本 | 说明 |
+| --- | --- | --- | --- | --- |
+| `install.php` | GET 状态 / POST 安装 | 无 | 两版 | 安装向导（安装后自删除） |
+| `public.php` | — | 无 | 两版 | 主页全部公开数据（隐藏分组对非管理员过滤） |
+| `auth.php` | `me` / `login` / `logout` | 部分需要 | 两版 | 会话检测 / 登录 / 登出 |
+| `groups.php` | `list` / `edit` / `delete` / `sort` / `sort_batch` / `visible` | 登录 | 两版 | 分组管理与前端显隐 |
+| `items.php` | `list` / `edit` / `delete` / `sort` / `sort_batch` / `favicon` / `fetch_meta` | 登录 | 两版 | 卡片管理、站点信息与图标抓取 |
+| `settings.php` | `list` / `save` | 登录（保存仅管理员） | 两版 | 站点设置（26+ 项白名单，4 分区独立保存） |
+| `user.php` | `me` / `list` / `create` / `update` / `change_password` / `delete` / `set_role` / `set_password` | 登录（账号管理仅管理员） | 两版 | 账号与权限 / 2FA 绑定 |
+| `upload.php` | — | 管理员 / 编辑者 | 两版 | 图标 / Logo / 壁纸上传 |
+| `gallery.php` | `list` / `delete` | 管理员 / 编辑者 | 两版 | 壁纸图库（含系统预置壁纸） |
+| `backup.php` | `export` / `import` / `reset` | 仅管理员 | 两版 | 配置与文件备份 / 恢复 / 恢复初始状态 |
+| `wallpaper.php` | — | 无 | 两版 | 每日壁纸（Bing 源）公开缓存接口 |
+| `weather.php` | `current` | 无 | 两版 | 天气查询（open-meteo 主源 + wttr.in 兜底） |
+| `news.php` | `meta` / `all` / `source` | 无 | 两版 | 热点新闻 / 自定义 RSS |
+| `feeds.php` | `list` / `save` / `delete` / `toggle` | 登录（仅管理员） | 两版 | 自定义 RSS/Atom 源管理 |
+| `audit.php` | `list` / `clear` | 登录（仅管理员） | 两版 | 审计日志（登录 / 设置 / 导入等敏感操作） |
+| `import.php` | — | 登录（管理员 / 编辑者） | 两版 | 浏览器书签导入（Netscape HTML 格式） |
+| `upgrade.php` | `check` / `apply` / `cancel` | 仅管理员 | **PHP 独有** | 手动上传升级包的校验 / 应用 / 取消 |
+| `version.php` | `check` / `download` | 仅管理员 | **PHP 独有** | 新版本自动检测与完整包下载（一键升级） |
 
 > **CSRF 说明**：所有写请求（POST）必须携带 `X-CSRF-Token` 请求头。令牌由服务端在会话建立时通过 `csrf_token` Cookie 下发，前端自动读取并携带。
 
@@ -363,8 +368,6 @@ API 路径与响应格式：
 ```bash
 docker compose pull && docker compose up -d
 ```
-
-或在后台「💾 备份与更新 → 🔍 检查更新」一键升级（v2.0.05+）。
 
 ### Web 版：自动检测 + 一键升级（推荐）
 
@@ -400,7 +403,7 @@ docker compose pull && docker compose up -d
 - **出站 TLS**：服务端出站请求（图标抓取 / 站点信息 / 热榜 / 天气）默认启用 TLS 证书严格校验，证书异常的目标站点将被拦截。
 - **存储型 XSS**：卡片地址强制 `http(s)` 协议白名单；上传 SVG 自动净化；新闻标题纯文本渲染。
 - **文件上传**：扩展名白名单 + 真实内容复核（magic byte 检测）+ 随机文件名；上传目录禁止执行脚本。
-- **权限控制**：三级角色（管理员 / 编辑者 / 只读/访客），只读账号不可修改显示名称且后台控件灰色禁用；最后一个管理员保护。
+- **权限控制**：四级角色（管理员 / 编辑者 / 只读 / 访客），只读账号不可修改显示名称且后台控件灰色禁用；最后一个管理员保护。
 - **限流**：Docker 版 DB 持久化滑动窗口（重启不丢）；PHP 版可通过宝塔 / Nginx 层实现。
 - **暴力破解防护**：登录失败计数 + 8 次临时锁定 + 审计日志自动记录。
 
@@ -450,5 +453,4 @@ v2.0 起发布的都是**完整包**，任意旧版本可一步直升，无需�
 SolarPanel —— 柔软而精致的个人导航面板，数据完全自持。
 
 ## 致谢
-### ● [【qiancheng817】](https://github.com/qiancheng817) 制作Solarpanel自托管导航面板的安卓客户端（WebView 外壳，全内嵌不跳浏览器）
-### ●  Clash / Mihomo / sing-box 生态项目与规则集作者 
+### ● [【qiancheng817】](https://github.com/qiancheng817) 制作 [Solarpanel 自托管导航面板的安卓客户端](https://github.com/qiancheng817/Solarpanel)（WebView 外壳，全内嵌不跳浏览器）
