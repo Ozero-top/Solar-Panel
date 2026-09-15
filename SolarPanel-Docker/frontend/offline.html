@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>离线 - SolarPanel</title>
+  <link rel="icon" href="favicon.ico">
+  <link rel="stylesheet" href="assets/css/common.css">
+  <style>
+    body { min-height: 100vh; display:flex; align-items:center; justify-content:center; background: radial-gradient(ellipse at center, #1e1e2a, #0d0d10); color: #e4e4eb; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+    .offline-box { text-align:center; padding:48px 40px; border-radius:20px; background: rgba(255,255,255,0.04); backdrop-filter: blur(14px); border: 1px solid rgba(255,255,255,0.08); }
+    .offline-emoji { font-size: 72px; margin-bottom: 16px; }
+    .offline-title { font-size: 20px; font-weight: 600; margin: 0 0 8px; }
+    .offline-hint { font-size: 13px; color: #999; margin: 0 0 20px; }
+    .offline-btn { display:inline-block; padding: 10px 24px; border-radius: 10px; background: rgba(255,255,255,0.1); color:#e4e4eb; text-decoration:none; font-size: 14px; }
+    .offline-btn:hover { background: rgba(255,255,255,0.18); }
+  </style>
+</head>
+<body>
+  <div class="offline-box">
+    <div class="offline-emoji">📴</div>
+    <h1 class="offline-title">当前处于离线状态</h1>
+    <p class="offline-hint">请检查网络连接后重试，已缓存的静态页面可正常访问。</p>
+    <a class="offline-btn" href="./" onclick="event.preventDefault(); location.reload();">🔄 重新连接</a>
+  </div>
+  <script>
+    window.addEventListener('online', () => location.reload());
+  </script>
+</body>
+</html>
