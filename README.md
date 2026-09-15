@@ -1,6 +1,7 @@
 # SolarPanel
 
-[SolarPanel演示站](https://test.ozero.top/)
+[SolarPanel演示站](https://test.ozero.top/)     
+[Solarpanel 自托管导航面板的安卓客户端](https://github.com/qiancheng817/Solarpanel) - 作者:[qiancheng817](https://github.com/qiancheng817) 
 
 > 一款可自托管的个人导航 / 起始页面板。前端与后端完全分离，主页显示的**一切内容均由后台设置**——站点标题、Logo、壁纸、公告、时钟、天气、搜索引擎、分组与卡片，全部无需改动一行代码即可配置。
 
@@ -447,3 +448,7 @@ v2.0 起发布的都是**完整包**，任意旧版本可一步直升，无需�
 ---
 
 SolarPanel —— 柔软而精致的个人导航面板，数据完全自持。
+
+## 致谢
+### ● [【qiancheng817】](https://github.com/qiancheng817) 制作Solarpanel自托管导航面板的安卓客户端（WebView 外壳，全内嵌不跳浏览器）
+### ●  Clash / Mihomo / sing-box 生态项目与规则集作者 
