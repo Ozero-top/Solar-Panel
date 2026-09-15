@@ -1,13 +1,19 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>SolarPanel</title>
+  <meta name="theme-color" content="rgba(20,20,24,0.85)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="mobile-web-app-capable" content="yes">
   <link rel="icon" href="favicon.ico?v=20260915" type="image/x-icon">
-  <link rel="stylesheet" href="frontend/assets/css/common.css?v=20260906">
-  <link rel="stylesheet" href="frontend/assets/css/index.css?v=20260939">
-  <link rel="stylesheet" href="frontend/assets/css/themes.css?v=20260924">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="frontend/assets/img/icon.svg">
+  <title>SolarPanel</title>
+  <link rel="stylesheet" href="frontend/assets/css/common.css?v=20270114">
+  <link rel="stylesheet" href="frontend/assets/css/index.css?v=20270114">
+  <link rel="stylesheet" href="frontend/assets/css/themes.css?v=20270114">
 </head>
 <body>
   <div class="bg-layer" id="bgLayer"></div>
@@ -27,6 +33,8 @@
       </div>
       <div class="top-actions">
         <span class="ann-pill" id="annBar" hidden title=""></span>
+        <button class="icon-btn" id="pwaInstallBtn" hidden title="安装为应用" aria-label="安装为应用">📥</button>
+        <button class="icon-btn" id="shortcutsBtn" title="键盘快捷键（?）" aria-label="键盘快捷键">⌨️</button>
         <button class="icon-btn" id="themeBtn" title="切换主题">🌙</button>
       </div>
     </header>
@@ -82,6 +90,21 @@
       <button class="vs-btn" id="vsNews" type="button">📰 热点新闻</button>
     </nav>
 
+    <!-- 卡片筛选栏（导航视图下，按标题/地址/描述实时过滤） -->
+    <section class="card-filter glass" id="cardFilter" hidden>
+      <input id="cardFilterInput" type="text" placeholder="筛选卡片（按标题 / 地址 / 描述）…" autocomplete="off">
+      <button class="cf-clear" id="cardFilterClear" type="button" hidden>✕</button>
+    </section>
+
+    <!-- 最近常用（frecency 排序，上限 12 条） -->
+    <section class="recent-section" id="recentSection" hidden>
+      <div class="recent-head">
+        <span class="recent-title">🕒 最近常用</span>
+        <button class="recent-clear" id="recentClear" type="button">清空</button>
+      </div>
+      <div class="recent-chips" id="recentChips"></div>
+    </section>
+
     <!-- 分组与卡片（全部由后端数据渲染） -->
     <main id="groupsWrap"></main>
 
@@ -96,14 +119,40 @@
     </footer>
   </div>
 
-  <!-- 更新日志弹窗 -->
-  <div class="modal" id="changelogModal">
-    <div class="modal-box glass-strong changelog-box">
+  <!-- ============ 访客锁屏层（guest_access_enabled=1 时显示） ============ -->
+  <div class="guest-lock" id="guestLock" hidden>
+    <div class="guest-lock-box glass-strong">
+      <h3 class="guest-lock-title">🔒 访客访问密码</h3>
+      <p class="guest-lock-hint">本站已开启访客访问密码，请输入密码继续访问</p>
+      <form id="guestLockForm" autocomplete="off">
+        <input type="password" id="guestLockPwd" class="input" placeholder="请输入密码" autocomplete="current-password" autofocus>
+        <button type="submit" class="btn btn-primary" id="guestLockSubmit">解锁访问</button>
+      </form>
+      <div class="guest-lock-err" id="guestLockErr" hidden>密码错误，还可以再试 <span id="guestLockLeft">8</span> 次</div>
+      <div class="guest-lock-admin">管理员？<a href="frontend/login.html">去登录后台</a></div>
+    </div>
+  </div>
+
+  <!-- ============ 快捷键帮助弹窗 ============ -->
+  <div class="modal" id="shortcutsModal">
+    <div class="modal-box glass-strong" style="max-width:460px">
       <div class="modal-head">
-        <h3>📋 更新日志</h3>
-        <button class="modal-close" id="changelogClose" type="button" aria-label="关闭">✕</button>
+        <h3>⌨️ 键盘快捷键</h3>
+        <button class="modal-close" id="shortcutsClose" type="button" aria-label="关闭">✕</button>
       </div>
-      <div class="changelog-body" id="changelogBody"></div>
+      <div class="shortcuts-list">
+        <div class="sc-row"><kbd>/</kbd> 或 <kbd>Ctrl</kbd>+<kbd>K</kbd><span>聚焦搜索框</span></div>
+        <div class="sc-row"><kbd>f</kbd><span>聚焦卡片筛选</span></div>
+        <div class="sc-row"><kbd>t</kbd><span>切换深浅主题</span></div>
+        <div class="sc-row"><kbd>n</kbd><span>切到热点新闻视图</span></div>
+        <div class="sc-row"><kbd>b</kbd> / <kbd>h</kbd><span>切到导航站视图</span></div>
+        <div class="sc-row"><kbd>g</kbd><span>展开 / 收起分组目录</span></div>
+        <div class="sc-row"><kbd>?</kbd><span>打开本帮助</span></div>
+        <div class="sc-row"><kbd>Esc</kbd><span>关弹窗 → 清筛选 → 失焦</span></div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn" type="button" id="shortcutsClose2">关闭</button>
+      </div>
     </div>
   </div>
 
@@ -135,11 +184,22 @@
     </div>
   </div>
 
+  <!-- 更新日志弹窗 -->
+  <div class="modal" id="changelogModal">
+    <div class="modal-box glass-strong changelog-box">
+      <div class="modal-head">
+        <h3>📋 更新日志</h3>
+        <button class="modal-close" id="changelogClose" type="button" aria-label="关闭">✕</button>
+      </div>
+      <div class="changelog-body" id="changelogBody"></div>
+    </div>
+  </div>
+
   <button id="backTop" class="back-top" aria-label="返回顶部" title="返回顶部">
     <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>
   </button>
 
-  <script src="frontend/assets/js/api.js?v=20260983"></script>
-  <script src="frontend/assets/js/index.js?v=20260941"></script>
+  <script src="frontend/assets/js/api.js?v=20270114"></script>
+  <script src="frontend/assets/js/index.js?v=20270114"></script>
 </body>
 </html>

@@ -9,12 +9,15 @@
   --surface: #e9edf5;
   --surface-2: #edf0f7;
   --text: #3b4354;
-  --text-muted: #8b94a7;
+  --text-muted: #646b78;
   --accent: #5c7cfa;
+  --on-accent: #0c0d10;
   --accent-soft: rgba(92, 124, 250, 0.14);
   --accent-hover: #4a6bf0;
   --danger: #e05d5d;
+  --on-danger: #0c0d10;
   --success: #3fa981;
+  --on-success: #0c0d10;
   --edge: rgba(255, 255, 255, 0.62);
   --edge-weak: rgba(59, 67, 84, 0.08);
   --overlay: rgba(60, 70, 90, 0.35);
@@ -48,10 +51,13 @@
   --text: #d6dbe6;
   --text-muted: #8f98ab;
   --accent: #7189ff;
+  --on-accent: #0c0d10;
   --accent-soft: rgba(113, 137, 255, 0.16);
   --accent-hover: #869bff;
   --danger: #ef7068;
+  --on-danger: #0c0d10;
   --success: #52bd92;
+  --on-success: #0c0d10;
   --edge: rgba(255, 255, 255, 0.055);
   --edge-weak: rgba(255, 255, 255, 0.06);
   --overlay: rgba(0, 0, 0, 0.55);
@@ -159,13 +165,13 @@ a:hover {
 .btn-primary {
   background: var(--accent);
   border-color: transparent;
-  color: #fff;
+  color: var(--on-accent, #fff);
   box-shadow: 2px 2px 5px var(--sh-dark), 6px 6px 16px var(--accent-glow),
     inset 0 1px 0 rgba(255, 255, 255, 0.28);
 }
 .btn-primary:hover {
   background: var(--accent-hover);
-  color: #fff;
+  color: var(--on-accent, #fff);
   transform: translateY(-2px);
   box-shadow: 3px 3px 7px var(--sh-dark), 10px 10px 24px var(--accent-glow),
     inset 0 1px 0 rgba(255, 255, 255, 0.32);
@@ -181,7 +187,7 @@ a:hover {
 .btn-danger:hover {
   background: var(--danger);
   border-color: transparent;
-  color: #fff;
+  color: var(--on-danger, #fff);
 }
 .btn-sm {
   padding: 4px 12px;
@@ -291,6 +297,8 @@ input[type='checkbox'] {
   inset: 0;
   z-index: 200;
   background: var(--overlay);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
   align-items: center;
   justify-content: center;
   padding: 24px;
@@ -340,6 +348,26 @@ input[type='checkbox'] {
   white-space: nowrap;
 }
 
+/* ---------- 文字图标 grid 基座（三页共享：主页/后台/登录均加载 common.css） ---------- */
+.icon-grid-cn {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 0;
+}
+.icon-wrap-en {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 0;
+}
+.icon-grid-cn .child-text,
+.icon-wrap-en .child-text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
 /* ---------- 轻提示（胶囊） ---------- */
 .toast {
   position: fixed;
@@ -365,12 +393,12 @@ input[type='checkbox'] {
 .toast.error {
   background: var(--danger);
   border-color: transparent;
-  color: #fff;
+  color: var(--on-danger, #fff);
 }
 .toast.success {
   background: var(--success);
   border-color: transparent;
-  color: #fff;
+  color: var(--on-success, #fff);
 }
 
 /* ---------- 滚动条 ---------- */

@@ -14,10 +14,20 @@ require_once __DIR__ . '/../lib/response.php';
 require_once __DIR__ . '/../lib/news_sources.php';
 // HTTP 抓取公共库（TLS 证书严格校验；curl 失败自动回退 stream；OpenSSL3 close_notify 兼容）
 require_once __DIR__ . '/../lib/http.php';
+// SSRF 防护 sp_url_is_public（自定义 RSS 源运行时二次校验）
+require_once __DIR__ . '/../lib/security.php';
 
 // 公开接口：禁止中间代理 / CDN 缓存
 header('Cache-Control: no-store, max-age=0');
 @set_time_limit(30);
+
+// DB 级限流（30/min）
+try {
+    require_once __DIR__ . '/../lib/db.php';
+    require_once __DIR__ . '/../lib/auth.php';
+    $rate = sp_rate_check('news', 30, 60);
+    if (!$rate['ok']) sp_rate_limit_respond($rate);
+} catch (Throwable $e) {}
 
 const NEWS_TTL = 1800; // 缓存兜底有效期（秒）：超过且回源失败则报错
 
@@ -159,11 +169,66 @@ if ($action === 'all') {
             $list[] = ['id' => $d['id'], 'status' => 'empty', 'updated' => 0, 'items' => []];
         }
     }
+
+    try {
+        require_once __DIR__ . '/../lib/db.php';
+        $pdo = db();
+        $feeds = $pdo->query('SELECT id, title, url FROM custom_feeds WHERE enabled = 1 ORDER BY sort ASC, id ASC')->fetchAll();
+        foreach ($feeds as $f) {
+            $cid = 'custom_' . $f['id'];
+            // 缓存
+            $c = news_read_cache($cid);
+            if ($c) {
+                $list[] = ['id' => $cid, 'status' => 'cache', 'updated' => (int)$c['updated'], 'items' => $c['items']];
+            } else {
+                $list[] = ['id' => $cid, 'status' => 'empty', 'updated' => 0, 'items' => []];
+            }
+        }
+    } catch (Throwable $e) {}
+
     ok(['enabled' => true, 'sources' => $defs, 'list' => $list]);
 }
 
 if ($action === 'source') {
     $id = str_param('id', '');
+
+    // —— custom_feeds 源（custom_N 格式）——
+    if (strpos($id, 'custom_') === 0) {
+        $fid = (int)substr($id, 7);
+        if ($fid <= 0) fail('未知数据源');
+        try {
+            require_once __DIR__ . '/../lib/db.php';
+            $pdo = db();
+            $st = $pdo->prepare('SELECT title, url FROM custom_feeds WHERE id = ? AND enabled = 1');
+            $st->execute([$fid]);
+            $feed = $st->fetch();
+            if (!$feed) fail('该自定义源不存在或已禁用');
+        } catch (Throwable $e) { fail('自定义源不可用'); }
+
+        $latest = str_param('latest', '') === '1';
+        $now = time();
+        $cache = news_read_cache($id);
+        $interval = 300; // 自定义源固定 5 分钟间隔
+        if (!$latest && $cache && $now - (int)$cache['updated'] < $interval) {
+            ok(['id' => $id, 'status' => 'success', 'updated' => (int)$cache['updated'], 'items' => $cache['items']]);
+        }
+        if (!$latest && $cache && $now - (int)$cache['updated'] < NEWS_TTL) {
+            ok(['id' => $id, 'status' => 'cache', 'updated' => (int)$cache['updated'], 'items' => $cache['items']]);
+        }
+        try {
+            // —— SSRF 运行时二次校验（防历史脏数据绕过保存校验）——
+            if (!sp_url_is_public($feed['url'])) fail('自定义源 URL 指向内网/保留地址，已拦截');
+            $items = news_rss_items($feed['url']);
+            $items = array_slice(array_values($items), 0, 20);
+            news_write_cache($id, $items);
+            ok(['id' => $id, 'status' => 'success', 'updated' => $now, 'items' => $items]);
+        } catch (Throwable $e) {
+            error_log('[SolarPanel] news.php 自定义源「' . $feed['title'] . '」抓取失败：' . $e->getMessage());
+            if ($cache) ok(['id' => $id, 'status' => 'cache', 'updated' => (int)$cache['updated'], 'items' => $cache['items']]);
+            ok(['id' => $id, 'status' => 'error', 'updated' => 0, 'items' => []]);
+        }
+    }
+
     $def = news_source_def($id);
     if (!$def) fail('未知数据源');
     $latest = str_param('latest', '') === '1';

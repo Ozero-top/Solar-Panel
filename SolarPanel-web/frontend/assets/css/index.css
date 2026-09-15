@@ -40,6 +40,14 @@
   padding: 10px 20px;
   margin-bottom: 30px;
   border-radius: 999px;
+  transition: transform 0.35s cubic-bezier(.4,0,.2,1), opacity 0.35s ease;
+  will-change: transform;
+}
+/* 滚动向下隐藏（只有到顶部才恢复显示，向上滚不弹回） */
+.topbar.hidden-scroll {
+  transform: translateY(-140%);
+  opacity: 0;
+  pointer-events: none;
 }
 .brand {
   display: flex;
@@ -350,7 +358,7 @@
   border-radius: 999px;
   padding: 9px 24px;
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent, #fff);
   font-size: 14px;
   cursor: pointer;
   flex-shrink: 0;
@@ -512,6 +520,7 @@
   align-items: baseline;
   gap: 12px;
   margin-bottom: 15px;
+  position: relative;
 }
 .group-head h2 {
   margin: 0;
@@ -562,10 +571,132 @@
   text-decoration: none !important;
   cursor: pointer;
   position: relative;
-  overflow: hidden;
+  overflow: visible !important;   /* 允许 × 删除按钮溢出 */
   box-shadow: var(--raised-sm);
   transition: box-shadow var(--tr) var(--ease), transform var(--tr) var(--ease);
 }
+/* × 删除按钮（仅 editor+admin 显示；hover 时显现，排序态常驻） */
+.card-del {
+  position: absolute;
+  top: -10px; right: -10px;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: var(--danger, #e74c3c);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700; line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+  transform: scale(0.7);
+  transition: opacity 0.2s, transform 0.2s;
+  pointer-events: auto;
+  z-index: 2;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+.card:hover .card-del,
+.group.sorting .card .card-del { opacity: 1; transform: scale(1); }
+.group.sorting .card .card-del { opacity: 1; transform: scale(1); }
+
+/* + 快速添加按钮 —— 放在 .group-sort 容器内 flex 排列 */
+.group-add-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px; height: 28px;
+  margin-left: 2px;
+  border-radius: 50%;
+  font-size: 16px; font-weight: 700;
+  background: var(--surface);
+  color: var(--accent);
+  box-shadow: var(--raised-sm);
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.15s, box-shadow 0.15s;
+  opacity: 0.7;
+}
+.group-add-btn:hover { opacity: 1; transform: scale(1.1); }
+
+/* ============================================================
+   主页 quick-add modal 专用样式（从 auth-admin.css 移植 + 主页作用域）
+   ============================================================ */
+.radio-group {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 14px;
+}
+.radio-group label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+}
+.upload-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: nowrap;
+}
+.upload-row .icon-preview { flex-shrink: 0; }
+.icon-preview {
+  width: 46px;
+  height: 46px;
+  border-radius: 13px;
+  background: var(--surface);
+  box-shadow: var(--raised-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--accent);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.icon-preview img { width: 100%; height: 100%; object-fit: cover; }
+
+/* 文字图标 grid 通用层 */
+.icon-grid-cn {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  grid-template-rows: 1fr 1fr !important;
+  gap: 0 !important;
+}
+.icon-wrap-en {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr 1fr 1fr !important;
+  gap: 0 !important;
+}
+.icon-grid-cn .child-text,
+.icon-wrap-en .child-text {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+}
+
+/* icon-preview 特异度层（覆盖自身 display:flex） */
+.icon-preview.icon-grid-cn {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  grid-template-rows: 1fr 1fr !important;
+  gap: 0 !important;
+  align-items: stretch !important;
+  justify-items: stretch !important;
+  padding: 4px !important;
+  font-weight: 600 !important;
+}
+.icon-preview.icon-wrap-en {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr 1fr 1fr !important;
+  gap: 0 !important;
+  align-items: stretch !important;
+  justify-items: stretch !important;
+  padding: 3px !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.3px !important;
+}
+
 .card:hover {
   transform: translateY(-3px);
   box-shadow: var(--raised);
@@ -584,7 +715,7 @@
   justify-content: center;
   font-size: 21px;
   font-weight: 700;
-  color: #fff;
+  color: var(--on-accent, #fff);
   background: var(--accent);
   overflow: hidden;
   box-shadow: 0 2px 6px var(--sh-dark), inset 0 1px 0 rgba(255, 255, 255, 0.3);
@@ -603,6 +734,32 @@
   object-fit: contain;
   padding: 3px;
 }
+
+/* ============================================================
+   主页卡片 .card .icon grid 特异度层（所有属性 !important 强杀 flex）
+   覆盖 .card .icon { display:flex } (0,0,2,0) → 这里 (0,0,3,0) + !important
+   ============================================================ */
+.card .icon.icon-grid-cn {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  grid-template-rows: 1fr 1fr !important;
+  gap: 0 !important;
+  align-items: stretch !important;
+  justify-items: stretch !important;
+  padding: 5px !important;
+  font-weight: 600 !important;
+}
+.card .icon.icon-wrap-en {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr 1fr 1fr !important;
+  gap: 0 !important;
+  align-items: stretch !important;
+  justify-items: stretch !important;
+  padding: 4px !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.3px !important;
+}
+
 .card .info {
   min-width: 0;
 }
@@ -708,28 +865,6 @@
   user-select: text;
 }
 
-.footer-beian {
-  margin-top: 6px;
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 14px;
-  font-size: 12px;
-  color: var(--text-muted);
-  line-height: 1.6;
-}
-.footer-beian a {
-  color: var(--text-muted);
-  text-decoration: none;
-  transition: color var(--tr) var(--ease);
-}
-.footer-beian a:hover {
-  color: var(--accent);
-}
-.footer-beian .beian-dot {
-  opacity: 0.5;
-}
-
 /* ---------- 分组入场：打开主页后由上而下逐个浮现（仅首屏，JS 控制只播一次） ---------- */
 /* 注：系统「减少动效」偏好开启时动画被禁用属预期兜底行为 */
 .group.group-in {
@@ -820,7 +955,7 @@
 }
 .vs-btn.active {
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent, #fff);
   box-shadow: var(--raised-sm);
 }
 
@@ -965,7 +1100,7 @@
 }
 .nc-rank.top {
   background: var(--nc, var(--accent));
-  color: #fff;
+  color: var(--on-accent, #fff);
   box-shadow: 0 2px 7px color-mix(in srgb, var(--nc, var(--accent)) 45%, transparent),
               inset 0 1px 0 rgba(255, 255, 255, 0.35);
 }
@@ -1134,6 +1269,35 @@
 }
 
 /* ================= 更新日志弹窗 ================= */
+.footer .app-ver {
+  cursor: pointer;
+  transition: color var(--tr) var(--ease), opacity var(--tr) var(--ease);
+}
+.footer .app-ver:hover {
+  color: var(--accent);
+  opacity: 1;
+}
+.footer-beian {
+  margin-top: 6px;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+.footer-beian a {
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color var(--tr) var(--ease);
+}
+.footer-beian a:hover {
+  color: var(--accent);
+}
+.footer-beian .beian-dot {
+  opacity: 0.5;
+}
 #changelogModal {
   display: none;
   position: fixed;
@@ -1352,3 +1516,166 @@
   font-size: 13px;
   padding: 20px 8px;
 }
+
+/* ============ P1: 卡片筛选栏 ============ */
+/* 卡片筛选栏：居中 540px，与参考站 nav.ozero.top 一致 */
+.card-filter {
+  max-width: 540px;
+  margin: 10px auto 14px;
+  padding: 8px 14px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.card-filter[hidden] { display: none !important; }
+.card-filter input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 14px;
+  padding: 6px 0;
+  outline: none;
+}
+.card-filter input::placeholder { color: var(--text-muted); }
+.cf-clear {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 0 4px;
+}
+.cf-clear:hover { color: var(--text); }
+.card.match-hit { box-shadow: 0 0 0 2px var(--accent); }
+
+/* ============ P2: 最近常用 ============ */
+.recent-section {
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.recent-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.recent-title { font-size: 13px; color: var(--text-muted); }
+.recent-clear {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 12px;
+}
+.recent-clear:hover { color: var(--danger); }
+.recent-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.recent-chips .chip {
+  padding: 4px 10px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 14px;
+  color: var(--text);
+  text-decoration: none;
+  font-size: 12.5px;
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: background 0.15s;
+}
+.recent-chips .chip:hover { background: var(--accent); color: var(--on-accent, #fff); }
+
+/* ============ P0: 访客锁屏 ============ */
+.guest-lock {
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(circle at 30% 20%, rgba(var(--accent-rgb,120,160,255),0.18), transparent 50%),
+    radial-gradient(circle at 75% 80%, rgba(var(--accent-rgb,120,160,255),0.12), transparent 55%),
+    rgba(0,0,0,0.55);
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 9999;
+  animation: guestLockIn .35s ease-out;
+}
+:root[data-theme='light'] .guest-lock {
+  background:
+    radial-gradient(circle at 30% 20%, rgba(var(--accent-rgb,80,120,220),0.14), transparent 50%),
+    rgba(255,255,255,0.55);
+}
+.guest-lock[hidden] { display: none !important; } /* 同 .engine-menu/.search-box：display:flex 会覆盖 [hidden] UA 样式 */
+@keyframes guestLockIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.guest-lock-box {
+  padding: 44px 36px 32px;
+  border-radius: 26px;
+  width: min(380px, 92vw);
+  text-align: center;
+  position: relative;
+  animation: guestLockBoxIn .4s cubic-bezier(.2,.8,.2,1);
+  background: var(--surface-2, rgba(30,32,42,0.78));
+  backdrop-filter: blur(24px) saturate(1.3);
+  -webkit-backdrop-filter: blur(24px) saturate(1.3);
+  border: 1px solid var(--edge, rgba(255,255,255,0.12));
+  box-shadow:
+    0 30px 60px -15px rgba(0,0,0,0.45),
+    0 2px 0 rgba(255,255,255,0.08) inset,
+    0 -1px 0 rgba(0,0,0,0.2) inset;
+}
+:root[data-theme='light'] .guest-lock-box {
+  box-shadow:
+    0 30px 60px -20px rgba(0,0,0,0.2),
+    0 2px 0 rgba(255,255,255,0.6) inset,
+    0 -1px 0 rgba(0,0,0,0.06) inset;
+}
+@keyframes guestLockBoxIn {
+  from { opacity: 0; transform: translateY(18px) scale(.96); }
+  to   { opacity: 1; transform: none; }
+}
+.guest-lock-box::before {
+  content: '🔒';
+  position: absolute; top: -28px; left: 50%; transform: translateX(-50%);
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  font-size: 26px;
+  background: var(--surface-2);
+  border: 1px solid var(--edge);
+  box-shadow: 0 8px 20px -8px rgba(0,0,0,0.4), 0 0 0 4px var(--bg, rgba(18,20,28,1));
+}
+.guest-lock-title { margin: 12px 0 10px; font-size: 20px; font-weight: 600; letter-spacing: .01em; }
+.guest-lock-hint { margin: 0 0 24px; font-size: 13px; color: var(--text-muted); line-height: 1.55; }
+.guest-lock-box .input { width: 100%; margin-bottom: 16px; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--border); background: rgba(0,0,0,0.25); color: var(--text); font-size: 14px; outline: none; transition: border-color .2s, box-shadow .2s; }
+.guest-lock-box .input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(var(--accent-rgb,120,160,255),0.25); }
+.guest-lock-box .btn { width: 100%; padding: 12px; border-radius: 12px; font-weight: 500; }
+.guest-lock-err { margin-top: 12px; font-size: 13px; color: var(--danger); min-height: 20px; }
+.guest-lock-admin { margin-top: 18px; font-size: 12px; color: var(--text-muted); }
+.guest-lock-admin a { color: var(--accent); text-decoration: none; }
+.guest-lock-admin a:hover { text-decoration: underline; }
+
+/* ============ P2: 快捷键帮助 ============ */
+.shortcuts-list {
+  display: flex; flex-direction: column; gap: 8px;
+  padding: 8px 0;
+}
+.sc-row {
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 16px;
+}
+.sc-row span { color: var(--text-muted); font-size: 13px; }
+kbd {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-family: monospace;
+  font-size: 12px;
+  color: var(--text);
+}
+
+/* update-ready / shortcuts-btn 已移除（Docker 版无 SW update 提示） */

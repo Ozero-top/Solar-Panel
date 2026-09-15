@@ -1,19 +1,23 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="rgba(20,20,24,0.85)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
   <title>登录 - SolarPanel</title>
   <link rel="icon" href="../favicon.ico?v=20260915" type="image/x-icon">
-  <link rel="stylesheet" href="assets/css/common.css?v=20260906">
-  <link rel="stylesheet" href="assets/css/auth-admin.css?v=20260969">
-  <link rel="stylesheet" href="assets/css/themes.css?v=20260924">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="assets/img/icon.svg">
+  <link rel="stylesheet" href="assets/css/common.css?v=20270114">
+  <link rel="stylesheet" href="assets/css/auth-admin.css?v=20270114">
+  <link rel="stylesheet" href="assets/css/themes.css?v=20270114">
 </head>
 <body class="login-body">
   <div class="style-fx" aria-hidden="true"></div>
   <div class="login-card glass-strong">
     <h1>SolarPanel</h1>
-    <div class="sub">登录管理后台</div>
+    <div class="sub" id="loginSub">登录管理后台</div>
     <div class="login-error" id="loginError"></div>
     <form id="loginForm">
       <div class="form-item">
@@ -24,12 +28,22 @@
         <label for="password">密码</label>
         <input class="input" id="password" name="password" type="password" autocomplete="current-password" required>
       </div>
+      <!-- 2FA 两步验证表单（密码通过后才显示，默认 hidden） -->
+      <div class="form-item" id="twofaField" hidden>
+        <label for="twofaCode">🔐 两步验证（6 位动态码）</label>
+        <input class="input" id="twofaCode" type="text" inputmode="numeric" maxlength="6" placeholder="请输入动态码" autocomplete="one-time-code">
+        <label class="trust-cb" for="trustDevice">
+          <input type="checkbox" id="trustDevice">
+          <span>信任此设备 30 天（下次无需再输入验证码）</span>
+        </label>
+      </div>
+      <input type="hidden" id="twofaUID">
       <button class="btn btn-primary" id="loginBtn" type="submit">登 录</button>
     </form>
-    <div class="login-back"><a href="../index.html">← 返回主页</a></div>
+    <div class="login-back"><a href="/">← 返回主页</a></div>
   </div>
 
-  <script src="assets/js/api.js?v=20260983"></script>
-  <script src="assets/js/login.js?v=20260905"></script>
+  <script src="assets/js/api.js?v=20270114"></script>
+  <script src="assets/js/login.js?v=20270114"></script>
 </body>
 </html>

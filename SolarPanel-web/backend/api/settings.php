@@ -67,8 +67,10 @@ if ($action === 'save') {
             $value = (string)$n;
         }
         if ($key === 'clock_show' && !in_array($value, ['0', '1'], true)) $value = '1';
+        if ($key === 'search_bar_enabled' && !in_array($value, ['0', '1'], true)) $value = '1';
+        if ($key === 'card_filter_enabled' && !in_array($value, ['0', '1'], true)) $value = '1';
         if ($key === 'default_theme' && !in_array($value, ['light', 'dark', 'system'], true)) $value = 'dark';
-        if ($key === 'theme_style' && !in_array($value, ['soft', 'nature', 'natural', 'holo', 'gradient', 'material', 'fabric', 'aurora', 'scandi', 'clay', 'spotlight', 'neumorphism', 'skeuomorphism', 'immersive-photo', 'ghibli', 'fluent', 'warm-dashboard'], true)) $value = 'soft';
+        if ($key === 'theme_style' && !in_array($value, ['soft', 'nature', 'natural', 'holo', 'gradient', 'material', 'fabric', 'aurora', 'scandi', 'clay', 'spotlight', 'neumorphism', 'skeuomorphism', 'immersive-photo', 'ghibli', 'fluent', 'warm-dashboard', 'blueprint'], true)) $value = 'soft';
         if ($key === 'card_style' && !in_array($value, ['detail', 'app'], true)) $value = 'detail';
         if ($key === 'search_engines' && $value !== '') {
             $engines = json_decode($value, true);
@@ -120,9 +122,24 @@ if ($action === 'save') {
             $value = json_encode($clean, JSON_UNESCAPED_UNICODE);
         }
 
+        if ($key === 'wallpaper_source') {
+            if (!in_array($value, ['', 'bing'], true)) $value = '';
+        }
+        if ($key === 'guest_access_enabled' && !in_array($value, ['0', '1'], true)) $value = '0';
+        if ($key === 'guest_password_hash') {
+            // 前端可以提交 password 字段（admin.js 直接保存），但这里要做 bcrypt — 简化：后端在 auth.php guest_login 校验密码时已经会用 password_verify 验证
+            // 如果传入纯文本密码，则 hash 保存；如果已经是 bcrypt hash（$2y$10$）直接保存
+            if ($value !== '' && strpos($value, '$2') !== 0) {
+                $value = password_hash($value, PASSWORD_DEFAULT);
+            }
+        }
+
         $st->execute([$key, mb_substr($value, 0, 65535)]);
         $saved++;
     }
+
+    sp_log('settings.save', "saved=$saved keys=" . implode(',', array_slice(array_keys($body), 0, 10)), 'success', $u['username'] ?? '', $u['role'] ?? 'admin');
+
     ok(['saved' => $saved]);
 }
 

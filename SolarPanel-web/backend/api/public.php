@@ -3,12 +3,20 @@
  * 主页公开数据接口：前端展示内容全部由此接口提供
  * GET /backend/api/public.php
  * 返回：settings 全部设置 + groups 分组(含卡片) + user 当前登录用户(可为 null)
+ *       + guest_required（是否需要访客密码）
  */
 require_once __DIR__ . '/../lib/db.php';
 require_once __DIR__ . '/../lib/auth.php';
 
 // 返回数据含当前登录用户信息，禁止中间代理 / CDN 缓存，防止串号
 header('Cache-Control: no-store, max-age=0');
+
+// DB 级限流（60/min）
+try {
+    require_once __DIR__ . '/../lib/auth.php';
+    $rate = sp_rate_check('public', 60, 60);
+    if (!$rate['ok']) sp_rate_limit_respond($rate);
+} catch (Throwable $e) {}
 
 try {
     $settings = [];
@@ -19,9 +27,28 @@ try {
     // 分组显隐：隐藏分组仅登录管理员可见，未登录 / 其他账号一律过滤
     $u = current_user();
     $isAdmin = user_has_role($u, 'admin');
+    $isViewerOrEditor = user_has_role($u, 'viewer', 'editor');
+    $isGuest = !empty($_SESSION['is_guest']);
     ensure_group_visible_column();
 
+    // guest_required：未登录 + guest_access_enabled=1 → true
+    $guestEnabled = (int)($settings['guest_access_enabled'] ?? '0');
+    $guestRequired = ($u === null) && $guestEnabled === 1;
+
+    // 访客密码未验证：不返回任何分组/卡片数据，彻底隐藏前端信息
+    if ($guestRequired) {
+        ok([
+            'settings'        => $settings,
+            'groups'          => [],
+            'user'            => null,
+            'guest_required'  => true,
+        ]);
+    }
+
     if ($isAdmin) {
+        $groups = db()->query('SELECT id, title, description, is_visible FROM item_groups ORDER BY sort ASC, id ASC')->fetchAll();
+    } elseif ($u) {
+        // 已登录（editor/viewer/guest）：能看全部分组
         $groups = db()->query('SELECT id, title, description, is_visible FROM item_groups ORDER BY sort ASC, id ASC')->fetchAll();
     } else {
         $groups = db()->query('SELECT id, title, description FROM item_groups WHERE is_visible = 1 ORDER BY sort ASC, id ASC')->fetchAll();
@@ -49,13 +76,22 @@ try {
         }
     }
 
+    $userData = null;
+    if ($u) {
+        $userData = [
+            'username' => $u['username'],
+            'name'     => $u['name'],
+            'role'     => $u['role'] ?? 'viewer',
+        ];
+    }
+
     ok([
-        'settings' => $settings,
-        'groups'   => $groups,
-        'user'     => $u ? ['username' => $u['username'], 'name' => $u['name'], 'role' => $u['role'] ?? 'viewer'] : null,
+        'settings'        => $settings,
+        'groups'          => $groups,
+        'user'            => $userData,
+        'guest_required'  => $guestRequired,
     ]);
 } catch (Throwable $e) {
-    // 详细错误（含数据库账号 / 主机 / SQL 结构）只写服务端日志，不返回给访客
     error_log('[SolarPanel] public.php 数据读取失败：' . $e->getMessage());
     fail('数据读取失败，请确认站点已正确安装（访问 /backend/api/install.php），或联系管理员查看服务器日志');
 }

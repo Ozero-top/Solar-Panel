@@ -16,6 +16,13 @@ header('Cache-Control: no-store, max-age=0');
 
 @set_time_limit(25);
 
+try {
+    require_once __DIR__ . '/../lib/db.php';
+    require_once __DIR__ . '/../lib/auth.php';
+    $rate = sp_rate_check('weather', 10, 60);
+    if (!$rate['ok']) sp_rate_limit_respond($rate);
+} catch (Throwable $e) {}
+
 /** 天气数据源抓取（URL 全部内置，无用户可控输入；实现见 lib/http.php 的 sp_http_simple） */
 function w_fetch(string $u, int $timeout = 5): string
 {

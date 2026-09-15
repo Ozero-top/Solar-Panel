@@ -19,6 +19,8 @@ function sp_allowed_settings(): array
         'home_view', 'news_sources', 'news_order',
         'icp_show', 'icp_number', 'icp_link',
         'police_show', 'police_number', 'police_link',
+        'wallpaper_source', 'guest_access_enabled', 'guest_password_hash',
+        'search_bar_enabled', 'card_filter_enabled',
     ];
 }
 

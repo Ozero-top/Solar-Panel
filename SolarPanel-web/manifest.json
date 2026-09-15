@@ -1,0 +1,48 @@
+{
+  "name": "SolarPanel 导航面板",
+  "short_name": "SolarPanel",
+  "description": "自托管的书签导航 / 起始页面板，支持分组卡片、搜索引擎、天气、热点新闻与自定义 RSS。",
+  "id": "./",
+  "start_url": "./?source=pwa",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "any",
+  "lang": "zh-CN",
+  "dir": "ltr",
+  "theme_color": "#222734",
+  "background_color": "#222734",
+  "categories": ["productivity", "utilities", "bookmarks"],
+  "icons": [
+    {
+      "src": "frontend/assets/img/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "frontend/assets/img/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    },
+    {
+      "src": "favicon.ico",
+      "sizes": "32x32 48x48",
+      "type": "image/x-icon",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "管理后台",
+      "short_name": "管理",
+      "url": "frontend/login.html?source=pwa"
+    },
+    {
+      "name": "热点新闻",
+      "short_name": "新闻",
+      "url": "./?source=pwa#news"
+    }
+  ]
+}

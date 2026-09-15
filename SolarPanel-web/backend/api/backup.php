@@ -394,6 +394,18 @@ if ($action === 'reset') {
             ['name' => '抖音',     'url' => 'https://www.douyin.com/search/%s'],
         ], JSON_UNESCAPED_UNICODE),
         'search_default'     => '百度',
+        // —— 补齐与 install.php / init.sql 一致的设置键 ——
+        'icp_show'           => '0',
+        'icp_number'         => '',
+        'icp_link'           => '',
+        'police_show'        => '0',
+        'police_number'      => '',
+        'police_link'        => '',
+        'wallpaper_source'   => '',
+        'guest_access_enabled' => '0',
+        'guest_password_hash' => '',
+        'search_bar_enabled' => '1',
+        'card_filter_enabled' => '1',
     ];
 
     // 1. 事务清空并恢复默认设置 + 示例分组 / 卡片（与安装向导一致，users 表不受影响）

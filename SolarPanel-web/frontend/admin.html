@@ -1,13 +1,13 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>管理后台 - SolarPanel</title>
-  <link rel="icon" href="../favicon.ico?v=20260915" type="image/x-icon">
-  <link rel="stylesheet" href="assets/css/common.css?v=20260906">
-  <link rel="stylesheet" href="assets/css/auth-admin.css?v=20260969">
-  <link rel="stylesheet" href="assets/css/themes.css?v=20260924">
+  <link rel="icon" href="favicon.ico?v=20260915" type="image/x-icon">
+  <link rel="stylesheet" href="assets/css/common.css?v=20270114">
+  <link rel="stylesheet" href="assets/css/auth-admin.css?v=20270114">
+  <link rel="stylesheet" href="assets/css/themes.css?v=20270114">
 </head>
 <body>
   <div class="style-fx" aria-hidden="true"></div>
@@ -17,7 +17,7 @@
       <div class="brand">SolarPanel · 管理后台 <span class="ver" id="appVer"></span></div>
       <div style="display:flex;gap:8px;align-items:center">
         <span id="whoami" style="font-size:13px;color:var(--text-muted)"></span>
-        <a class="btn btn-sm" href="../index.html" target="_blank" rel="noopener">查看主页</a>
+        <a class="btn btn-sm" href="/" target="_blank" rel="noopener">查看主页</a>
         <button class="btn btn-sm" id="logoutBtn">退出登录</button>
       </div>
     </header>
@@ -28,7 +28,8 @@
       <button class="tab" data-tab="items">卡片管理</button>
       <button class="tab" data-tab="groups">分组管理</button>
       <button class="tab" data-tab="account">账号管理</button>
-      <button class="tab" data-tab="backup">备份与更新</button>
+      <button class="tab" data-tab="backup">系统备份</button>
+      <button class="tab" data-tab="audit">审计日志</button>
     </nav>
 
     <!-- ============ 卡片管理 ============ -->
@@ -147,7 +148,24 @@
             <textarea class="textarea" id="s_announcement" maxlength="500"></textarea>
           </div>
 
-          <!-- 时钟与天气（并入基础信息） -->
+          <h4 class="sub-group-title">� 访客访问密码</h4>
+          <div class="form-row">
+            <div class="form-item">
+              <label>访客访问开关（默认关闭）</label>
+              <select class="select" id="s_guest_access_enabled">
+                <option value="0">关闭（访客可直接访问主页）</option>
+                <option value="1">开启（未登录访客需先输入密码）</option>
+              </select>
+              <div class="form-hint">开启后，访客访问主页将先看到密码锁屏；已登录管理员不受影响。密码使用 bcrypt 存储（不在表单中回显）。</div>
+            </div>
+            <div class="form-item">
+              <label>访客密码（留空则保持原密码不变；仅在开启时有效）</label>
+              <input class="input" id="s_guest_password" type="password" placeholder="输入访客密码（留空 = 不改）" autocomplete="off">
+              <div class="form-hint">访客密码将与本站访客密码保持一致（bcrypt(10) 哈希存储）。</div>
+            </div>
+          </div>
+
+          <h4 class="sub-group-title">� 时钟与天气</h4>
           <div class="form-row">
             <div class="form-item">
               <label>显示时钟</label>
@@ -244,6 +262,7 @@
                 <option value="ghibli">Ghibli 吉卜力（手绘水彩 · 治愈自然）</option>
                 <option value="fluent">Fluent 流利设计（微软蓝 · 亚克力 · Reveal 光效）</option>
                 <option value="warm-dashboard">暖色仪表盘（珊瑚赤陶 · 奶油白卡 · 青绿金黄）</option>
+                <option value="blueprint">Blueprint 工程蓝图（深蓝底 · 白线网格 · 等宽字 · 橙色标注）</option>
               </select>
               <div class="form-hint">主页即时生效；深浅模式可由访客在主页右上角按钮自行切换</div>
             </div>
@@ -258,9 +277,18 @@
               </select>
             </div>
             <div class="form-item">
-              <label>搜索栏宽度（滑块调整，单位 px）</label>
-              <input type="range" class="range" id="s_search_width" min="360" max="1200" step="10" value="640">
-              <div class="form-hint">当前：<span class="range-val" id="v_search_width">640</span> px（默认 640，保存后刷新主页生效）</div>
+              <label>搜索引擎搜索栏</label>
+              <select class="select" id="s_search_bar_enabled">
+                <option value="1">显示（主页顶部）</option>
+                <option value="0">隐藏</option>
+              </select>
+            </div>
+            <div class="form-item">
+              <label>卡片筛选搜索栏（导航视图下）</label>
+              <select class="select" id="s_card_filter_enabled">
+                <option value="1">显示</option>
+                <option value="0">隐藏</option>
+              </select>
             </div>
           </div>
 
@@ -289,7 +317,7 @@
             <div class="form-hint">保存后刷新主页生效；若未生效多为浏览器缓存，可强制刷新（Ctrl+F5）。</div>
           </div>
 
-          <!-- Logo 与壁纸（并入外观布局） -->
+          <h4 class="sub-group-title">🖼️ Logo 与壁纸</h4>
           <div class="form-item">
             <label>站点 Logo</label>
             <div class="upload-row">
@@ -321,6 +349,15 @@
               <div class="form-hint">保存后刷新主页生效</div>
             </div>
           </div>
+
+          <div class="form-item">
+            <label>每日壁纸源（开启后主页顶部上方静态壁纸将被每日自动更新的壁纸覆盖；留空 = 禁用）</label>
+            <select class="select" id="s_wallpaper_source">
+              <option value="">禁用（使用上方静态壁纸）</option>
+              <option value="bing">Bing 每日壁纸（服务器代理抓取，按日缓存）</option>
+            </select>
+            <div class="form-hint">开启后由服务器代理抓取 Bing 每日壁纸，按日期缓存至 UploadDir/daily_wallpaper/，当日零回源；失败回退最近一次缓存；3 天自动清理。</div>
+          </div>
         </form>
       </div>
 
@@ -336,6 +373,11 @@
               <label>默认搜索引擎</label>
               <select class="select" id="s_search_default"></select>
             </div>
+          </div>
+          <div class="form-item">
+            <label>搜索栏宽度（滑块调整，单位 px）</label>
+            <input type="range" class="range" id="s_search_width" min="360" max="1200" step="10" value="640">
+            <div class="form-hint">当前：<span class="range-val" id="v_search_width">640</span> px（默认 640，保存后刷新主页生效）</div>
           </div>
           <div class="form-item">
             <label>搜索引擎列表（主页搜索框按此显示）</label>
@@ -359,10 +401,31 @@
               <div class="form-hint">数据源加载中…</div>
             </div>
           </div>
+          <hr style="border:none;border-top:1px dashed var(--border);margin:18px 0">
+          <h4 class="sub-group-title" style="margin-bottom:8px">📌 自定义 RSS / Atom 源</h4>
+          <div class="form-hint" style="margin-bottom:8px">在下方添加任意 RSS 或 Atom 订阅源，将作为额外的热点卡片在新闻视图展示。URL 必须以 http:// 或 https:// 开头。</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+            <input class="input" id="feedTitle" type="text" placeholder="标题（建议 ≤12 字）" style="max-width:200px">
+            <input class="input" id="feedURL" type="text" placeholder="RSS / Atom 订阅地址，如 https://hnrss.org/newest" style="flex:1;min-width:300px">
+            <button class="btn btn-primary" type="button" id="addFeedBtn">＋ 添加</button>
+          </div>
+          <table class="table" id="feedsTable">
+            <thead>
+              <tr>
+                <th style="width:40px">ID</th>
+                <th>标题</th>
+                <th>URL</th>
+                <th style="width:60px">启用</th>
+                <th style="width:80px">排序</th>
+                <th style="width:160px">操作</th>
+              </tr>
+            </thead>
+            <tbody id="feedsTbody"></tbody>
+          </table>
         </form>
       </div>
 
-      <!-- 备份与更新：已提升为一级导航（tab-backup） -->
+      <!-- 系统备份：已提升为一级导航（tab-backup） -->
     </section>
 
     <!-- ============ 账号 ============ -->
@@ -411,6 +474,44 @@
         </form>
       </div>
 
+      <!-- ============ 两步验证 (2FA) ============ -->
+      <div class="account-card" style="margin-top:20px" id="twofaCard">
+        <div class="account-card-title">🔐 两步验证 (2FA)</div>
+        <div id="twofaStatus" style="font-size:13px;color:var(--text-muted);margin-bottom:12px">状态：加载中…</div>
+        <div id="twofaSetup" hidden style="margin-bottom:16px">
+          <div id="twofaQR" style="text-align:center;margin-bottom:10px"></div>
+          <div id="twofaSecret" style="text-align:center;font-family:monospace;font-size:13px;color:var(--text-muted);margin-bottom:8px"></div>
+          <div style="display:flex;gap:8px">
+            <input class="input" id="twofaCode" type="text" placeholder="输入验证器中的 6 位动态码" maxlength="6" autocomplete="off" style="flex:1">
+            <button class="btn btn-primary" type="button" id="twofaEnableBtn">✅ 开启 2FA</button>
+            <button class="btn" type="button" id="twofaCancelBtn">取消</button>
+          </div>
+        </div>
+        <div id="twofaActions">
+          <button class="btn btn-primary" type="button" id="twofaSetupBtn" style="display:none">🚀 开启 2FA</button>
+          <button class="btn btn-danger" type="button" id="twofaDisableBtn" style="display:none">🛑 关闭 2FA</button>
+        </div>
+        <div class="form-hint" style="margin-top:10px">密钥仅在本次页面显示；开启后每次登录需输入动态码。推荐使用 Google Authenticator / Microsoft Authenticator / Authy / 1Password 等应用。</div>
+      </div>
+
+      <!-- ============ 受信任设备 ============ -->
+      <div class="account-card" style="margin-top:20px" id="trustedDevicesCard" hidden>
+        <div class="account-card-title">📱 受信任设备</div>
+        <div id="trustedDevicesBody">加载中…</div>
+      </div>
+
+      <!-- ============ 书签导入 ============ -->
+      <div class="account-card" style="margin-top:20px">
+        <div class="account-card-title">📥 浏览器书签导入</div>
+        <div class="form-hint" style="margin-bottom:10px">从 Chrome / Edge / Firefox / Safari 导出的 bookmarks.html 导入，按分组自动创建卡片；http / https 链接有效。</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input type="file" id="bookmarksFile" accept=".html" hidden>
+          <button class="btn" type="button" id="openBookmarksBtn">📂 选择 bookmarks.html</button>
+          <span id="bookmarksPreview" style="font-size:13px;color:var(--text-muted)"></span>
+          <button class="btn btn-primary" type="button" id="applyBookmarksBtn" hidden>➡️ 导入到数据库</button>
+        </div>
+      </div>
+
       <div style="margin-top:36px" id="userManageBlock">
         <div class="panel-head">
           <h2>用户管理（新增 / 删除用户，重置密码，分配权限组）</h2>
@@ -446,10 +547,54 @@
       </div>
     </section>
 
-    <!-- ============ 备份与更新 ============ -->
+    <!-- ============ 审计日志 ============ -->
+    <section class="admin-panel glass" id="tab-audit" hidden>
+      <div class="panel-head">
+        <h2>📋 审计日志</h2>
+        <div style="display:flex;gap:8px;align-items:center">
+          <select class="select" id="auditFilterType" style="width:auto;min-width:140px">
+            <option value="">全部类型</option>
+            <option value="auth.login">登录</option>
+            <option value="auth.login.2fa">2FA 登录</option>
+            <option value="2fa.enable">2FA 开启</option>
+            <option value="2fa.disable">2FA 关闭</option>
+            <option value="guest.login">访客密码</option>
+            <option value="settings.save">保存设置</option>
+            <option value="item.add">新增卡片</option>
+            <option value="item.edit">编辑卡片</option>
+            <option value="item.delete">删除卡片</option>
+            <option value="group.add">新增分组</option>
+            <option value="group.edit">编辑分组</option>
+            <option value="group.delete">删除分组</option>
+            <option value="audit.clear">清空审计</option>
+          </select>
+          <button class="btn" type="button" id="auditRefreshBtn">🔄 刷新</button>
+          <button class="btn btn-danger" type="button" id="auditClearBtn">🗑️ 清空当前筛选</button>
+        </div>
+      </div>
+      <div class="form-hint" style="margin-bottom:10px">记录登录成功/失败与关键写操作（卡片 / 分组 / 设置 / 账号 / 2FA）；仅管理员可见；最近 500 条内分页展示。</div>
+      <table class="table audit-table">
+        <thead>
+          <tr>
+            <th style="width:150px">时间</th>
+            <th style="width:70px">类型</th>
+            <th style="width:80px">用户</th>
+            <th style="width:140px">动作</th>
+            <th>对象</th>
+            <th style="width:80px">结果</th>
+            <th style="width:120px">IP</th>
+          </tr>
+        </thead>
+        <tbody id="auditTbody"></tbody>
+      </table>
+      <div class="pager" id="auditPager" hidden></div>
+    </section>
+
+    <!-- ============ 系统备份 ============ -->
     <section class="admin-panel glass" id="tab-backup" hidden>
-      <div class="panel-head"><h2>备份与更新</h2></div>
+      <div class="panel-head"><h2>系统备份</h2></div>
       <div class="backup-actions">
+
         <!-- 🔍 在线检测更新 -->
         <div class="backup-row">
           <div class="backup-info">
@@ -460,13 +605,6 @@
           <button class="btn btn-primary" type="button" id="checkUpdateBtn">🔍 检查更新</button>
         </div>
 
-        <div class="backup-row">
-          <div class="backup-info">
-            <b>系统在线升级</b>
-            <span>上传升级包（.zip）自动校验并预览变更，确认后仅应用变更文件；被替换 / 删除的原文件自动备份可回滚。当前版本 <b id="upgradeCurVer">—</b></span>
-          </div>
-          <button class="btn btn-primary" type="button" id="upgradeBtn">🚀 在线升级</button>
-        </div>
         <div class="backup-row">
           <div class="backup-info">
             <b>导出配置</b>
@@ -489,8 +627,7 @@
           <button class="btn btn-danger" type="button" id="resetBackupBtn">🗑️ 恢复初始状态</button>
         </div>
         <input type="file" id="importBackupFile" accept=".json,application/json" hidden>
-        <input type="file" id="upgradeFile" accept=".zip,application/zip,application/x-zip-compressed" hidden>
-        <div class="form-hint">升级前建议先「导出配置」备份一次。</div>
+        <div class="form-hint">导入配置或恢复初始状态前，建议先「导出配置」备份一次。</div>
       </div>
 
       <!-- 更新日志 -->
@@ -570,16 +707,29 @@
           </div>
         </div>
         <div class="form-item">
-          <label>图标（图片地址；文字图标取标题首字）</label>
+          <label>图标</label>
           <div class="upload-row">
             <span class="icon-preview" id="i_preview"></span>
-            <input class="input" id="i_icon" type="text" placeholder="图标图片地址，或点击右侧上传">
+            <input class="input" id="i_icon" type="text" placeholder="图标图片地址（选择「图片」类型时使用）">
             <button class="btn" type="button" data-upload="i_icon">上传图标</button>
             <button class="btn" type="button" id="i_useFavicon" hidden>获取站点图标</button>
           </div>
+          <!-- 文字图标手动输入（type=text 时显示） -->
+          <div class="form-item" style="margin-top:10px" id="i_textWrap">
+            <label>手动文字（留空自动取卡片标题）</label>
+            <input class="input" id="i_iconText" type="text" maxlength="12" placeholder="支持中文 4 字 / 英文 12 字母">
+          </div>
+          <!-- 颜色面板（text/image 都可设置；favicon 时隐藏） -->
           <div class="form-item" style="margin-top:10px" id="i_bgWrap">
-            <label>文字图标背景色</label>
-            <input class="input" id="i_bg" type="text" placeholder="#0969da（留空自动配色）" maxlength="20" style="max-width:200px">
+            <label>图标背景色</label>
+            <div class="upload-row" style="gap:8px;flex-wrap:nowrap">
+              <input type="color" id="i_color" value="#0969da" style="width:44px;height:34px;padding:2px;border-radius:6px;cursor:pointer">
+              <span style="font-size:12px;color:var(--text-muted);white-space:nowrap">透明度</span>
+              <input type="range" id="i_alpha" min="0" max="100" value="100" style="flex:1">
+              <span id="i_alphaLabel" style="font-size:12px;color:var(--text-muted);min-width:32px;text-align:right">100%</span>
+              <!-- 隐藏字段：JS 用 buildBgCss 合成后写入 -->
+              <input type="hidden" id="i_bg" value="">
+            </div>
           </div>
         </div>
         <div class="modal-foot">
@@ -692,32 +842,6 @@
     </div>
   </div>
 
-  <!-- ============ 在线升级确认弹窗 ============ -->
-  <div class="modal" id="upgradeModal">
-    <div class="modal-box glass-strong" style="max-width:540px">
-      <div class="modal-head">
-        <h3>确认升级</h3>
-        <button class="btn btn-sm" data-close="upgradeModal">✕</button>
-      </div>
-      <div class="upgrade-verline">
-        <span class="upgrade-ver" id="upgradeFrom">—</span>
-        <span class="upgrade-arrow">→</span>
-        <span class="upgrade-ver upgrade-ver-new" id="upgradeTo">—</span>
-        <span class="upgrade-counts" id="upgradeCounts"></span>
-      </div>
-      <div class="upgrade-files" id="upgradeFiles"></div>
-      <div class="upgrade-delblock" id="upgradeDelBlock" hidden>
-        <b>将移除的废弃文件（自动备份后删除）：</b>
-        <div class="upgrade-files" id="upgradeDelFiles"></div>
-      </div>
-      <p class="form-hint">升级过程请勿关闭页面；完成后页面自动刷新，建议再按 Ctrl+F5 强制刷新浏览器缓存。数据库中的分组 / 卡片 / 设置不受升级影响。</p>
-      <div class="modal-foot">
-        <button class="btn" type="button" data-close="upgradeModal">取消</button>
-        <button class="btn btn-primary" type="button" id="upgradeApplyBtn">🚀 确认升级</button>
-      </div>
-    </div>
-  </div>
-
   <!-- ============ 通用确认弹窗（替代浏览器原生 confirm：与主题风格同步 + 居中） ============ -->
   <div class="modal" id="confirmModal">
     <div class="modal-box glass-strong" style="max-width:430px">
@@ -733,7 +857,8 @@
     </div>
   </div>
 
-  <script src="assets/js/api.js?v=20260983"></script>
-  <script src="assets/js/admin.js?v=20260965"></script>
+  <script src="assets/js/qrcode.min.js"></script>
+  <script src="assets/js/api.js?v=20270114"></script>
+  <script src="assets/js/admin.js?v=20270114"></script>
 </body>
 </html>

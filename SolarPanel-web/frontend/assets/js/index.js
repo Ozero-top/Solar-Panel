@@ -10,17 +10,80 @@ const state = {
   sortingGroupId: null, // 当前正在排序的分组 id（仅管理员，null = 未排序）
   sortDirty: false, // 当前排序分组有未保存的拖拽改动
   groupIntroDone: false, // 首屏分组入场动画只播一次（后续重绘不闪动画）
+  cardsIntroDone: false, // 首屏卡片入场动画只播一次（后续重绘不闪动画）
+  cardFilterKw: '',      // 当前卡片筛选关键词（bindCardFilter / applyCardFilter 共享）
 };
 
 const API_BASE = '../backend/api/';
 
+/** 卡片筛选栏显隐统一入口 — 三个场景都调这个函数：
+ *  - renderGroups()：分组重绘后
+ *  - switchView()：导航↔新闻切换后
+ *  - bindCardFilter()：首次绑定时
+ *  逻辑：只有在「当前是导航视图」且「有分组数据」时才显示
+ */
+function bindTopbarAutoHide() {
+  const topbar = document.querySelector('.topbar');
+  if (!topbar) return;
+
+  let lastY = window.scrollY;
+  let ticking = false;
+  const HIDE_THRESHOLD = 64;
+
+  function onScroll() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      const y = window.scrollY;
+      const dy = y - lastY;
+
+      // 规则 1：到顶部 → 显示
+      if (y <= 10) {
+        topbar.classList.remove('hidden-scroll');
+      }
+      // 规则 2：向下滚过阈值 → 隐藏
+      else if (dy > HIDE_THRESHOLD) {
+        topbar.classList.add('hidden-scroll');
+      }
+      // 注意：不要写「向上滚立即显示」—— 需求是只有到顶才显示
+
+      lastY = y;
+      ticking = false;
+    });
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+}
+
+function updateCardFilterVisibility() {
+  const cf = document.getElementById('cardFilter');
+  if (!cf) return;
+  const newsHidden = document.getElementById('newsView').hidden;
+  // newsView.hidden=true → 当前是导航视图 → newsHidden=true → isNav=true → hidden=false（显示）
+  // newsView.hidden=false → 当前是新闻视图 → newsHidden=false → isNav=false → hidden=true（隐藏）
+  const isNav = newsHidden;
+  cf.hidden = !isNav || !state.groups.length || (state.settings.card_filter_enabled === '0');
+}
+
 async function boot() {
+  bindTopbarAutoHide();
   let data;
   try {
     data = await API.get(API_BASE + 'public.php');
   } catch (e) {
     document.getElementById('groupsWrap').innerHTML =
-      '<div class="empty-tip glass">数据加载失败：' + esc(e.message) + '<br>请确认已完成安装：访问 <a href="../backend/api/install.php">/backend/api/install.php</a></div>';
+      '<div class="empty-tip glass">数据加载失败：' + esc(e.message) + '</div>';
+    return;
+  }
+
+  // 访客访问密码：开启且未通过验证时，仅渲染锁屏页，不加载分组/卡片/新闻
+  if (data.guest_required) {
+    state.settings = data.settings || {};
+    state.theme = applyTheme(state.settings);
+    updateThemeBtn();
+    renderBase();
+    startClock();
+    renderGuestLock();
     return;
   }
 
@@ -34,6 +97,7 @@ async function boot() {
   startClock();
   renderSearch();
   renderGroups();
+  bindCardFilter();
   bindGlobal();
   initNewsSwitch();
 }
@@ -55,9 +119,9 @@ function renderBase() {
   // 壁纸与遮罩（未设置壁纸时使用柔和渐变背景，不叠加遮罩；有壁纸时隐藏风格装饰层）
   const bg = document.getElementById('bgLayer');
   const mask = document.getElementById('bgMask');
-  document.body.classList.toggle('has-wallpaper', !!s.wallpaper);
-  if (s.wallpaper) {
-    bg.style.backgroundImage = 'url("' + assetUrl(s.wallpaper).replace(/"/g, '%22') + '")';
+  const hasWp = !!(s.wallpaper || s.wallpaper_source);
+  document.body.classList.toggle('has-wallpaper', hasWp);
+  if (hasWp) {
     const opacity = parseFloat(s.mask_opacity);
     mask.style.background =
       'rgba(0,0,0,' + (isNaN(opacity) ? 0.35 : Math.min(Math.max(opacity, 0), 1)) + ')';
@@ -76,6 +140,16 @@ function renderBase() {
     mask.style.background = 'transparent';
     bg.style.filter = '';
     bg.style.transform = '';
+  }
+  // 壁纸来源：每日壁纸源优先（异步拉取，sessionStorage 当日缓存），回退静态壁纸
+  const applyWp = (url) => {
+    if (url) bg.style.backgroundImage = 'url("' + assetUrl(url).replace(/"/g, '%22') + '")';
+    else bg.style.backgroundImage = '';
+  };
+  if (s.wallpaper_source) {
+    applyDailyWallpaper(s.wallpaper_source, applyWp, s.wallpaper || '');
+  } else if (s.wallpaper) {
+    applyWp(s.wallpaper);
   }
 
   // 内容区域尺寸（最大宽度 / 左右边距 / 顶部边距 / 底部边距）
@@ -122,6 +196,7 @@ function renderBase() {
   };
   if (s.icp_show === '1') addBeian(s.icp_number, (s.icp_link || '').trim());
   if (s.police_show === '1') addBeian(s.police_number, (s.police_link || '').trim());
+  // 两个都显示则加分隔点
   if (beian.children.length === 2) {
     const dot = document.createElement('span');
     dot.className = 'beian-dot';
@@ -145,11 +220,15 @@ function renderBase() {
   // 地址模式：后台设置（外网 public / 内网 lan）
   state.lanMode = s.default_lan_mode === 'lan';
 
-  // 管理入口：已登录直达后台，否则去登录页
+  // 管理入口：guest 角色跳登录页（需管理员账号），其他已登录角色直达后台
   const link = document.getElementById('adminLink');
   if (state.user) {
-    link.href = 'frontend/admin.html';
-    link.title = '管理后台（' + (state.user.name || state.user.username) + '）';
+    if (state.user.role === 'guest') {
+      link.href = 'frontend/login.html';
+    } else {
+      link.href = 'frontend/admin.html';
+      link.title = '管理后台（' + (state.user.name || state.user.username) + '）';
+    }
   }
 }
 
@@ -282,7 +361,7 @@ function renderSearch() {
   });
 
   refreshCur();
-  document.getElementById('searchBox').hidden = false;
+  document.getElementById('searchBox').hidden = (state.settings.search_bar_enabled === '0');
 
   // 搜索历史：localStorage 存储（最多 10 条）
   const HIST_KEY = 'sp_search_history';
@@ -455,8 +534,9 @@ function renderGroups() {
       desc.textContent = g.description;
       head.appendChild(desc);
     }
-    // 管理员：分组名后显示排序操作（未排序显示「排序」，排序中显示「保存排序 / 取消排序」）
-    if (state.user && state.user.role === 'admin') {
+    // 管理员/编辑：分组名后显示排序操作（未排序显示「排序」，排序中显示「保存排序 / 取消排序」）
+    const isEditor = state.user && (state.user.role === 'admin' || state.user.role === 'editor');
+    if (isEditor) {
       const sortWrap = document.createElement('span');
       sortWrap.className = 'group-sort';
       if (state.sortingGroupId === g.id) {
@@ -483,12 +563,32 @@ function renderGroups() {
         sortWrap.appendChild(sortBtn);
       }
       head.appendChild(sortWrap);
+
+      // + 快速添加按钮 —— 放在 sortWrap 容器内部（sortBtn 后面），让 flex 自然排列
+      if (state.sortingGroupId !== g.id) {
+        const addBtn = document.createElement('span');
+        addBtn.className = 'group-add-btn';
+        addBtn.title = '快速添加卡片';
+        addBtn.textContent = '+';
+        addBtn.onclick = (e) => { e.stopPropagation(); openQuickAddCard(g.id); };
+        sortWrap.appendChild(addBtn);
+      }
     }
     section.appendChild(head);
 
     const cards = document.createElement('div');
     cards.className = 'cards' + (styleApp ? ' style-app' : '');
-    (g.items || []).forEach(item => cards.appendChild(buildCard(item, styleApp)));
+    (g.items || []).forEach((item, ci) => {
+      const card = buildCard(item, styleApp);
+      // 首屏：卡片依次浮现（每组内从左到右，组间由上而下，JS 控制只播一次）
+      if (!state.cardsIntroDone) {
+        card.classList.add('card-in');
+        // 每组起始延迟 = 组序号 * 120ms + 卡片序号 * 60ms，上限 1200ms
+        const delay = Math.min(i * 120 + ci * 60, 1200);
+        card.style.animationDelay = delay + 'ms';
+      }
+      cards.appendChild(card);
+    });
     section.appendChild(cards);
 
     if (!(g.items || []).length) {
@@ -503,8 +603,13 @@ function renderGroups() {
 
   // 首屏入场动画已排布完成，后续重绘（排序 / 切换视图等）不再播放
   state.groupIntroDone = true;
+  state.cardsIntroDone = true;
 
-  renderGroupNav();
+  // 卡片筛选栏：仅导航视图下且有分组时显示
+  updateCardFilterVisibility();
+  applyCardFilter();
+  // 最近常用条目随分组重绘一起刷新（排序态 / 新闻视图由 renderRecent 内部隐藏）
+  renderRecent();
 }
 
 /* ---------- 左侧悬浮目录条（导航视图=分组目录 / 新闻视图=平台目录，共用同一对元素） ---------- */
@@ -636,19 +741,41 @@ function buildCard(item, styleApp) {
   a.className = 'card' + (styleApp ? ' app-card' : '');
   a.href = '#';
   a.dataset.id = item.id; // 排序模式拖拽落位后按 data-id 收集顺序
+  // 筛选/最近常用依赖的 data-* 属性
+  a.dataset.title = item.title || '';
+  a.dataset.url = item.url || item.lan_url || '';
+  // 搜索索引 = 标题 + 描述 + URL（空格分隔，统一小写在 applyCardFilter 里做）
+  a.dataset.search = [
+    (item.title || '').toLowerCase(),
+    (item.description || '').toLowerCase(),
+    (item.url || '').toLowerCase(),
+    (item.lan_url || '').toLowerCase(),
+  ].join(' ') + (item.icon_type === 'favicon' ? ' favicon' : '');
   a.draggable = false; // 默认禁止原生链接拖拽；排序模式下由 mousedown 动态开启
 
   // 图标
   const icon = document.createElement('span');
   icon.className = 'icon';
-  if (item.icon_bg) icon.style.background = item.icon_bg;
+  a.appendChild(icon); // ★ 提前进 DOM，renderTextIcon 才能读到真实 clientWidth
+
   let iconDone = false;
   const useTextIcon = () => {
     if (iconDone) return;
     iconDone = true;
     icon.classList.remove('has-img');
-    icon.textContent = (item.title || '?').trim().charAt(0).toUpperCase();
-    if (!item.icon_bg) icon.style.background = stringColor(item.title);
+    // 文字型：手动文字优先 → 空则 fallback title
+    let raw = '';
+    if (item.icon_type === 'text') {
+      if (item.icon_value && !isImageUrlLike(item.icon_value)) {
+        raw = item.icon_value;
+      } else {
+        raw = item.title || '?';
+      }
+    } else {
+      raw = item.title || '?';
+    }
+    icon.style.background = item.icon_bg || stringColor(item.title);
+    renderTextIcon(icon, smartIconText(raw), 21);
   };
   if (item.icon_type === 'image' && item.icon_value) {
     const img = document.createElement('img');
@@ -679,7 +806,6 @@ function buildCard(item, styleApp) {
   } else {
     useTextIcon();
   }
-  a.appendChild(icon);
 
   // 文本
   const info = document.createElement('div');
@@ -700,6 +826,26 @@ function buildCard(item, styleApp) {
     badge.className = 'lan-badge';
     badge.textContent = '内网';
     a.appendChild(badge);
+  }
+
+  // × 删除按钮：排序态下必显；editor+admin 登录态下卡片 hover 时也显
+  const showDel = (state.sortingGroupId !== null)
+                  || (state.user && (state.user.role === 'admin' || state.user.role === 'editor'));
+  if (showDel) {
+    const del = document.createElement('span');
+    del.className = 'card-del';
+    del.title = '删除卡片';
+    del.textContent = '×';
+    del.onclick = async (e) => {
+      e.stopPropagation();
+      if (!await uiConfirm('确定删除卡片「' + (item.title || item.url || '') + '」？', { danger: true })) return;
+      try {
+        await API.post(API_BASE + 'items.php?action=delete', { id: item.id });
+        toast('已删除', 'success');
+        await reloadPublic();
+      } catch (err) { toast('删除失败：' + err.message, 'error'); }
+    };
+    a.appendChild(del);
   }
 
   a.onclick = e => {
@@ -796,15 +942,29 @@ function bindGlobal() {
 
   bindSortMode();
 
-  // 更新日志弹窗关闭
-  const changelogModal = document.getElementById('changelogModal');
-  document.getElementById('changelogClose').onclick = closeChangelogModal;
-  changelogModal.addEventListener('click', e => {
-    if (e.target === changelogModal) closeChangelogModal();
-  });
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && changelogModal.classList.contains('show')) closeChangelogModal();
-  });
+  // 最近常用：清空按钮
+  const recentClear = document.getElementById('recentClear');
+  if (recentClear) {
+    recentClear.onclick = () => {
+      localStorage.removeItem(SP_RECENT_KEY);
+      renderRecent();
+    };
+  }
+
+  // PWA：顶栏安装按钮（beforeinstallprompt 时显示）
+  bindPWAInstall();
+
+  // 键盘快捷键
+  bindShortcuts();
+
+  // 底部版本号：点击弹出当前版本更新日志
+  const footerVer = document.getElementById('footerVer');
+  if (footerVer) {
+    footerVer.addEventListener('click', () => {
+      const cm = document.getElementById('changelogModal');
+      if (cm) cm.classList.add('show');
+    });
+  }
 
   // 排序中且有未保存更改时，关闭/刷新页面走浏览器原生拦截
   window.addEventListener('beforeunload', e => {
@@ -1005,6 +1165,8 @@ function switchView(v) {
   document.getElementById('vsNews').classList.toggle('active', !isNav);
   document.getElementById('groupsWrap').hidden = !isNav;
   document.getElementById('newsView').hidden = isNav;
+  // 卡片筛选栏：导航视图才显示，新闻视图隐藏
+  updateCardFilterVisibility();
   // 左侧悬浮目录：导航视图=分组目录，新闻视图=平台目录（内容随视图重建）
   if (isNav) {
     renderGroupNav();
@@ -1254,5 +1416,662 @@ function openChangelogModal() {
 function closeChangelogModal() {
   document.getElementById('changelogModal').classList.remove('show');
 }
+
+/* ---------- 访客访问锁屏（guest_required=true 时 boot 提前 return 调此函数） ---------- */
+let __guestLockBound = false; // 防止 boot 重入时重复绑定 submit
+function renderGuestLock() {
+  const lock = document.getElementById('guestLock');
+  if (!lock) return;
+
+  // 显示全屏玻璃蒙版弹窗
+  lock.hidden = false;
+  // 隐藏 footer（锁屏状态下页脚不应可见）
+  const footer = document.getElementById('footer');
+  if (footer) footer.hidden = true;
+  // 聚焦密码输入
+  const pwd = document.getElementById('guestLockPwd');
+  if (pwd) pwd.focus();
+
+  // 只绑定一次 submit（boot 成功后会再次调用 renderGuestLock，需要幂等）
+  if (__guestLockBound) return;
+  __guestLockBound = true;
+
+  const form = document.getElementById('guestLockForm');
+  const errBox = document.getElementById('guestLockErr');
+  const leftSpan = document.getElementById('guestLockLeft');
+  const btn = document.getElementById('guestLockSubmit');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (errBox) errBox.hidden = true;
+    if (btn) { btn.disabled = true; btn.textContent = '验证中…'; }
+    try {
+      await API.post('../backend/api/auth.php?action=guest_login', { password: pwd.value });
+      // 验证成功：隐藏锁屏并重新加载主页数据
+      lock.hidden = true;
+      __guestLockBound = false; // 允许下次需要时重新绑定
+      boot();
+    } catch (err) {
+      // 显示错误 + 剩余次数（如果服务端返回的话）
+      const msg = err.message || '密码错误';
+      if (errBox) {
+        errBox.hidden = false;
+        errBox.textContent = msg;
+        errBox.appendChild(document.createTextNode(' '));
+        const remain = document.createElement('span');
+        remain.textContent = '请重试';
+        errBox.appendChild(remain);
+      }
+      pwd.select();
+      if (btn) { btn.disabled = false; btn.textContent = '解锁访问'; }
+    }
+  });
+}
+
+/* ============ P1: 卡片筛选（导航视图下按标题/地址/描述实时过滤） ============ */
+function bindCardFilter() {
+  const bar = document.getElementById('cardFilter');
+  if (!bar) return;
+  const input = document.getElementById('cardFilterInput');
+  const clear = document.getElementById('cardFilterClear');
+  if (!input || !clear) return;
+  if (input.__cfBound) return;
+  input.__cfBound = true;
+
+  // 初始化显隐（后续由 updateCardFilterVisibility / switchView / renderGroups 统一管理）
+  updateCardFilterVisibility();
+
+  let debounce;
+  input.addEventListener('input', () => {
+    state.cardFilterKw = input.value.trim();
+    clear.hidden = !state.cardFilterKw;
+    if (debounce) clearTimeout(debounce);
+    debounce = setTimeout(applyCardFilter, 120);
+  });
+  // Esc 清除筛选
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && state.cardFilterKw) {
+      input.value = '';
+      state.cardFilterKw = '';
+      clear.hidden = true;
+      applyCardFilter();
+      input.blur();
+    }
+  });
+  clear.addEventListener('click', () => {
+    input.value = '';
+    state.cardFilterKw = '';
+    clear.hidden = true;
+    applyCardFilter();
+    input.focus();
+  });
+}
+
+function applyCardFilter() {
+  const kw = (state.cardFilterKw || '').toLowerCase();
+  const wrap = document.getElementById('groupsWrap');
+  if (!wrap) return;
+
+  // 移除上一次的「无结果」提示
+  const oldEmpty = wrap.querySelector('.cf-no-result');
+  if (oldEmpty) oldEmpty.remove();
+
+  // 无关键词：还原全部显示
+  if (!kw) {
+    wrap.querySelectorAll('.group').forEach(sec => { sec.style.display = ''; });
+    wrap.querySelectorAll('.card').forEach(c => {
+      c.style.display = '';
+      c.classList.remove('match-hit');
+    });
+    renderGroupNav();
+    return;
+  }
+
+  let totalMatch = 0;
+  wrap.querySelectorAll('.group').forEach(sec => {
+    const cards = sec.querySelectorAll('.cards .card');
+    let visible = 0;
+    cards.forEach(card => {
+      const haystack = card.dataset.search || '';
+      const hit = haystack.includes(kw);
+      card.style.display = hit ? '' : 'none';   // inline style 优先级最高，覆盖 .card { display:flex }
+      card.classList.toggle('match-hit', hit);
+      if (hit) visible++;
+    });
+    totalMatch += visible;
+    // 隐藏没有匹配卡片的分组（含空分组）
+    sec.style.display = visible > 0 ? '' : 'none';
+  });
+
+  if (totalMatch === 0) {
+    const tip = document.createElement('div');
+    tip.className = 'cf-no-result empty-tip glass';
+    tip.textContent = '没有匹配「' + state.cardFilterKw + '」的卡片';
+    wrap.appendChild(tip);
+  }
+
+  // 同步左侧分组目录：仅显示可见分组
+  renderGroupNav();
+}
+
+/* ============ P2: 最近常用（frecency 排序，localStorage） ============ */
+const SP_RECENT_KEY = 'sp_recent_v1';
+function bindRecent() {
+  // 卡片点击时记录
+  document.addEventListener('click', e => {
+    const card = e.target.closest('.card');
+    if (!card || card.dataset.search === undefined) return;
+    const url = card.dataset.url || card.href;
+    if (!url) return;
+    recordRecent(card.dataset.title || '', url);
+    renderRecent();
+  });
+  renderRecent();
+}
+function recordRecent(title, url) {
+  let list = [];
+  try { list = JSON.parse(localStorage.getItem(SP_RECENT_KEY) || '[]'); } catch (e) {}
+  list = list.filter(x => x.url !== url);
+  list.unshift({ title, url, count: 1, lastTs: Date.now() });
+  list = list.slice(0, 80); // 上限 80
+  localStorage.setItem(SP_RECENT_KEY, JSON.stringify(list));
+}
+function renderRecent() {
+  const chips = document.getElementById('recentChips');
+  const section = document.getElementById('recentSection');
+  const clearBtn = document.getElementById('recentClear');
+  if (!chips) return;
+  let list = [];
+  try { list = JSON.parse(localStorage.getItem(SP_RECENT_KEY) || '[]'); } catch (e) {}
+  // frecency: 按 count DESC, lastTs DESC
+  list.sort((a, b) => (b.count - a.count) || (b.lastTs - a.lastTs));
+  list = list.slice(0, 12); // 展示 12 条
+
+  if (list.length === 0) {
+    section.hidden = true;
+    return;
+  }
+  section.hidden = false;
+  clearBtn.onclick = () => { localStorage.removeItem(SP_RECENT_KEY); renderRecent(); };
+  chips.innerHTML = list.map(it =>
+    `<a class="chip" href="${esc(it.url)}" target="_blank" rel="noopener" title="${esc(it.title + '\n访问 ' + it.count + ' 次')}">${esc(it.title)}</a>`
+  ).join('');
+}
+
+/* ============ P2: 键盘快捷键 ============ */
+function spIsTyping() {
+  const t = document.activeElement && document.activeElement.tagName;
+  if (!t) return false;
+  if (t === 'INPUT' || t === 'TEXTAREA' || t === 'SELECT') return true;
+  if (document.activeElement.isContentEditable) return true;
+  return false;
+}
+function spCloseTopModal() {
+  // 依次尝试关：iframeModal > orderGuardModal > changelogModal > shortcutsModal
+  for (const id of ['iframeModal', 'orderGuardModal', 'changelogModal', 'shortcutsModal']) {
+    const m = document.getElementById(id);
+    if (m && m.classList.contains('show')) { m.classList.remove('show'); return true; }
+  }
+  return false;
+}
+function bindShortcuts() {
+  document.addEventListener('keydown', e => {
+    // Esc：关弹窗 → 清筛选 → 失焦
+    if (e.key === 'Escape') {
+      if (spCloseTopModal()) { e.preventDefault(); return; }
+      const cfInput = document.getElementById('cardFilterInput');
+      if (cfInput && cfInput.value) {
+        cfInput.value = '';
+        state.cardFilterKw = '';
+        document.getElementById('cardFilterClear').hidden = true;
+        applyCardFilter();
+        e.preventDefault();
+        return;
+      }
+      const focused = document.activeElement;
+      if (focused && (focused.tagName === 'INPUT' || focused.tagName === 'TEXTAREA')) focused.blur();
+      return;
+    }
+    // 输入框内放行 Ctrl/Cmd+K（焦点搜索）
+    if (e.key === 'k' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      document.getElementById('searchInput').focus();
+      return;
+    }
+    if (spIsTyping()) return; // 其它所有单键在输入框内放行
+
+    switch (e.key.toLowerCase()) {
+      case '/':
+        e.preventDefault();
+        document.getElementById('searchInput').focus();
+        break;
+      case 'f':
+        e.preventDefault();
+        const f = document.getElementById('cardFilterInput'); if (f && !f.closest('[hidden]')) f.focus();
+        break;
+      case 't': updateThemeBtn && updateThemeBtn(); document.getElementById('themeBtn').click(); break;
+      case 'n': switchView('news'); break;
+      case 'b':
+      case 'h': switchView('nav'); break;
+      case 'g':
+        document.getElementById('groupNav') && document.getElementById('gnToggle').click();
+        break;
+      case '?':
+        e.preventDefault();
+        document.getElementById('shortcutsModal').classList.add('show');
+        break;
+    }
+  });
+  // 快捷键帮助弹窗
+  document.getElementById('shortcutsClose')?.addEventListener('click', () => document.getElementById('shortcutsModal').classList.remove('show'));
+  document.getElementById('shortcutsClose2')?.addEventListener('click', () => document.getElementById('shortcutsModal').classList.remove('show'));
+  document.getElementById('shortcutsModal')?.addEventListener('click', e => {
+    if (e.target.id === 'shortcutsModal') e.target.classList.remove('show');
+  });
+  // 更新日志弹窗关闭
+  document.getElementById('changelogClose')?.addEventListener('click', closeChangelogModal);
+  document.getElementById('changelogModal')?.addEventListener('click', e => {
+    if (e.target.id === 'changelogModal') closeChangelogModal();
+  });
+  // 顶栏快捷键按钮（nav 源码风格）
+  const scBtn = document.getElementById('shortcutsBtn');
+  if (scBtn) scBtn.onclick = () => document.getElementById('shortcutsModal').classList.add('show');
+}
+
+/* ============ 顶栏 PWA 安装按钮（Chrome/Edge 触发 beforeinstallprompt 时显示） ============ */
+function bindPWAInstall() {
+  const btn = document.getElementById('pwaInstallBtn');
+  if (!btn) return;
+  let deferred = null;
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    deferred = e;
+    btn.hidden = false;
+  });
+  btn.addEventListener('click', async () => {
+    if (!deferred) return;
+    deferred.prompt();
+    await deferred.userChoice;
+    deferred = null;
+    btn.hidden = true;
+  });
+  window.addEventListener('appinstalled', () => { deferred = null; btn.hidden = true; });
+}
+
+/* ============ P2: 每日壁纸（Bing） ============ */
+/**
+ * 每日壁纸：当日 sessionStorage 命中则同步应用，否则先用静态壁纸兜底再异步拉取。
+ * 源地址由后端 wallpaper.php 代理抓取（Bing 等），前端只拿本地缓存 URL。
+ */
+async function applyDailyWallpaper(source, apply, fallback) {
+  const KEY = 'sp_daily_wallpaper';
+  const today = new Date().toISOString().slice(0, 10);
+  let cached = null;
+  try { cached = JSON.parse(sessionStorage.getItem(KEY)) || null; } catch (e) { cached = null; }
+  if (cached && cached.date === today && cached.url) { apply(cached.url); return; }
+  // 先用静态壁纸兜底，避免短暂空白
+  apply(fallback || '');
+  try {
+    const r = await API.get('../backend/api/wallpaper.php?action=daily&source=' + encodeURIComponent(source));
+    if (r && r.url) {
+      apply(r.url);
+      try { sessionStorage.setItem(KEY, JSON.stringify({ date: today, url: r.url })); } catch (e) {}
+    }
+  } catch (e) { /* 拉取失败保留静态壁纸 */ }
+}
+
+/* ================= 主页专用：主题化确认弹窗 + reloadPublic + quick-add 入口 ================= */
+
+/** 主页动态注入 confirmModal（admin.html 已有，但主页 index.html 没写） */
+function ensureConfirmModal() {
+  if (document.getElementById('confirmModal')) return;
+  const m = document.createElement('div');
+  m.className = 'modal';
+  m.id = 'confirmModal';
+  m.innerHTML = `
+    <div class="modal-box glass-strong" style="max-width:430px">
+      <div class="modal-head">
+        <h3 id="confirmTitle">确认操作</h3>
+        <button class="btn btn-sm" type="button" id="confirmXBtn">✕</button>
+      </div>
+      <p id="confirmText" style="margin:0;color:var(--text-muted);font-size:13.5px;line-height:1.7;white-space:pre-line"></p>
+      <div class="modal-foot">
+        <button class="btn" type="button" id="confirmCancelBtn">取消</button>
+        <button class="btn btn-primary" type="button" id="confirmOkBtn">确定</button>
+      </div>
+    </div>`;
+  document.body.appendChild(m);
+}
+
+/** 主页版 uiConfirm — 与 admin.js 实现一致，复用同一个 confirmModal */
+function uiConfirm(message, opts) {
+  ensureConfirmModal();
+  const m = document.getElementById('confirmModal');
+  if (!m) return Promise.resolve(window.confirm(message));
+  const o = opts || {};
+  document.getElementById('confirmTitle').textContent = o.title || '确认操作';
+  document.getElementById('confirmText').textContent = message;
+  const ok = document.getElementById('confirmOkBtn');
+  ok.textContent = o.okText || '确定';
+  ok.className = 'btn ' + (o.danger ? 'btn-danger' : 'btn-primary');
+  m.classList.add('show');
+  return new Promise(resolve => {
+    function done(v) {
+      m.classList.remove('show');
+      ok.onclick = cancel.onclick = x.onclick = null;
+      m.removeEventListener('click', onBg);
+      document.removeEventListener('keydown', onKey);
+      resolve(v);
+    }
+    function onBg(e) { if (e.target === m) done(false); }
+    function onKey(e) { if (e.key === 'Escape') done(false); }
+    const cancel = document.getElementById('confirmCancelBtn');
+    const x = document.getElementById('confirmXBtn');
+    ok.onclick = () => done(true);
+    cancel.onclick = () => done(false);
+    x.onclick = () => done(false);
+    m.addEventListener('click', onBg);
+    document.addEventListener('keydown', onKey);
+  });
+}
+
+/** 重新拉 public.php 并全量重绘 — 新增/删除卡片后调用 */
+async function reloadPublic() {
+  try {
+    const data = await API.get(API_BASE + 'public.php');
+    state.settings = data.settings || {};
+    state.groups = data.groups || [];
+    // 重建全部
+    const container = document.getElementById('groupsWrap');
+    if (container) container.innerHTML = '';
+    state.groupIntroDone = true;  // 不再播放首屏动画
+    state.cardsIntroDone = true;
+    renderGroups();
+    updateCardFilterVisibility();
+  } catch (e) { toast('刷新失败：' + e.message, 'error'); }
+}
+
+/** 主页快速添加卡片弹窗入口 — 具体实现见下方完整实现 */
+function openQuickAddCard(groupId) {
+  ensureQuickAddModal();
+  const m = document.getElementById('quickAddModal');
+  m.dataset.groupId = String(groupId);
+
+  const groupSel = document.getElementById('qa_group');
+  groupSel.innerHTML = '';
+  (state.groups || []).forEach(g => {
+    const opt = document.createElement('option');
+    opt.value = String(g.id);
+    opt.textContent = g.title;
+    if (String(g.id) === String(groupId)) opt.selected = true;
+    groupSel.appendChild(opt);
+  });
+
+  document.getElementById('qaForm').reset();
+  document.getElementById('qa_title').value = '';
+  document.getElementById('qa_url').value = '';
+  document.getElementById('qa_lan').value = '';
+  document.getElementById('qa_desc').value = '';
+  document.getElementById('qa_icon').value = '';
+  document.getElementById('qa_iconText').value = '';
+  document.getElementById('qa_open').value = '2';
+  document.getElementById('qa_color').value = '#0969da';
+  document.getElementById('qa_alpha').value = '100';
+  document.getElementById('qa_alphaLabel').textContent = '100%';
+  document.getElementById('qa_bg').value = buildBgCss('#0969da', 100);
+  document.querySelector('#qa_itype input[value="favicon"]').checked = true;
+  window.__qaIconTextManual = false;
+  window.__qaMetaIcon = '';
+
+  onQAIconTypeChange();
+  m.classList.add('show');
+
+  setTimeout(() => {
+    const urlInput = document.getElementById('qa_url');
+    if (urlInput.value.trim()) fetchQAMeta();
+  }, 100);
+}
+
+function ensureQuickAddModal() {
+  if (document.getElementById('quickAddModal')) return;
+  const m = document.createElement('div');
+  m.className = 'modal';
+  m.id = 'quickAddModal';
+  m.innerHTML = `
+    <div class="modal-box glass-strong quick-add" style="max-width:560px">
+      <div class="modal-head">
+        <h3>快速添加卡片</h3>
+        <button class="btn btn-sm" type="button" id="qaCloseX">✕</button>
+      </div>
+      <form id="qaForm" autocomplete="off">
+        <input type="hidden" id="qa_group_id">
+        <div class="form-row">
+          <div class="form-item">
+            <label>所属分组</label>
+            <select class="select" id="qa_group"></select>
+          </div>
+          <div class="form-item">
+            <label>打开方式</label>
+            <select class="select" id="qa_open">
+              <option value="2">新窗口打开</option>
+              <option value="1">当前页打开</option>
+              <option value="3">弹层内嵌打开</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-item">
+          <label>标题</label>
+          <input class="input" id="qa_title" type="text" maxlength="50" required>
+        </div>
+        <div class="form-item">
+          <label>地址
+            <button class="btn btn-sm" type="button" id="qa_fetchMeta" style="float:right">自动获取信息</button>
+          </label>
+          <input class="input" id="qa_url" type="text" placeholder="https://…">
+        </div>
+        <div class="form-item">
+          <label>内网地址（可选）</label>
+          <input class="input" id="qa_lan" type="text" placeholder="http://192.168.x.x:port">
+        </div>
+        <div class="form-item">
+          <label>描述（可选）</label>
+          <input class="input" id="qa_desc" type="text" maxlength="1000">
+        </div>
+        <div class="form-item">
+          <label>图标类型</label>
+          <div class="radio-group" id="qa_itype">
+            <label><input type="radio" name="qaitype" value="favicon" checked> 自动获取站点图标</label>
+            <label><input type="radio" name="qaitype" value="image"> 图片地址</label>
+            <label><input type="radio" name="qaitype" value="text"> 文字图标</label>
+          </div>
+        </div>
+        <div class="form-item">
+          <label>图标</label>
+          <div class="upload-row">
+            <span class="icon-preview" id="qa_preview"></span>
+            <input class="input" id="qa_icon" type="text" placeholder="图片地址（选「图片」类型时）">
+          </div>
+          <div class="form-item" style="margin-top:10px" id="qa_textWrap">
+            <label>手动文字（留空自动取卡片标题）</label>
+            <input class="input" id="qa_iconText" type="text" maxlength="12" placeholder="中文 4 字 / 英文 12 字母">
+          </div>
+          <div class="form-item" style="margin-top:10px" id="qa_bgWrap">
+            <label>图标背景色</label>
+            <div class="upload-row" style="gap:8px;flex-wrap:nowrap">
+              <input type="color" id="qa_color" value="#0969da" style="width:44px;height:34px;padding:2px;border-radius:6px;cursor:pointer">
+              <span style="font-size:12px;color:var(--text-muted);white-space:nowrap">透明度</span>
+              <input type="range" id="qa_alpha" min="0" max="100" value="100" style="flex:1">
+              <span id="qa_alphaLabel" style="font-size:12px;color:var(--text-muted);min-width:32px;text-align:right">100%</span>
+              <input type="hidden" id="qa_bg" value="">
+            </div>
+          </div>
+        </div>
+        <div class="modal-foot">
+          <button class="btn" type="button" id="qaCancel">取消</button>
+          <button class="btn btn-primary" type="submit" id="qaSaveBtn">添加卡片</button>
+        </div>
+      </form>
+    </div>`;
+  document.body.appendChild(m);
+
+  // 关闭绑定
+  document.getElementById('qaCloseX').onclick = () => m.classList.remove('show');
+  document.getElementById('qaCancel').onclick = () => m.classList.remove('show');
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('show'); });
+
+  // 图标类型切换
+  document.querySelectorAll('#qa_itype input').forEach(r => {
+    r.addEventListener('change', onQAIconTypeChange);
+  });
+
+  // 实时预览
+  document.getElementById('qa_title').addEventListener('input', () => {
+    if (!window.__qaIconTextManual) {
+      document.getElementById('qa_iconText').value = smartIconText(document.getElementById('qa_title').value);
+    }
+    updateQAIconPreview();
+  });
+  document.getElementById('qa_iconText').addEventListener('input', () => {
+    window.__qaIconTextManual = true;
+    updateQAIconPreview();
+  });
+  document.getElementById('qa_icon').addEventListener('input', updateQAIconPreview);
+  document.getElementById('qa_url').addEventListener('input', updateQAIconPreview);
+
+  // 颜色联动
+  document.getElementById('qa_color').addEventListener('input', syncQAColorPanel);
+  document.getElementById('qa_alpha').addEventListener('input', syncQAColorPanel);
+
+  // fetch_meta
+  document.getElementById('qa_fetchMeta').addEventListener('click', fetchQAMeta);
+
+  // 提交
+  document.getElementById('qaForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn = document.getElementById('qaSaveBtn');
+    btn.disabled = true;
+    try {
+      const itype = document.querySelector('#qa_itype input:checked').value;
+      let iconValue = '';
+      switch (itype) {
+        case 'image':   iconValue = document.getElementById('qa_icon').value.trim(); break;
+        case 'favicon': iconValue = ''; break;
+        case 'text':
+          iconValue = document.getElementById('qa_iconText').value.trim();
+          if (isImageUrlLike(iconValue)) iconValue = '';
+          break;
+      }
+      syncQAColorPanel();
+      await API.post(API_BASE + 'items.php?action=edit', {
+        id: 0,
+        group_id: Number(document.getElementById('qa_group').value) || 0,
+        open_method: Number(document.getElementById('qa_open').value),
+        title: document.getElementById('qa_title').value.trim(),
+        url: document.getElementById('qa_url').value.trim(),
+        lan_url: document.getElementById('qa_lan').value.trim(),
+        description: document.getElementById('qa_desc').value.trim(),
+        icon_type: itype,
+        icon_value: iconValue,
+        icon_bg: document.getElementById('qa_bg').value.trim(),
+      });
+      m.classList.remove('show');
+      toast('已添加', 'success');
+      await reloadPublic();
+    } catch (err) {
+      toast(err.message, 'error');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+}
+
+/** 图标类型切换 → 控制显隐 */
+function onQAIconTypeChange() {
+  const type = document.querySelector('#qa_itype input:checked').value;
+  document.getElementById('qa_textWrap').style.display = type === 'text' ? '' : 'none';
+  document.getElementById('qa_bgWrap').style.display = (type === 'text' || type === 'image') ? '' : 'none';
+  updateQAIconPreview();
+}
+
+/** quick-add 图标实时预览 */
+function updateQAIconPreview() {
+  const type = document.querySelector('#qa_itype input:checked').value;
+  const icon = document.getElementById('qa_icon').value.trim();
+  const title = document.getElementById('qa_title').value.trim();
+  const url = document.getElementById('qa_url').value.trim();
+  const bg = document.getElementById('qa_bg').value.trim();
+  const preview = document.getElementById('qa_preview');
+
+  if (type === 'image') {
+    preview.style.background = bg || '#0969da';
+    preview.innerHTML = icon ? '<img src="' + esc(assetUrl(icon)) + '" alt="" onerror="this.parentElement.innerHTML=\'<span>🖼</span>\'">' : '<span>🖼</span>';
+  } else if (type === 'favicon') {
+    preview.style.background = '';
+    const metaIcon = (window.__qaMetaIcon || '').trim();
+    const urls = metaIcon ? [metaIcon] : faviconSources(url);
+    if (urls.length) {
+      // 用 data-srcs 存候选源，onerror 调 window.__qaFavFallback(idx)
+      const key = '__qaFav_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+      window[key] = urls;
+      preview.innerHTML = '<img src="' + esc(urls[0]) + '" alt="" referrerpolicy="no-referrer" onerror="window.__qaFavFallback(this,\'' + key + '\',1)">';
+    } else {
+      preview.innerHTML = '<span>?</span>';
+    }
+  } else {
+    preview.style.background = bg || '#0969da';
+    const raw = (document.getElementById('qa_iconText').value.trim())
+                ? document.getElementById('qa_iconText').value : (title || '?');
+    renderTextIcon(preview, smartIconText(raw), 18);
+  }
+}
+
+/** quick-add 颜色面板联动 */
+function syncQAColorPanel() {
+  const c = document.getElementById('qa_color').value;
+  const a = parseInt(document.getElementById('qa_alpha').value);
+  document.getElementById('qa_alphaLabel').textContent = a + '%';
+  document.getElementById('qa_bg').value = buildBgCss(c, a);
+  updateQAIconPreview();
+}
+
+/** fetch_meta — 自动填充 title/description；favicon 无 icon 自动降级 text */
+async function fetchQAMeta() {
+  const url = document.getElementById('qa_url').value.trim();
+  if (!url) return;
+  try {
+    const btn = document.getElementById('qa_fetchMeta');
+    btn.disabled = true; btn.textContent = '获取中…';
+    const data = await API.get(API_BASE + 'items.php?action=fetch_meta&url=' + encodeURIComponent(url));
+    if (data.title) document.getElementById('qa_title').value = data.title;
+    if (data.description) document.getElementById('qa_desc').value = data.description;
+    // 缓存 meta 返回的真实 favicon URL
+    window.__qaMetaIcon = (data.icon || '').trim();
+    const curType = document.querySelector('#qa_itype input:checked').value;
+    if (curType === 'favicon' && !data.icon && (data.title || url)) {
+      document.querySelector('#qa_itype input[value="text"]').checked = true;
+      document.getElementById('qa_iconText').value = smartIconText(data.title || url);
+      window.__qaIconTextManual = true;
+      onQAIconTypeChange();
+    } else {
+      updateQAIconPreview();
+    }
+  } catch (err) { toast('自动获取失败：' + err.message, 'error'); }
+  finally {
+    const btn = document.getElementById('qa_fetchMeta');
+    btn.disabled = false; btn.textContent = '自动获取信息';
+  }
+}
+
+/** favicon onerror 回退函数 —— 挂在 window 上让 innerHTML 里的 onerror 属性能调到 */
+window.__qaFavFallback = function(imgEl, key, nextIdx) {
+  const arr = window[key];
+  if (!arr) { imgEl.parentElement.innerHTML = '<span>🌐</span>'; return; }
+  if (nextIdx < arr.length) {
+    imgEl.src = arr[nextIdx];
+  } else {
+    imgEl.parentElement.innerHTML = '<span>🌐</span>';
+    try { delete window[key]; } catch(e) { window[key] = null; }
+  }
+};
 
 boot();

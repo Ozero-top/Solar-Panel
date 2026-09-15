@@ -103,3 +103,130 @@ function ensure_user_id_columns(): void
         }
     }
 }
+
+function ensure_custom_feeds_table(): void
+{
+    static $done = false;
+    if ($done) return;
+    $done = true;
+    try {
+        db()->exec(
+            "CREATE TABLE IF NOT EXISTS `custom_feeds` (
+                `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+                `title` VARCHAR(100) NOT NULL,
+                `url` VARCHAR(1000) NOT NULL,
+                `sort` INT NOT NULL DEFAULT 0,
+                `enabled` TINYINT(1) NOT NULL DEFAULT 1,
+                `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (`id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+        );
+    } catch (Throwable $e) {}
+}
+
+function ensure_audit_logs_table(): void
+{
+    static $done = false;
+    if ($done) return;
+    $done = true;
+    try {
+        db()->exec(
+            "CREATE TABLE IF NOT EXISTS `audit_logs` (
+                `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+                `action` VARCHAR(50) NOT NULL,
+                `target` VARCHAR(255) NOT NULL DEFAULT '',
+                `result` VARCHAR(20) NOT NULL DEFAULT 'success',
+                `actor` VARCHAR(50) NOT NULL DEFAULT '',
+                `actor_role` VARCHAR(20) NOT NULL DEFAULT '',
+                `ip` VARCHAR(64) NOT NULL DEFAULT '',
+                `user_agent` VARCHAR(500) NOT NULL DEFAULT '',
+                `detail` VARCHAR(255) NOT NULL DEFAULT '',
+                `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (`id`),
+                KEY `idx_action` (`action`),
+                KEY `idx_created` (`created_at`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+        );
+    } catch (Throwable $e) {}
+}
+
+function ensure_rate_limits_table(): void
+{
+    static $done = false;
+    if ($done) return;
+    $done = true;
+    try {
+        db()->exec(
+            "CREATE TABLE IF NOT EXISTS `rate_limits` (
+                `ip` VARCHAR(64) NOT NULL,
+                `endpoint` VARCHAR(50) NOT NULL,
+                `count` INT UNSIGNED NOT NULL DEFAULT 0,
+                `window_start` BIGINT UNSIGNED NOT NULL DEFAULT 0,
+                PRIMARY KEY (`ip`, `endpoint`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+        );
+    } catch (Throwable $e) {}
+}
+
+/** —— 受信任设备（2FA 勾信任 30 天免二次验证）—— */
+function ensure_trusted_devices_table(): void
+{
+    static $done = false;
+    if ($done) return;
+    $done = true;
+    try {
+        db()->exec(
+            "CREATE TABLE IF NOT EXISTS `trusted_devices` (
+                `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+                `user_id` INT UNSIGNED NOT NULL,
+                `token_hash` CHAR(64) NOT NULL COMMENT 'SHA-256(token)',
+                `device_name` VARCHAR(100) NOT NULL DEFAULT '',
+                `ip_snippet` VARCHAR(45) NOT NULL DEFAULT '',
+                `user_agent` VARCHAR(255) NOT NULL DEFAULT '',
+                `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                `last_used_at` DATETIME DEFAULT NULL,
+                `expires_at` DATETIME NOT NULL,
+                PRIMARY KEY (`id`),
+                KEY `idx_user` (`user_id`),
+                KEY `idx_hash` (`token_hash`),
+                KEY `idx_expires` (`expires_at`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+        );
+    } catch (Throwable $e) {}
+}
+
+function ensure_new_settings_keys(): void
+{
+    static $done = false;
+    if ($done) return;
+    $done = true;
+    $newKeys = [
+        'wallpaper_source'       => '',
+        'guest_access_enabled'   => '0',
+        'guest_password_hash'    => '',
+    ];
+    $pdo = db();
+    foreach ($newKeys as $k => $v) {
+        try {
+            $st = $pdo->prepare('SELECT COUNT(*) FROM settings WHERE config_name = ?');
+            $st->execute([$k]);
+            if ((int)$st->fetchColumn() === 0) {
+                $pdo->prepare('INSERT INTO settings (config_name, config_value) VALUES (?, ?)')->execute([$k, $v]);
+            }
+        } catch (Throwable $e) {}
+    }
+
+    // —— 防御性：settings.config_value 升级成 TEXT
+    // （极老版本可能是 VARCHAR(255)，search_engines JSON 约 2.5KB 会被截断）
+    try {
+        $st = db()->prepare(
+            "SELECT DATA_TYPE FROM information_schema.COLUMNS
+             WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'settings' AND COLUMN_NAME = 'config_value'"
+        );
+        $st->execute();
+        $type = strtolower((string)$st->fetchColumn());
+        if ($type !== 'text' && $type !== 'longtext' && $type !== 'mediumtext') {
+            db()->exec('ALTER TABLE `settings` MODIFY `config_value` TEXT');
+        }
+    } catch (Throwable $e) {}
+}

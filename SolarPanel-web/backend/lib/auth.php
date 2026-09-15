@@ -45,6 +45,8 @@ function auth_session_start(): void
 /**
  * CSRF 令牌校验：仅对会改变状态的方法生效；GET/HEAD/OPTIONS 放行。
  * 校验失败返回 403 JSON。
+ * 特殊放行：action=login/logout/login_2fa/guest_login —— 登录前没有 CSRF 令牌，
+ * 这些敏感操作已经有防爆破限制 + 密码/2FA 双重校验，不再叠加 CSRF。
  */
 function sp_csrf_check(): void
 {
@@ -52,6 +54,13 @@ function sp_csrf_check(): void
     if (in_array($method, ['GET', 'HEAD', 'OPTIONS'], true)) {
         return;
     }
+    // 放行的登录类 action（还没有 session）
+    $action = (string)($_GET['action'] ?? $_POST['action'] ?? '');
+    $skipActions = ['login', 'login_2fa', 'guest_login', 'logout', 'install', 'create', 'register'];
+    if ($action !== '' && in_array($action, $skipActions, true)) {
+        return;
+    }
+
     $header  = (string)($_SERVER['HTTP_X_CSRF_TOKEN'] ?? '');
     $session = (string)($_SESSION['csrf_token'] ?? '');
     if ($session === '' || $header === '' || !hash_equals($session, $header)) {
@@ -80,10 +89,18 @@ function current_user(): ?array
 {
     auth_session_start();
     if (empty($_SESSION['uid'])) {
+        // uid=0 代表 guest 访客用户
+        if (isset($_SESSION['is_guest']) && $_SESSION['is_guest']) {
+            static $guest = null;
+            if ($guest === null) {
+                $guest = ['id' => 0, 'username' => 'guest', 'name' => '访客', 'role' => 'guest', 'status' => 1];
+            }
+            return $guest;
+        }
         return null;
     }
     static $user = null;
-    if ($user === null) {
+    if ($user === null || (int)$user['id'] !== (int)$_SESSION['uid']) {
         ensure_user_role_column();
         try {
             $st = db()->prepare('SELECT id, username, name, status, role FROM users WHERE id = ? LIMIT 1');
@@ -142,13 +159,13 @@ function require_roles(string ...$roles): void
 /** 角色的中文名 */
 function role_label(string $role): string
 {
-    return ['admin' => '管理员', 'editor' => '编辑者', 'viewer' => '只读'][$role] ?? $role;
+    return ['admin' => '管理员', 'editor' => '编辑者', 'viewer' => '只读', 'guest' => '访客（只读）'][$role] ?? $role;
 }
 
-/** 角色白名单校验，非法值回退 admin */
+/** 角色白名单校验，非法值回退 admin（guest 为访客只读，不回退） */
 function normalize_role(string $role): string
 {
-    return in_array($role, ['admin', 'editor', 'viewer'], true) ? $role : 'admin';
+    return in_array($role, ['admin', 'editor', 'viewer', 'guest'], true) ? $role : 'admin';
 }
 
 /** 要求已登录，否则返回 401 JSON */
@@ -159,4 +176,101 @@ function require_login(): array
         fail('未登录或登录已过期', 401);
     }
     return $u;
+}
+
+
+/** users.totp_secret 列：旧库补齐 */
+function ensure_totp_secret_column(): void
+{
+    static $done = false;
+    if ($done) return;
+    $done = true;
+    try {
+        $st = db()->prepare(
+            "SELECT COUNT(*) FROM information_schema.COLUMNS
+             WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'users' AND COLUMN_NAME = 'totp_secret'"
+        );
+        $st->execute();
+        if ((int)$st->fetchColumn() === 0) {
+            db()->exec(
+                "ALTER TABLE `users` ADD COLUMN `totp_secret` VARCHAR(64) NOT NULL DEFAULT '' AFTER `role`"
+            );
+        }
+    } catch (Throwable $e) {}
+}
+
+/** 反向代理感知真实客户端 IP */
+function sp_client_ip(): string
+{
+    foreach (['HTTP_X_FORWARDED_FOR', 'HTTP_X_REAL_IP', 'HTTP_CF_CONNECTING_IP'] as $k) {
+        if (!empty($_SERVER[$k])) {
+            $ip = trim(explode(',', $_SERVER[$k])[0]);
+            if (filter_var($ip, FILTER_VALIDATE_IP)) return $ip;
+        }
+    }
+    return (string)($_SERVER['REMOTE_ADDR'] ?? '127.0.0.1');
+}
+
+/** 审计日志写入（静默不抛出，避免审计本身影响主流程） */
+function sp_log(string $action, string $target = '', string $result = 'success', string $actor = '', string $actorRole = '', string $detail = ''): void
+{
+    try {
+        require_once __DIR__ . '/db.php';
+        ensure_audit_logs_table();
+        $ip = sp_client_ip();
+        $ua = mb_substr((string)($_SERVER['HTTP_USER_AGENT'] ?? ''), 0, 500);
+        db()->prepare(
+            "INSERT INTO audit_logs (action, target, result, actor, actor_role, ip, user_agent, detail)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+        )->execute([$action, mb_substr($target, 0, 255), $result, mb_substr($actor, 0, 50), mb_substr($actorRole, 0, 20), $ip, $ua, mb_substr($detail, 0, 255)]);
+    } catch (Throwable $e) { /* 审计静默失败 */ }
+}
+
+/**
+ * IP 限流（MySQL 表持久化，重启不丢）
+ * @return array { ok: bool, remaining: int, retry_after: int }
+ */
+function sp_rate_check(string $endpoint, int $maxRequests, int $windowSeconds): array
+{
+    try {
+        require_once __DIR__ . '/db.php';
+        ensure_rate_limits_table();
+        $ip = sp_client_ip();
+        $now = time();
+        $windowStart = $now - $windowSeconds;
+
+        $pdo = db();
+        $st = $pdo->prepare('SELECT count, window_start FROM rate_limits WHERE ip = ? AND endpoint = ?');
+        $st->execute([$ip, $endpoint]);
+        $row = $st->fetch();
+
+        $count = 0;
+        if ($row && (int)$row['window_start'] >= $windowStart) {
+            $count = (int)$row['count'];
+        }
+        if ($count >= $maxRequests) {
+            return ['ok' => false, 'remaining' => 0, 'retry_after' => $windowSeconds - ($now - (int)$row['window_start'])];
+        }
+        // 更新
+        $newStart = $row ? (int)$row['window_start'] : $now;
+        if ($newStart < $windowStart) $newStart = $now;
+        $newCount = $count + 1;
+        $pdo->prepare(
+            'INSERT INTO rate_limits (ip, endpoint, count, window_start) VALUES (?, ?, ?, ?)
+             ON DUPLICATE KEY UPDATE count = ?, window_start = ?'
+        )->execute([$ip, $endpoint, $newCount, $newStart, $newCount, $newStart]);
+
+        return ['ok' => true, 'remaining' => $maxRequests - $newCount, 'retry_after' => 0];
+    } catch (Throwable $e) {
+        // 限流失败时放行（不阻断主业务）
+        return ['ok' => true, 'remaining' => $maxRequests, 'retry_after' => 0];
+    }
+}
+
+/** 429 + Retry-After 响应 */
+function sp_rate_limit_respond(array $rate): void
+{
+    header('Retry-After: ' . max(1, (int)$rate['retry_after']));
+    http_response_code(429);
+    fail('请求过于频繁，请 ' . max(1, (int)$rate['retry_after']) . ' 秒后再试', 429);
 }

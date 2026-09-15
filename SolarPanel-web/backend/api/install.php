@@ -90,6 +90,7 @@ function create_tables(PDO $pdo): void
         `name` VARCHAR(50) NOT NULL DEFAULT '',
         `status` TINYINT NOT NULL DEFAULT 1,
         `role` VARCHAR(20) NOT NULL DEFAULT 'admin' COMMENT '权限组：admin 管理员 / editor 编辑者 / viewer 只读',
+        `totp_secret` VARCHAR(64) NOT NULL DEFAULT '' COMMENT '2FA Base32 密钥',
         `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
         PRIMARY KEY (`id`),
         UNIQUE KEY `uk_username` (`username`)
@@ -131,6 +132,40 @@ function create_tables(PDO $pdo): void
         `config_value` TEXT,
         PRIMARY KEY (`id`),
         UNIQUE KEY `uk_config_name` (`config_name`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS `custom_feeds` (
+        `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+        `title` VARCHAR(100) NOT NULL,
+        `url` VARCHAR(1000) NOT NULL,
+        `sort` INT NOT NULL DEFAULT 0,
+        `enabled` TINYINT(1) NOT NULL DEFAULT 1,
+        `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (`id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS `audit_logs` (
+        `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        `action` VARCHAR(50) NOT NULL,
+        `target` VARCHAR(255) NOT NULL DEFAULT '',
+        `result` VARCHAR(20) NOT NULL DEFAULT 'success',
+        `actor` VARCHAR(50) NOT NULL DEFAULT '',
+        `actor_role` VARCHAR(20) NOT NULL DEFAULT '',
+        `ip` VARCHAR(64) NOT NULL DEFAULT '',
+        `user_agent` VARCHAR(500) NOT NULL DEFAULT '',
+        `detail` VARCHAR(255) NOT NULL DEFAULT '',
+        `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (`id`),
+        KEY `idx_action` (`action`),
+        KEY `idx_created` (`created_at`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS `rate_limits` (
+        `ip` VARCHAR(64) NOT NULL,
+        `endpoint` VARCHAR(50) NOT NULL,
+        `count` INT UNSIGNED NOT NULL DEFAULT 0,
+        `window_start` BIGINT UNSIGNED NOT NULL DEFAULT 0,
+        PRIMARY KEY (`ip`, `endpoint`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
 }
 
@@ -185,6 +220,15 @@ function seed_data(PDO $pdo, string $adminUser, string $adminPass, string $siteU
             ['name' => '抖音',     'url' => 'https://www.douyin.com/search/%s'],
         ], JSON_UNESCAPED_UNICODE),
         'search_default'     => '百度',
+        'icp_show'           => '0',
+        'icp_number'         => '',
+        'icp_link'           => '',
+        'police_show'        => '0',
+        'police_number'      => '',
+        'police_link'        => '',
+        'wallpaper_source'   => '',
+        'guest_access_enabled' => '0',
+        'guest_password_hash' => '',
     ];
     $st = $pdo->prepare('INSERT INTO settings (config_name, config_value) VALUES (?, ?)');
     foreach ($defaultSettings as $name => $value) {

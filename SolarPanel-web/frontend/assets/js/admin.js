@@ -27,6 +27,12 @@ const ROLE_LABEL = { admin: '管理员', editor: '编辑者', viewer: '只读' }
       return;
     }
     state.role = u.role || 'admin';
+    // 访客密码解锁后不能直接进入后台管理面板
+    if (state.role === 'guest') {
+      toast('访客权限不足，请使用管理员账号登录', 'error');
+      location.replace('login.html');
+      return;
+    }
     document.getElementById('whoami').textContent = u.name || u.username;
     document.getElementById('accName').value = u.name || '';
     const accUser = document.getElementById('accUsername');
@@ -59,20 +65,35 @@ const ROLE_LABEL = { admin: '管理员', editor: '编辑者', viewer: '只读' }
   bindNewsSourceDrag();
   bindAccount();
   bindBackup();
-  bindVersionCheck();
-  bindUpgrade();
   renderVersionInfo();
+  bindVersionCheck();   // 🔍 在线检测更新 + 一键下载升级
   applyRoleUI();
+
+  bindAudit();          // 审计日志（仅 admin）
+  bindFeeds();          // 自定义 RSS 源
+  bindImportBookmarks();// 书签导入
+  bindTwoFA();          // 两步验证
+  bindDailyWallpaper(); // 每日壁纸源下拉
 })();
 
 /* ================= 按权限组显示 / 隐藏后台功能 ================= */
 function applyRoleUI() {
-  if (state.role === 'viewer') {
-    // 只读：可查看全部标签页与所有设置，但一切写操作禁用
+  if (state.role === 'viewer' || state.role === 'guest') {
+    // 只读 / 访客：可查看全部标签页与所有设置，但一切写操作禁用
     document.body.classList.add('role-viewer');
+    if (state.role === 'guest') document.body.classList.add('role-guest');
     // 用户管理区块隐藏（不能增删用户 / 改权限）
     const um = document.getElementById('userManageBlock');
     if (um) um.style.display = 'none';
+    // 审计日志：viewer/guest 无权查看敏感日志
+    const auditTab = document.querySelector('.admin-tabs .tab[data-tab="audit"]');
+    if (auditTab) auditTab.style.display = 'none';
+    // 书签导入、2FA 开关（viewer 只读，访客也无权修改）
+    document.querySelectorAll('#openBookmarksBtn, #twofaSetupBtn, #twofaEnableBtn, #twofaDisableBtn').forEach(el => {
+      el.disabled = true;
+      el.style.opacity = '0.5';
+      el.style.pointerEvents = 'none';
+    });
     // 站点设置：所有表单控件禁用（灰色不可操作），但保留二级导航可切换查看
     document.querySelectorAll('#tab-settings input, #tab-settings select, #tab-settings textarea, #tab-settings button, #tab-backup select, #tab-backup button').forEach(el => {
       if (el.closest('.settings-subnav')) return; // 分区切换按钮保留可用
@@ -81,13 +102,20 @@ function applyRoleUI() {
     });
     // 账号页：禁用修改密码与显示名称（只读账号无写权限）
     document.querySelectorAll('#pwdForm input, #pwdForm button, #accName, #saveNameBtn').forEach(el => { el.disabled = true; });
+    // 访客隐藏账号页的修改入口
+    if (state.role === 'guest') {
+      document.querySelectorAll('#tab-account .btn, #tab-account input:not([readonly])').forEach(el => { el.disabled = true; });
+    }
   } else if (state.role !== 'admin') {
     // 编辑者：不可见站点设置与用户管理（内容管理可用）
     const settingsTab = document.querySelector('.admin-tabs .tab[data-tab="settings"]');
     if (settingsTab) settingsTab.style.display = 'none';
-    // 备份与更新：仅管理员（升级 / 导入 / 清空为高危写操作）
+    // 系统备份：仅管理员（导入 / 清空为高危写操作）
     const backupTab = document.querySelector('.admin-tabs .tab[data-tab="backup"]');
     if (backupTab) backupTab.style.display = 'none';
+    // 审计日志：仅管理员可见（敏感信息）
+    const auditTab = document.querySelector('.admin-tabs .tab[data-tab="audit"]');
+    if (auditTab) auditTab.style.display = 'none';
     // 默认页签为站点设置，编辑者不可见 → 回退到卡片管理
     const firstTab = document.querySelector('.admin-tabs .tab[data-tab="items"]');
     if (firstTab) activateTab(firstTab);
@@ -264,7 +292,7 @@ function renderGroupsTable() {
   });
 }
 
-function groupAction(act, g) {
+async function groupAction(act, g) {
   if (act === 'vis') {
     const toHide = (g.is_visible ?? 1) ? 1 : 0;
     API.post(API_BASE + 'groups.php?action=visible', { id: g.id, visible: toHide ? 0 : 1 })
@@ -290,7 +318,7 @@ function groupAction(act, g) {
     return;
   }
   if (act === 'del') {
-    if (!confirm('删除分组「' + g.title + '」将同时删除组内 ' + g.item_count + ' 张卡片，确定？')) return;
+    if (!await uiConfirm('删除分组「' + g.title + '」将同时删除组内 ' + g.item_count + ' 张卡片，确定？', { danger: true })) return;
     API.post(API_BASE + 'groups.php?action=delete', { id: g.id })
       .then(() => { toast('已删除', 'success'); loadGroups().then(loadItems); })
       .catch(e => toast(e.message, 'error'));
@@ -377,15 +405,9 @@ function renderItemsTable() {
       '<button class="btn btn-sm" data-act="edit">编辑</button>' +
       '<button class="btn btn-sm btn-danger" data-act="del">删除</button>' +
       '</div></td>';
-    // 图标预览
+    // 图标预览：iconFor 统一返回 HTML（img 或 grid span），直接 innerHTML
     const iconCell = tr.querySelector('[data-cell="icon"]');
-    const it = iconFor(item);
-    if (it.startsWith('<img')) {
-      iconCell.innerHTML = it;
-    } else {
-      iconCell.textContent = it;
-      iconCell.style.background = item.icon_bg || '#0969da';
-    }
+    iconCell.innerHTML = iconFor(item);
     tr.querySelectorAll('[data-act]').forEach(btn => {
       btn.onclick = () => itemAction(btn.dataset.act, item);
     });
@@ -456,7 +478,7 @@ function renderItemsPager(total) {
   pager.appendChild(nav);
 }
 
-/** 后台表格里的图标 HTML/文字（仅预览用） */
+/** 后台表格里的图标 HTML（统一返回 HTML 片段，三态一致） */
 function iconFor(item) {
   if (item.icon_type === 'image' && item.icon_value) {
     return '<img src="' + esc(assetUrl(item.icon_value)) + '" alt="">';
@@ -465,10 +487,30 @@ function iconFor(item) {
     const fu = faviconUrl(item.url || item.lan_url);
     if (fu) return '<img src="' + esc(fu) + '" alt="" referrerpolicy="no-referrer">';
   }
-  return (item.title || '?').charAt(0).toUpperCase();
+
+  // 文字型：手动文字优先 → 空则 fallback title
+  const raw = (item.icon_type === 'text' && item.icon_value
+               && !isImageUrlLike(item.icon_value))
+              ? item.icon_value : (item.title || '?');
+  const txt = smartIconText(raw);
+  const layout = textLayout(txt);
+  const chars = Array.from(txt);
+
+  // 后台表格图标容器约 26px（style="width:34px;height:34px" 但有 padding？实际 render 内测）
+  let fontSize;
+  if (layout === 'cn')
+    fontSize = Math.min(14, Math.floor((26 / 2) * 0.92));
+  else
+    fontSize = Math.min(14, Math.floor((26 / 4) * 1.75));
+  fontSize = Math.max(7, fontSize);
+
+  const bg = item.icon_bg ? 'background:' + esc(item.icon_bg) + ';' : '';
+  const cls = layout === 'cn' ? 'icon-grid-cn' : 'icon-wrap-en';
+  const inner = chars.map(c => '<span class="child-text">' + esc(c) + '</span>').join('');
+  return '<span class="' + cls + '" style="' + bg + 'font-size:' + fontSize + 'px;">' + inner + '</span>';
 }
 
-function itemAction(act, item) {
+async function itemAction(act, item) {
   if (act === 'edit') {
     openItemModal(item);
     return;
@@ -480,7 +522,7 @@ function itemAction(act, item) {
     return;
   }
   if (act === 'del') {
-    if (!confirm('确定删除卡片「' + item.title + '」？')) return;
+    if (!await uiConfirm('确定删除卡片「' + item.title + '」？', { danger: true })) return;
     API.post(API_BASE + 'items.php?action=delete', { id: item.id })
       .then(() => { toast('已删除', 'success'); loadGroups().then(loadItems); })
       .catch(e => toast(e.message, 'error'));
@@ -496,12 +538,54 @@ function openItemModal(item) {
   document.getElementById('i_url').value = item ? item.url : '';
   document.getElementById('i_lan').value = item ? item.lan_url : '';
   document.getElementById('i_desc').value = item ? item.description : '';
+
+  // 图标类型 + 手动文字回填 + __iconTextManual 标记
   const itype = item ? item.icon_type : 'favicon';
   document.querySelector('#i_itype input[value="' + itype + '"]').checked = true;
   document.getElementById('i_icon').value = item && item.icon_type === 'image' ? item.icon_value : '';
-  document.getElementById('i_bg').value = item ? item.icon_bg : '';
-  updateIconPreview();
+
+  if (item && item.icon_type === 'text') {
+    if (item.icon_value && !isImageUrlLike(item.icon_value)) {
+      // ✓ 真正的手动文字 → 回填，标记手动
+      document.getElementById('i_iconText').value = item.icon_value;
+      window.__iconTextManual = true;
+    } else {
+      // ✗ 脏数据！icon_value 里存了图片 URL → 自动纠正
+      document.getElementById('i_iconText').value = smartIconText(item.title || '');
+      window.__iconTextManual = false;
+    }
+  } else if (item) {
+    // favicon / image → 预填标题智能截断结果，跟随模式
+    document.getElementById('i_iconText').value = smartIconText(item.title || '');
+    window.__iconTextManual = false;
+  } else {
+    // 新建：空
+    document.getElementById('i_iconText').value = '';
+    window.__iconTextManual = false;
+  }
+
+  // 颜色面板初始化（解析已有 icon_bg → color + alpha）
+  const bgInput = item ? (item.icon_bg || '') : '';
+  let cVal = '#0969da', aVal = 100;
+  if (bgInput) {
+    const m = bgInput.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)$/i);
+    if (m) {
+      const r = parseInt(m[1]), g = parseInt(m[2]), b = parseInt(m[3]);
+      cVal = '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
+      aVal = m[4] ? Math.round(parseFloat(m[4]) * 100) : 100;
+    } else if (bgInput.startsWith('#')) {
+      cVal = bgInput;
+      aVal = 100;
+    }
+  }
+  document.getElementById('i_color').value = cVal;
+  document.getElementById('i_alpha').value = String(aVal);
+  document.getElementById('i_alphaLabel').textContent = aVal + '%';
+  document.getElementById('i_bg').value = buildBgCss(cVal, aVal);
+
+  // ★ 关键：先 display:flex（.modal.show）再同步渲染；读 clientWidth 会强制 reflow 拿到真实尺寸
   document.getElementById('itemModal').classList.add('show');
+  updateIconPreview();
 }
 
 function updateIconPreview() {
@@ -512,18 +596,34 @@ function updateIconPreview() {
   const bg = document.getElementById('i_bg').value.trim();
   const preview = document.getElementById('i_preview');
   const faviconBtn = document.getElementById('i_useFavicon');
-  document.getElementById('i_bgWrap').style.display = type === 'text' ? '' : 'none';
+
+  // 显隐：文字输入框仅 text 类型显示；颜色面板 text/image 显示，favicon 隐藏
+  document.getElementById('i_textWrap').style.display = type === 'text' ? '' : 'none';
+  document.getElementById('i_bgWrap').style.display = (type === 'text' || type === 'image') ? '' : 'none';
   faviconBtn.hidden = type !== 'image';
 
-  preview.style.background = bg || '#0969da';
-  if (type === 'image' && icon) {
-    preview.innerHTML = '<img src="' + esc(assetUrl(icon)) + '" alt="">';
-  } else if (type === 'favicon' && url) {
+  if (type === 'image') {
+    preview.style.background = bg || '#0969da';
+    preview.innerHTML = icon ? '<img src="' + esc(assetUrl(icon)) + '" alt="">' : '';
+  } else if (type === 'favicon') {
+    preview.style.background = '';
     const fu = faviconUrl(url);
-    preview.innerHTML = fu ? '<img src="' + esc(fu) + '" alt="" referrerpolicy="no-referrer">' : '?';
+    preview.innerHTML = fu ? '<img src="' + esc(fu) + '" alt="" referrerpolicy="no-referrer">' : '<span>?</span>';
   } else {
-    preview.textContent = (title || '?').charAt(0).toUpperCase();
+    // 文字型
+    preview.style.background = bg || '#0969da';
+    const raw = (document.getElementById('i_iconText').value.trim())
+                ? document.getElementById('i_iconText').value : (title || '?');
+    renderTextIcon(preview, smartIconText(raw), 18);
   }
+}
+
+/** 颜色面板联动 → 合成值写入 i_bg hidden 字段 */
+function syncColorPanel() {
+  const c = document.getElementById('i_color').value;
+  const a = parseInt(document.getElementById('i_alpha').value);
+  document.getElementById('i_alphaLabel').textContent = a + '%';
+  document.getElementById('i_bg').value = buildBgCss(c, a);
 }
 
 /* ================= 拖拽排序（拖动 → 点「保存排序」才提交） ================= */
@@ -618,14 +718,36 @@ function bindDragSort() {
 
 function bindItems() {
   document.getElementById('addItemBtn').onclick = () => openItemModal(null);
-  ['i_title', 'i_url', 'i_icon', 'i_bg'].forEach(id => {
-    document.getElementById(id).addEventListener('input', updateIconPreview);
+
+  // ============ 事件绑定 ============
+  // 标题 → iconText 自动同步（未手动编辑过时才跟随）
+  document.getElementById('i_title').addEventListener('input', () => {
+    if (!window.__iconTextManual) {
+      document.getElementById('i_iconText').value = smartIconText(document.getElementById('i_title').value);
+    }
+    updateIconPreview();
   });
+  // iconText 一旦有 input → 标记手动，以后标题改动不再自动覆盖
+  document.getElementById('i_iconText').addEventListener('input', () => {
+    window.__iconTextManual = true;
+    updateIconPreview();
+  });
+  // URL 输入
+  document.getElementById('i_url').addEventListener('input', updateIconPreview);
+  // 图片地址输入
+  document.getElementById('i_icon').addEventListener('input', updateIconPreview);
+  // 颜色面板联动
+  document.getElementById('i_color').addEventListener('input', () => { syncColorPanel(); updateIconPreview(); });
+  document.getElementById('i_alpha').addEventListener('input', () => { syncColorPanel(); updateIconPreview(); });
+  // 图标类型切换
   document.querySelectorAll('#i_itype input').forEach(r => {
-    r.addEventListener('change', updateIconPreview);
+    r.addEventListener('change', () => {
+      syncColorPanel();
+      updateIconPreview();
+    });
   });
 
-  // 抓取网页标题/描述/图标（auto=true 时仅标题为空才自动触发；进行中时忽略重复触发）
+  // ============ fetchMeta（三态分支 + 自动降级 text）============
   let metaBusy = false;
   const fetchMeta = async (auto) => {
     if (metaBusy) return;
@@ -641,35 +763,45 @@ function bindItems() {
     try {
       const res = await API.get(API_BASE + 'items.php?action=fetch_meta&url=' + encodeURIComponent(url));
       const got = [];
-      const changed = {};
-      // 记录请求前空字段（避免失焦+点击双重触发时，失焦填充被误认为按钮没取到）
-      const empty = {
-        title: !document.getElementById('i_title').value.trim(),
-        desc:  !document.getElementById('i_desc').value.trim(),
-        icon:  !document.getElementById('i_icon').value.trim(),
-      };
-      if (res.title && empty.title) {
+      // ★ 关键：只在当前 favicon 模式下处理图标（尊重用户已选类型）
+      const curType = document.querySelector('#i_itype input:checked').value;
+      const emptyTitle = !document.getElementById('i_title').value.trim();
+      const emptyDesc  = !document.getElementById('i_desc').value.trim();
+
+      if (res.title && emptyTitle) {
         document.getElementById('i_title').value = res.title;
         got.push('标题');
-        changed.title = true;
       }
-      if (res.description && empty.desc) {
+      if (res.description && emptyDesc) {
         document.getElementById('i_desc').value = res.description;
         got.push('描述');
-        changed.desc = true;
       }
-      if (res.icon && empty.icon) {
-        document.querySelector('#i_itype input[value="image"]').checked = true;
-        document.getElementById('i_icon').value = res.icon;
-        got.push(res.fallback_icon ? '图标(浏览器加载)' : '图标');
-        changed.icon = true;
+
+      // 图标处理：三态分支
+      if (curType === 'favicon') {
+        if (res.icon) {
+          if (res.fallback_icon) {
+            // 公共图标源 → 切 image + 填 URL
+            document.querySelector('#i_itype input[value="image"]').checked = true;
+            document.getElementById('i_icon').value = res.icon;
+            got.push('图标(浏览器加载)');
+          } else {
+            // 站点有真 favicon → 保持 favicon 类型
+            got.push('图标');
+          }
+        } else {
+          // favicon 拿不到 → 自动降级为文字图标
+          document.querySelector('#i_itype input[value="text"]').checked = true;
+          document.getElementById('i_iconText').value = smartIconText(res.title || document.getElementById('i_title').value);
+          window.__iconTextManual = false;
+          got.push('图标(自动降级为文字)');
+        }
       }
+
       updateIconPreview();
       const warnTxt = res.warn ? '（' + res.warn + '）' : '';
       if (got.length) {
         toast('已自动获取：' + got.join('、') + warnTxt, res.warn ? 'info' : 'success');
-      } else if (!empty.title || !empty.desc || !empty.icon) {
-        toast('已完成（未填充的字段是原本已有内容）' + warnTxt, 'info');
       } else {
         toast('未获取到可填充的字段' + (warnTxt || '（站点无信息）'), 'info');
       }
@@ -697,7 +829,6 @@ function bindItems() {
     btn.disabled = true;
     btn.textContent = '获取中…';
     try {
-      // 服务端多源抓取（页面 icon → /favicon.ico → 公共图标服务）并缓存到本地
       const res = await API.get(API_BASE + 'items.php?action=favicon&url=' + encodeURIComponent(url));
       document.querySelector('#i_itype input[value="image"]').checked = true;
       document.getElementById('i_icon').value = res.url;
@@ -715,11 +846,25 @@ function bindItems() {
     }
   };
 
+  // ============ submit（双重防线 + 颜色面板合成）============
   document.getElementById('itemForm').addEventListener('submit', async e => {
     e.preventDefault();
     const btn = document.getElementById('itemSaveBtn');
     btn.disabled = true;
     try {
+      const itype = document.querySelector('#i_itype input:checked').value;
+      let iconValue = '';
+      switch (itype) {
+        case 'image':   iconValue = document.getElementById('i_icon').value.trim(); break;
+        case 'favicon': iconValue = ''; break;
+        case 'text':
+          iconValue = document.getElementById('i_iconText').value.trim();
+          // ★ 脏数据防线：保存前再校验一次
+          if (isImageUrlLike(iconValue)) iconValue = '';
+          break;
+      }
+      syncColorPanel();  // 确保 i_bg 是最新合成值
+
       await API.post(API_BASE + 'items.php?action=edit', {
         id: Number(document.getElementById('i_id').value) || 0,
         group_id: Number(document.getElementById('i_group').value) || 0,
@@ -728,8 +873,8 @@ function bindItems() {
         url: document.getElementById('i_url').value.trim(),
         lan_url: document.getElementById('i_lan').value.trim(),
         description: document.getElementById('i_desc').value.trim(),
-        icon_type: document.querySelector('#i_itype input:checked').value,
-        icon_value: document.getElementById('i_icon').value.trim(),
+        icon_type: itype,
+        icon_value: iconValue,
         icon_bg: document.getElementById('i_bg').value.trim(),
       });
       document.getElementById('itemModal').classList.remove('show');
@@ -822,6 +967,8 @@ function fillSettingsForm(s) {
   document.getElementById('s_default_theme_note').textContent =
     s.default_theme === 'system' ? '跟随系统：访客未手动切换主题时，随其系统深浅自动变化' : '';
   document.getElementById('s_card_style').value = s.card_style === 'app' ? 'app' : 'detail';
+  document.getElementById('s_search_bar_enabled').value = s.search_bar_enabled === '0' ? '0' : '1';
+  document.getElementById('s_card_filter_enabled').value = s.card_filter_enabled === '0' ? '0' : '1';
 
   // 内容区域滑条
   document.getElementById('s_content_maxwidth').value = s.content_maxwidth || '1200';
@@ -846,6 +993,14 @@ function fillSettingsForm(s) {
   updateSettingPreview('s_site_logo');
   updateSettingPreview('s_wallpaper');
   syncGalleryActive(s.wallpaper || '');
+
+  const gaEl = document.getElementById('s_guest_access_enabled');
+  if (gaEl) gaEl.value = s.guest_access_enabled === '1' ? '1' : '0';
+  const wsEl = document.getElementById('s_wallpaper_source');
+  if (wsEl) wsEl.value = s.wallpaper_source === 'bing' ? 'bing' : '';
+  // 访客密码不回填（安全），每次打开清空
+  const gpEl = document.getElementById('s_guest_password');
+  if (gpEl) gpEl.value = '';
 }
 
 /* ---------- 热点新闻数据源勾选与排序（表格排版，参考分组管理） ---------- */
@@ -1070,7 +1225,7 @@ function buildWpItem(w) {
     del.title = '从图库删除';
     del.onclick = async e => {
       e.stopPropagation();
-      if (!confirm('从图库删除壁纸「' + w.name + '」？文件将被移除，已引用它的设置需另行调整。')) return;
+      if (!await uiConfirm('从图库删除壁纸「' + w.name + '」？文件将被移除，已引用它的设置需另行调整。', { danger: true })) return;
       try {
         await API.post(API_BASE + 'gallery.php?action=delete', { url: w.url });
         if (document.getElementById('s_wallpaper').value.trim() === w.url) {
@@ -1216,9 +1371,9 @@ function refreshEngineDefaults() {
 /* 分区定义：每个分区独立保存，只提交自己的设置项（后端白名单兼容部分提交）
    原「Logo 与壁纸」分区已并入「外观布局」；原「时钟与天气」分区已并入「基础信息」 */
 const SETTING_SECTIONS = {
-  basic:    { label: '基础信息', keys: ['site_title', 'site_url', 'footer', 'default_lan_mode', 'home_view', 'announcement_show', 'announcement', 'clock_show', 'weather_show', 'weather_city', 'icp_show', 'icp_number', 'icp_link', 'police_show', 'police_number', 'police_link'] },
-  theme:    { label: '外观布局', keys: ['default_theme', 'theme_style', 'content_maxwidth', 'content_pad_lr', 'content_pad_top', 'content_pad_bottom', 'card_style', 'search_width', 'site_logo', 'wallpaper', 'mask_opacity', 'wallpaper_blur'] },
-  search:   { label: '搜索引擎', keys: ['search_engines', 'search_default'] },
+  basic:    { label: '基础信息', keys: ['site_title', 'site_url', 'footer', 'default_lan_mode', 'home_view', 'announcement_show', 'announcement', 'clock_show', 'weather_show', 'weather_city', 'icp_show', 'icp_number', 'icp_link', 'police_show', 'police_number', 'police_link', 'guest_access_enabled', 'guest_password_hash'] },
+  theme:    { label: '外观布局', keys: ['default_theme', 'theme_style', 'content_maxwidth', 'content_pad_lr', 'content_pad_top', 'content_pad_bottom', 'card_style', 'search_bar_enabled', 'card_filter_enabled', 'site_logo', 'wallpaper', 'mask_opacity', 'wallpaper_blur', 'wallpaper_source'] },
+  search:   { label: '搜索引擎', keys: ['search_engines', 'search_default', 'search_width'] },
   news:     { label: '热点新闻', keys: ['news_sources', 'news_order'] },
 };
 
@@ -1264,7 +1419,16 @@ function collectSetting(key) {
     rows.forEach(r => { if (r.dataset.id) ids.push(r.dataset.id); });
     return JSON.stringify(ids);
   }
-  return document.getElementById('s_' + key).value.trim();
+  if (key === 'guest_password_hash') {
+    // 访客密码：前端输入明文（id=s_guest_password），留空=不改，返回 undefined 让后端跳过
+    const el = document.getElementById('s_guest_password');
+    if (!el) return undefined;
+    const v = el.value.trim();
+    return v === '' ? undefined : v;
+  }
+  const el = document.getElementById('s_' + key);
+  if (!el) return undefined;
+  return el.value.trim();
 }
 
 function bindSettings() {
@@ -1405,8 +1569,8 @@ function bindBackup() {
       toast('请选择导出生成的 .json 备份文件', 'error');
       return;
     }
-    if (!confirm('导入将【清空】当前全部分组、卡片、站点设置和图标 / 壁纸文件，然后用「' + file.name + '」恢复。\n用户账号不受影响。\n\n确定继续吗？')) return;
-    if (!confirm('再次确认：此操作不可撤销，建议先点「导出配置」备份当前数据。现在开始导入吗？')) return;
+    if (!await uiConfirm('导入将【清空】当前全部分组、卡片、站点设置和图标 / 壁纸文件，然后用「' + file.name + '」恢复。\n用户账号不受影响。\n\n确定继续吗？', { danger: true })) return;
+    if (!await uiConfirm('再次确认：此操作不可撤销，建议先点「导出配置」备份当前数据。现在开始导入吗？', { danger: true })) return;
 
     importBtn.disabled = true;
     const oldText = importBtn.textContent;
@@ -1430,8 +1594,8 @@ function bindBackup() {
   // 清空恢复初始状态
   if (resetBtn) {
     resetBtn.onclick = async () => {
-      if (!confirm('此操作将【删除】全部分组、卡片、自定义站点设置和图标 / 壁纸文件，恢复到刚安装时的默认状态。\n用户账号不受影响。\n\n确定继续吗？')) return;
-      if (!confirm('再次确认：此操作不可撤销，建议先点「导出配置」备份当前数据。现在开始恢复初始状态吗？')) return;
+      if (!await uiConfirm('此操作将【删除】全部分组、卡片、自定义站点设置和图标 / 壁纸文件，恢复到刚安装时的默认状态。\n用户账号不受影响。\n\n确定继续吗？', { danger: true })) return;
+      if (!await uiConfirm('再次确认：此操作不可撤销，建议先点「导出配置」备份当前数据。现在开始恢复初始状态吗？', { danger: true })) return;
       resetBtn.disabled = true;
       const oldText = resetBtn.textContent;
       resetBtn.textContent = '恢复中…';
@@ -1447,16 +1611,6 @@ function bindBackup() {
       }
     };
   }
-}
-
-/* ================= 系统在线升级 ================= */
-let upgradeToken = '';
-
-function upgradeCancelToken() {
-  const tk = upgradeToken;
-  if (!tk) return;
-  upgradeToken = '';
-  API.post(API_BASE + 'upgrade.php?action=cancel', { token: tk }).catch(() => { /* 清理失败无碍 */ });
 }
 
 /* ================= 主题化确认弹窗（替代浏览器原生 confirm：与主题风格同步 + 居中） ================= */
@@ -1493,221 +1647,6 @@ function uiConfirm(message, opts) {
   });
 }
 
-function bindVersionCheck() {
-  const btn = document.getElementById('checkUpdateBtn');
-  const result = document.getElementById('versionCheckResult');
-  if (!btn || !result) return;
-
-  // 渲染检测结果（手动点击与进后台自动检测共用）
-  const renderResult = (d) => {
-    if (d.available === false) {
-      result.className = 'version-check-result ok';
-      result.innerHTML = `✅ 当前已是最新版本 <b>${d.current}</b>`;
-      result.hidden = false;
-      return;
-    }
-    const cl = (d.changelog || []).map(c => `<li class="cl-${c.type || 'feature'}">${String(c.item).replace(/[&<>]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[ch]))}</li>`).join('');
-    const sizeStr = d.size ? (() => { const s = d.size; return s > 1048576 ? (s/1048576).toFixed(2)+' MB' : s > 1024 ? (s/1024).toFixed(1)+' KB' : s+' B'; })() : '';
-    result.className = 'version-check-result new';
-    if (!d.package_url) {
-      result.innerHTML = `🎉 发现新版本 <b>${d.latest}</b>（当前 ${d.current}）
-        ${cl ? `<ul class="vc-changelog">${cl}</ul>` : ''}
-        <div class="vc-hint">新版完整升级包尚未同步到更新源，请稍后再点「检查更新」，或联系作者获取。</div>`;
-      result.hidden = false;
-      return;
-    }
-    result.innerHTML = `
-      🎉 发现新版本 <b>${d.latest}</b>（当前 ${d.current}）${sizeStr ? ' · ' + sizeStr : ''}${d.full_pkg ? ' · 完整包' : ''}
-      ${cl ? `<ul class="vc-changelog">${cl}</ul>` : ''}
-      <div class="vc-hint">
-        <button class="btn btn-primary" id="vcDownloadApplyBtn" type="button">🔽 一键下载并升级</button>
-        <span style="margin-left:8px">自动备份原文件，失败自动回滚；升级后页面自动刷新。</span>
-      </div>
-    `;
-    result.hidden = false;
-
-    const applyBtn = result.querySelector('#vcDownloadApplyBtn');
-    if (applyBtn) applyBtn.onclick = async () => {
-      applyBtn.disabled = true;
-      applyBtn.textContent = '下载中...';
-      try {
-        const dlRes = await API.post(API_BASE + 'version.php?action=download', {
-          url: d.package_url,
-          md5: d.package_md5
-        });
-        const token = dlRes.token;
-        if (!token) throw new Error('下载失败：未获取到升级会话 token');
-        applyBtn.textContent = '应用中...';
-        await API.post(API_BASE + 'upgrade.php?action=apply', { token });
-        applyBtn.textContent = '升级成功，即将刷新...';
-        toast('升级完成：已更新到 ' + d.latest + '，页面即将刷新', 'success');
-        setTimeout(() => location.reload(), 2500);
-      } catch (e) {
-        applyBtn.disabled = false;
-        applyBtn.textContent = '🔽 一键下载并升级';
-        const msg = (e && e.message) ? e.message : '未知错误';
-        // code=2：后端已自动回滚，data.failed 含每个失败文件的路径与真实原因
-        const failed = e && e.data && Array.isArray(e.data.failed) ? e.data.failed : [];
-        if (failed.length) {
-          const lines = failed.slice(0, 6).map(f => '• ' + f.path + ' — ' + (f.reason || '写入失败')).join('\n');
-          const more = failed.length > 6 ? '\n…（共 ' + failed.length + ' 个文件失败，已自动回滚）' : '';
-          result.className = 'version-check-result err';
-          result.innerHTML = '';
-          const p = document.createElement('div');
-          p.textContent = '❌ ' + msg;
-          const pre = document.createElement('pre');
-          pre.style.cssText = 'white-space:pre-wrap;text-align:left;margin:8px 0 0;font:12px/1.6 inherit;max-height:200px;overflow:auto;';
-          pre.textContent = lines + more;
-          result.appendChild(p);
-          result.appendChild(pre);
-          result.hidden = false;
-          result.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-        toast('升级失败：' + msg, 'error');
-      }
-    };
-  };
-
-  // 顶栏版本号旁亮「可更新」徽标，点击直达备份与更新页
-  const showBadge = (latest) => {
-    const ver = document.getElementById('appVer');
-    if (!ver || document.getElementById('updateBadge')) return;
-    const badge = document.createElement('a');
-    badge.id = 'updateBadge';
-    badge.className = 'update-badge';
-    badge.href = 'javascript:void(0)';
-    badge.textContent = '🆕 ' + latest + ' 可更新';
-    badge.title = '点击前往「备份与更新」一键升级';
-    badge.onclick = () => {
-      const tab = document.querySelector('.admin-tabs .tab[data-tab="backup"]');
-      if (tab) tab.click();
-      result.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    };
-    ver.after(badge);
-  };
-
-  // 手动检查：强制绕过服务端 1h 缓存
-  btn.onclick = async () => {
-    btn.disabled = true;
-    btn.textContent = '检查中...';
-    result.hidden = true;
-    try {
-      const d = await API.get(API_BASE + 'version.php?action=check&nocache=1');
-      localStorage.setItem('sp_update_check_ts', String(Date.now()));
-      renderResult(d);
-      if (d.available) showBadge(d.latest);
-    } catch (e) {
-      result.className = 'version-check-result err';
-      result.innerHTML = '❌ 检查失败：' + (e.message || '无法连接到更新源，请稍后重试。');
-      result.hidden = false;
-    } finally {
-      btn.disabled = false;
-      btn.textContent = '🔍 检查更新';
-    }
-  };
-
-  // 进后台自动静默检测：localStorage 1h 节流 + 服务端 1h 缓存，失败静默不打扰
-  const AUTO_TTL = 3600 * 1000;
-  const last = parseInt(localStorage.getItem('sp_update_check_ts') || '0', 10);
-  if (Date.now() - last < AUTO_TTL) return;
-  setTimeout(async () => {
-    try {
-      const d = await API.get(API_BASE + 'version.php?action=check');
-      localStorage.setItem('sp_update_check_ts', String(Date.now()));
-      if (d && d.available) {
-        renderResult(d);
-        showBadge(d.latest);
-      }
-    } catch (e) { /* 自动检测失败静默：不影响后台正常使用 */ }
-  }, 2500);
-}
-
-function bindUpgrade() {
-  const btn = document.getElementById('upgradeBtn');
-  const fileInput = document.getElementById('upgradeFile');
-  const applyBtn = document.getElementById('upgradeApplyBtn');
-  if (!btn || !fileInput || !applyBtn) return;
-
-  const curVer = document.getElementById('upgradeCurVer');
-  if (curVer) curVer.textContent = APP_VERSION;
-
-  // 弹窗取消 / 关闭时清理服务端升级会话（暂存目录）
-  document.querySelectorAll('#upgradeModal [data-close="upgradeModal"]').forEach(el => {
-    el.addEventListener('click', upgradeCancelToken);
-  });
-
-  // 第一步：上传升级包 → 校验 + 变更预览
-  btn.onclick = () => fileInput.click();
-  fileInput.addEventListener('change', async () => {
-    const file = fileInput.files && fileInput.files[0];
-    fileInput.value = '';
-    if (!file) return;
-    if (!/\.zip$/i.test(file.name)) {
-      toast('请选择 SolarPanel 升级工具生成的 .zip 升级包', 'error');
-      return;
-    }
-    if (!(await uiConfirm('上传升级包「' + file.name + '」进行版本校验与变更预览？\n校验通过后需再点击「确认升级」才会真正应用。', { title: '校验升级包', okText: '上传并校验' }))) return;
-
-    btn.disabled = true;
-    const oldText = btn.textContent;
-    btn.textContent = '校验中…';
-    try {
-      const fd = new FormData();
-      fd.append('file', file);
-      const res = await API.postForm(API_BASE + 'upgrade.php?action=check', fd);
-      upgradeToken = res.token;
-      document.getElementById('upgradeFrom').textContent = res.current;
-      document.getElementById('upgradeTo').textContent = res.to;
-      document.getElementById('upgradeCounts').textContent = '更新 ' + res.updated + ' 个文件' + (res.deleted ? '，移除 ' + res.deleted + ' 个废弃文件' : '');
-      document.getElementById('upgradeFiles').innerHTML = res.files.map(f => '<div class="upgrade-file">' + esc(f) + '</div>').join('');
-      const delBlock = document.getElementById('upgradeDelBlock');
-      if (res.deleted_files && res.deleted_files.length) {
-        delBlock.hidden = false;
-        document.getElementById('upgradeDelFiles').innerHTML = res.deleted_files.map(f => '<div class="upgrade-file upgrade-file-del">' + esc(f) + '</div>').join('');
-      } else {
-        delBlock.hidden = true;
-      }
-      document.getElementById('upgradeModal').classList.add('show');
-    } catch (err) {
-      toast('升级包校验未通过：' + err.message, 'error');
-    } finally {
-      btn.disabled = false;
-      btn.textContent = oldText;
-    }
-  });
-
-  // 第二步：确认升级 → 备份原文件 + 原子替换
-  applyBtn.onclick = async () => {
-    if (!upgradeToken) return;
-    if (!(await uiConfirm('开始应用升级？被替换 / 删除的原文件会自动备份到 uploads/upgrade_backup，可手动回滚。', { title: '确认升级', okText: '🚀 开始升级' }))) return;
-    applyBtn.disabled = true;
-    const oldText = applyBtn.textContent;
-    applyBtn.textContent = '升级中…';
-    try {
-      const res = await API.post(API_BASE + 'upgrade.php?action=apply', { token: upgradeToken });
-      upgradeToken = '';
-      document.getElementById('upgradeModal').classList.remove('show');
-      toast('升级完成：更新 ' + res.updated + ' 个文件' + (res.deleted ? '、移除 ' + res.deleted + ' 个废弃文件' : '') + '，当前版本 ' + res.version + '，页面即将刷新', 'success');
-      setTimeout(() => location.reload(), 1600);
-    } catch (err) {
-      if (err.code === 2 && err.data && Array.isArray(err.data.failed) && err.data.failed.length) {
-        // code=2 部分失败：保留弹窗展示失败明细（含备份路径），可重试
-        document.getElementById('upgradeFiles').innerHTML = err.data.failed.map(f => '<div class="upgrade-file upgrade-file-del">' + esc(f.path) + ' — ' + esc(f.reason) + '</div>').join('');
-        document.getElementById('upgradeCounts').textContent = '已更新 ' + err.data.updated + ' 个，失败 ' + err.data.failed.length + ' 个（原文件备份于 ' + esc(err.data.backup || '—') + '）';
-        document.getElementById('upgradeDelBlock').hidden = true;
-        toast('部分文件升级失败，站点可能处于混合版本状态：请重试，或按失败明细手动处理', 'error');
-      } else {
-        toast('升级失败：' + err.message, 'error');
-        upgradeCancelToken();
-        document.getElementById('upgradeModal').classList.remove('show');
-      }
-    } finally {
-      applyBtn.disabled = false;
-      applyBtn.textContent = oldText;
-    }
-  };
-}
-
 /* ================= 账号 & 用户管理 ================= */
 async function loadUsers() {
   const tbody = document.getElementById('usersTbody');
@@ -1739,7 +1678,7 @@ async function loadUsers() {
   }
 }
 
-function userAction(act, u) {
+async function userAction(act, u) {
   if (act === 'pwd') {
     document.getElementById('userPwdTitle').textContent = '重置密码 - ' + u.username;
     document.getElementById('up_id').value = u.id;
@@ -1755,7 +1694,7 @@ function userAction(act, u) {
     return;
   }
   if (act === 'del') {
-    if (!confirm('确定删除用户「' + (u.name || u.username) + '」？')) return;
+    if (!await uiConfirm('确定删除用户「' + (u.name || u.username) + '」？', { danger: true })) return;
     API.post(API_BASE + 'user.php?action=delete', { id: u.id })
       .then(() => { toast('已删除', 'success'); loadUsers(); })
       .catch(e => toast(e.message, 'error'));
@@ -1867,3 +1806,437 @@ function bindAccount() {
 
   loadUsers();
 }
+
+/* ================= 审计日志 tab ================= */
+let _auditPage = 1, _auditTotal = 0;
+function bindAudit() {
+  if (state.role !== 'admin') return;
+  const tbody = document.getElementById('auditTbody');
+  if (!tbody) return;
+  const refresh = () => loadAudit();
+  document.getElementById('auditRefreshBtn')?.addEventListener('click', refresh);
+  document.getElementById('auditFilterType')?.addEventListener('change', refresh);
+  document.getElementById('auditClearBtn')?.addEventListener('click', async () => {
+    if (!await uiConfirm('确定清空全部审计日志？此操作不可撤销', { danger: true })) return;
+    try {
+      await API.post(API_BASE + 'audit.php?action=clear');
+      toast('已清空全部审计日志', 'success');
+      loadAudit();
+    } catch (e) { toast(e.message, 'error'); }
+  });
+  // tab 切换到 audit 时自动加载
+  document.querySelectorAll('.admin-tabs .tab').forEach(t => {
+    if (t.dataset.tab === 'audit') t.addEventListener('click', () => loadAudit());
+  });
+}
+async function loadAudit() {
+  const tbody = document.getElementById('auditTbody');
+  const filter = document.getElementById('auditFilterType');
+  tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:20px">加载中…</td></tr>';
+  try {
+    const data = await API.get(API_BASE + 'audit.php?action=list&page=' + _auditPage + '&pagesize=50');
+    _auditTotal = data.total;
+    const ftype = filter?.value || '';
+    const list = (data.list || []).filter(r => !ftype || r.action === ftype);
+    tbody.innerHTML = list.length === 0
+      ? '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:30px">暂无日志</td></tr>'
+      : list.map(r => {
+          const typeTag = r.action.startsWith('auth') ? '登录' : (r.action.startsWith('item') || r.action.startsWith('group') ? '操作' : (r.action.startsWith('2fa') ? '2FA' : (r.action.startsWith('guest') ? '访客' : '系统')));
+          const typeColor = r.action.startsWith('auth') ? 'var(--blue)' : (r.action === 'audit.clear' ? 'var(--danger)' : 'var(--text-muted)');
+          const resultTag = r.result === 'success' ? '<span style="color:#2fa85a">成功</span>' : '<span style="color:var(--danger)">失败</span>';
+          return `<tr>
+            <td style="white-space:nowrap">${(r.created_at || '').replace('T', ' ').slice(0, 19)}</td>
+            <td><span style="background:${typeColor}22;color:${typeColor};padding:2px 8px;border-radius:4px;font-size:12px">${typeTag}</span></td>
+            <td>${esc(r.actor || '')}</td>
+            <td style="font-family:monospace;font-size:12px">${esc(r.action)}</td>
+            <td>${esc(r.target || '')}</td>
+            <td>${resultTag}</td>
+            <td style="font-family:monospace;font-size:12px">${esc(r.ip || '')}</td>
+          </tr>`;
+        }).join('');
+    // 分页
+    const pager = document.getElementById('auditPager');
+    if (pager) {
+      const pages = Math.max(1, Math.ceil(_auditTotal / 50));
+      pager.innerHTML = `共 ${_auditTotal} 条 · ${pages} 页 · 当前 ${_auditPage}`;
+      pager.hidden = false;
+    }
+  } catch (e) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--danger);padding:20px">' + esc(e.message) + '</td></tr>';
+  }
+}
+
+/* ================= 自定义 RSS 源 ================= */
+function bindFeeds() {
+  const tbody = document.getElementById('feedsTbody');
+  if (!tbody) return;
+  loadFeeds();
+  document.getElementById('addFeedBtn')?.addEventListener('click', async () => {
+    const title = document.getElementById('feedTitle').value.trim();
+    const url = document.getElementById('feedURL').value.trim();
+    if (!title) { toast('请填写标题', 'error'); return; }
+    if (!/^https?:\/\//i.test(url)) { toast('URL 必须以 http:// 或 https:// 开头', 'error'); return; }
+    try {
+      await API.post(API_BASE + 'feeds.php?action=save', { title, url, sort: 0, enabled: 1 });
+      document.getElementById('feedTitle').value = '';
+      document.getElementById('feedURL').value = '';
+      toast('已添加', 'success');
+      loadFeeds();
+    } catch (e) { toast(e.message, 'error'); }
+  });
+}
+async function loadFeeds() {
+  const tbody = document.getElementById('feedsTbody');
+  tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:14px">加载中…</td></tr>';
+  try {
+    const feeds = await API.get(API_BASE + 'feeds.php?action=list');
+    tbody.innerHTML = feeds.length === 0
+      ? '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:20px">尚无自定义 RSS 源，在上方添加</td></tr>'
+      : feeds.map(f => `
+          <tr>
+            <td>${f.id}</td>
+            <td>${esc(f.title)}</td>
+            <td style="font-family:monospace;font-size:12px;word-break:break-all">${esc(f.url)}</td>
+            <td><input type="checkbox" ${f.enabled ? 'checked' : ''} data-feed-id="${f.id}" class="feed-toggle"></td>
+            <td>${f.sort ?? 0}</td>
+            <td>
+              <button class="btn btn-sm" data-feed-del="${f.id}">删除</button>
+            </td>
+          </tr>
+        `).join('');
+    // 事件委托
+    tbody.querySelectorAll('.feed-toggle').forEach(cb => cb.addEventListener('change', async () => {
+      const id = cb.dataset.feedId;
+      try {
+        await API.post(API_BASE + 'feeds.php?action=toggle', { id });
+        toast('状态已切换', 'success');
+      } catch (e) { toast(e.message, 'error'); cb.checked = !cb.checked; }
+    }));
+    tbody.querySelectorAll('[data-feed-del]').forEach(btn => btn.addEventListener('click', async () => {
+      const id = btn.dataset.feedDel;
+      if (!await uiConfirm('确定删除该 RSS 源？', { danger: true })) return;
+      try { await API.post(API_BASE + 'feeds.php?action=delete', { id }); toast('已删除', 'success'); loadFeeds(); }
+      catch (e) { toast(e.message, 'error'); }
+    }));
+  } catch (e) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--danger);padding:20px">' + esc(e.message) + '</td></tr>';
+  }
+}
+
+/* ================= 书签导入 ================= */
+function bindImportBookmarks() {
+  const openBtn = document.getElementById('openBookmarksBtn');
+  const fileInput = document.getElementById('bookmarksFile');
+  const preview = document.getElementById('bookmarksPreview');
+  const applyBtn = document.getElementById('applyBookmarksBtn');
+  if (!openBtn) return;
+
+  openBtn.addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', async () => {
+    const f = fileInput.files[0];
+    if (!f) { preview.textContent = ''; applyBtn.hidden = true; return; }
+    preview.textContent = `解析 ${f.name}…`;
+    applyBtn.hidden = true;
+    const form = new FormData();
+    form.append('file', f);
+    try {
+      const data = await API.postForm(API_BASE + 'import.php?action=bookmarks', form);
+      preview.textContent = `✅ ${data.total} 条 / ${data.groups.length} 个分组 可导入`;
+      applyBtn.hidden = false;
+      applyBtn.onclick = async () => {
+        // 导入：后端解析好了分组，前端只需要把 data.groups 提交即可
+        // 这里前端直接用 applyBookmarksData 函数；先让用户确认
+        if (!await uiConfirm(`将导入 ${data.groups.length} 个分组、${data.total} 张卡片到数据库，是否继续？`)) return;
+        try {
+          await API.post(API_BASE + 'import.php?action=apply', { groups: data.groups });
+          toast('导入成功！请刷新主页查看', 'success');
+          applyBtn.hidden = true;
+          preview.textContent = '';
+          fileInput.value = '';
+        } catch (e) { toast(e.message, 'error'); }
+      };
+    } catch (e) {
+      preview.textContent = '❌ 解析失败：' + e.message;
+    }
+  });
+}
+
+/* ================= 两步验证 (2FA) ================= */
+function bindTwoFA() {
+  const status = document.getElementById('twofaStatus');
+  const setupBtn = document.getElementById('twofaSetupBtn');
+  const enableBtn = document.getElementById('twofaEnableBtn');
+  const disableBtn = document.getElementById('twofaDisableBtn');
+  const cancelBtn = document.getElementById('twofaCancelBtn');
+  const setupBox = document.getElementById('twofaSetup');
+  const qr = document.getElementById('twofaQR');
+  const secretEl = document.getElementById('twofaSecret');
+
+  if (!status) return;
+  refresh2FAStatus();
+
+  setupBtn?.addEventListener('click', async () => {
+    try {
+      const data = await API.post(API_BASE + 'auth.php?action=2fa_setup');
+      // 用 qrcode-generator 库渲染真正的二维码 + 显示 secret
+      if (typeof qrcode === 'function') {
+        const qrg = qrcode(0, 'M');
+        qrg.addData(data.url);
+        qrg.make();
+        qr.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;gap:10px">${qrg.createImgTag(4, 4)}</div>`;
+        // 修正 img 样式：白底圆角 + 适当尺寸
+        const img = qr.querySelector('img');
+        if (img) {
+          img.style.background = '#fff';
+          img.style.padding = '6px';
+          img.style.borderRadius = '12px';
+          img.style.width = '200px';
+          img.style.height = '200px';
+          img.style.display = 'block';
+        }
+      } else {
+        // 降级：无 QR 库时显示纯文本 URL
+        qr.innerHTML = `<div style="background:rgba(255,255,255,0.08);padding:16px;border-radius:12px;font-family:monospace;font-size:13px;max-width:320px;word-break:break-all">${esc(data.url)}</div>`;
+      }
+      secretEl.textContent = data.secret;
+      setupBox.hidden = false;
+      setupBtn.style.display = 'none';
+    } catch (e) { toast(e.message, 'error'); }
+  });
+  cancelBtn?.addEventListener('click', () => { setupBox.hidden = true; setupBtn.style.display = 'inline-block'; });
+
+  enableBtn?.addEventListener('click', async () => {
+    const code = document.getElementById('twofaCode').value.trim();
+    if (!code) { toast('请输入 6 位动态码', 'error'); return; }
+    const secret = secretEl.textContent;
+    try {
+      await API.post(API_BASE + 'auth.php?action=2fa_enable', { secret, code });
+      toast('2FA 已开启', 'success');
+      setupBox.hidden = true;
+      refresh2FAStatus();
+    } catch (e) { toast(e.message, 'error'); }
+  });
+
+  disableBtn?.addEventListener('click', async () => {
+    const pwd = prompt('请输入当前登录密码以确认关闭 2FA：');
+    if (!pwd) return;
+    const code = prompt('请输入 6 位动态码：');
+    if (!code) return;
+    try {
+      await API.post(API_BASE + 'auth.php?action=2fa_disable', { password: pwd, code });
+      toast('2FA 已关闭', 'success');
+      refresh2FAStatus();
+    } catch (e) { toast(e.message, 'error'); }
+  });
+}
+async function refresh2FAStatus() {
+  try {
+    const u = await API.get(API_BASE + 'auth.php?action=me');
+    const enabled = u.has_2fa;
+    document.getElementById('twofaStatus').textContent = `状态：${enabled ? '✅ 已开启' : '未开启'}`;
+    const setupBtn = document.getElementById('twofaSetupBtn');
+    const disableBtn = document.getElementById('twofaDisableBtn');
+    if (enabled) {
+      setupBtn.style.display = 'none';
+      disableBtn.style.display = 'inline-block';
+    } else {
+      setupBtn.style.display = 'inline-block';
+      disableBtn.style.display = 'none';
+    }
+    // 受信任设备卡片：仅 2FA 开启时显示
+    const tc = document.getElementById('trustedDevicesCard');
+    if (enabled) {
+      tc.hidden = false;
+      loadTrustedDevices();
+    } else {
+      tc.hidden = true;
+    }
+  } catch (e) { /* ignore */ }
+}
+
+/* ================= 受信任设备 ================= */
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+async function loadTrustedDevices() {
+  const body = document.getElementById('trustedDevicesBody');
+  if (!body) return;
+  try {
+    const list = await API.get(API_BASE + 'auth.php?action=list_trusted_devices');
+    if (!Array.isArray(list) || list.length === 0) {
+      body.innerHTML = '<div class="form-hint">暂无，2FA 登录时勾选「信任此设备」即可加入（每账号最多 10 台，30 天自动过期）</div>';
+      return;
+    }
+    const rows = list.map(d => `
+      <div class="td-row${d.is_current ? ' td-current' : ''}">
+        <div class="td-main">
+          <span class="td-name">${escapeHtml(d.device_name)}${d.is_current ? ' <span class="td-tag">当前设备</span>' : ''}</span>
+          <span class="td-sub">${escapeHtml(d.ip_snippet)} · 上次 ${d.last_used_at || '—'} · 到期 ${d.expires_at}</span>
+        </div>
+        <button class="btn btn-danger td-revoke" data-id="${d.id}" type="button">撤销信任</button>
+      </div>
+    `).join('');
+    body.innerHTML = `<div class="td-list">${rows}</div>
+      <div style="margin-top:12px;text-align:right">
+        <button class="btn btn-danger" type="button" id="revokeAllTrusted">⚠️ 一键清除所有受信任设备</button>
+      </div>`;
+    // 绑定
+    body.querySelectorAll('.td-revoke').forEach(btn => btn.addEventListener('click', async () => {
+      if (!await uiConfirm('确认撤销此设备的信任？该设备下次 2FA 登录时必须重新输入动态码。', { danger: true })) return;
+      API.post(API_BASE + 'auth.php?action=delete_trusted_device', { id: Number(btn.dataset.id) }).then(() => {
+        toast('已撤销', 'success'); loadTrustedDevices();
+      }).catch(e => toast(e.message, 'error'));
+    }));
+    const ra = document.getElementById('revokeAllTrusted');
+    if (ra) ra.addEventListener('click', async () => {
+      if (!await uiConfirm('确认清除所有受信任设备？所有设备下次登录都必须输入 2FA 动态码。')) return;
+      API.post(API_BASE + 'auth.php?action=revoke_all_trusted_devices').then(() => {
+        toast('已清除全部受信任设备', 'success'); loadTrustedDevices();
+      }).catch(e => toast(e.message, 'error'));
+    });
+  } catch (e) {
+    body.innerHTML = `<div style="color:var(--danger);font-size:13px">加载失败：${escapeHtml(e.message)}</div>`;
+  }
+}
+
+/* ================= 每日壁纸源下拉 ================= */
+function bindDailyWallpaper() {
+  // 每日壁纸源 select：change 事件给用户即时提示；实际保存走 settings.php form
+  const sel = document.getElementById('s_wallpaper_source');
+  if (!sel) return;
+  sel.addEventListener('change', () => {
+    if (sel.value) {
+      toast('已选择：' + sel.options[sel.selectedIndex].text + '，刷新主页后生效', 'info');
+    }
+  });
+}
+
+/* ============ 🔍 在线检测更新 + 一键下载并升级 ============ */
+function bindVersionCheck() {
+  const btn = document.getElementById('checkUpdateBtn');
+  const result = document.getElementById('versionCheckResult');
+  if (!btn || !result) return;
+
+  // 渲染检测结果（手动点击与进后台自动检测共用）
+  const renderResult = (d) => {
+    if (d.available === false) {
+      result.className = 'version-check-result ok';
+      result.innerHTML = `✅ 当前已是最新版本 <b>${d.current}</b>`;
+      result.hidden = false;
+      return;
+    }
+    const cl = (d.changelog || []).map(c => `<li class="cl-${c.type || 'feature'}">${String(c.item).replace(/[&<>]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[ch]))}</li>`).join('');
+    const sizeStr = d.size ? (() => { const s = d.size; return s > 1048576 ? (s/1048576).toFixed(2)+' MB' : s > 1024 ? (s/1024).toFixed(1)+' KB' : s+' B'; })() : '';
+    result.className = 'version-check-result new';
+    if (!d.package_url) {
+      result.innerHTML = `🎉 发现新版本 <b>${d.latest}</b>（当前 ${d.current}）
+        ${cl ? `<ul class="vc-changelog">${cl}</ul>` : ''}
+        <div class="vc-hint">新版完整升级包尚未同步到更新源，请稍后再点「检查更新」，或联系作者获取。</div>`;
+      result.hidden = false;
+      return;
+    }
+    result.innerHTML = `
+      🎉 发现新版本 <b>${d.latest}</b>（当前 ${d.current}）${sizeStr ? ' · ' + sizeStr : ''}${d.full_pkg ? ' · 完整包' : ''}
+      ${cl ? `<ul class="vc-changelog">${cl}</ul>` : ''}
+      <div class="vc-hint">
+        <button class="btn btn-primary" id="vcDownloadApplyBtn" type="button">🔽 一键下载并升级</button>
+        <span style="margin-left:8px">自动备份原文件，失败自动回滚；升级后页面自动刷新。</span>
+      </div>
+    `;
+    result.hidden = false;
+
+    const applyBtn = result.querySelector('#vcDownloadApplyBtn');
+    if (applyBtn) applyBtn.onclick = async () => {
+      applyBtn.disabled = true;
+      applyBtn.textContent = '下载中...';
+      try {
+        const dlRes = await API.post(API_BASE + 'version.php?action=download', {
+          url: d.package_url,
+          md5: d.package_md5
+        });
+        const token = dlRes.token;
+        if (!token) throw new Error('下载失败：未获取到升级会话 token');
+        applyBtn.textContent = '应用中...';
+        await API.post(API_BASE + 'upgrade.php?action=apply', { token });
+        applyBtn.textContent = '升级成功，即将刷新...';
+        toast('升级完成：已更新到 ' + d.latest + '，页面即将刷新', 'success');
+        setTimeout(() => location.reload(), 2500);
+      } catch (e) {
+        applyBtn.disabled = false;
+        applyBtn.textContent = '🔽 一键下载并升级';
+        const msg = (e && e.message) ? e.message : '未知错误';
+        const failed = e && e.data && Array.isArray(e.data.failed) ? e.data.failed : [];
+        if (failed.length) {
+          const lines = failed.slice(0, 6).map(f => '• ' + f.path + ' — ' + (f.reason || '写入失败')).join('\n');
+          const more = failed.length > 6 ? '\n…（共 ' + failed.length + ' 个文件失败，已自动回滚）' : '';
+          result.className = 'version-check-result err';
+          result.innerHTML = '';
+          const p = document.createElement('div');
+          p.textContent = '❌ ' + msg;
+          const pre = document.createElement('pre');
+          pre.style.cssText = 'white-space:pre-wrap;text-align:left;margin:8px 0 0;font:12px/1.6 inherit;max-height:200px;overflow:auto;';
+          pre.textContent = lines + more;
+          result.appendChild(p);
+          result.appendChild(pre);
+          result.hidden = false;
+          result.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        toast('升级失败：' + msg, 'error');
+      }
+    };
+  };
+
+  // 顶栏版本号旁亮「可更新」徽标，点击直达备份与更新页
+  const showBadge = (latest) => {
+    const ver = document.getElementById('appVer');
+    if (!ver || document.getElementById('updateBadge')) return;
+    const badge = document.createElement('a');
+    badge.id = 'updateBadge';
+    badge.className = 'update-badge';
+    badge.href = 'javascript:void(0)';
+    badge.textContent = '🆕 ' + latest + ' 可更新';
+    badge.title = '点击前往「备份与更新」一键升级';
+    badge.onclick = () => {
+      const tab = document.querySelector('.admin-tabs .tab[data-tab="backup"]');
+      if (tab) tab.click();
+      result.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    };
+    ver.after(badge);
+  };
+
+  // 手动检查：强制绕过服务端 1h 缓存
+  btn.onclick = async () => {
+    btn.disabled = true;
+    btn.textContent = '检查中...';
+    result.hidden = true;
+    try {
+      const d = await API.get(API_BASE + 'version.php?action=check&nocache=1');
+      localStorage.setItem('sp_update_check_ts', String(Date.now()));
+      renderResult(d);
+      if (d.available) showBadge(d.latest);
+    } catch (e) {
+      result.className = 'version-check-result err';
+      result.innerHTML = '❌ 检查失败：' + (e.message || '无法连接到更新源，请稍后重试。');
+      result.hidden = false;
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '🔍 检查更新';
+    }
+  };
+
+  // 进后台自动静默检测：localStorage 20min 节流（每小时最多 3 次）+ 服务端 1h 缓存，失败静默不打扰
+  const AUTO_TTL = 1200 * 1000;
+  const last = parseInt(localStorage.getItem('sp_update_check_ts') || '0', 10);
+  if (Date.now() - last < AUTO_TTL) return;
+  setTimeout(async () => {
+    try {
+      const d = await API.get(API_BASE + 'version.php?action=check');
+      localStorage.setItem('sp_update_check_ts', String(Date.now()));
+      if (d && d.available) {
+        renderResult(d);
+        showBadge(d.latest);
+      }
+    } catch (e) { /* 自动检测失败静默：不影响后台正常使用 */ }
+  }, 2500);
+}
+

@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `name` VARCHAR(50) NOT NULL DEFAULT '',
   `status` TINYINT NOT NULL DEFAULT 1,
   `role` VARCHAR(20) NOT NULL DEFAULT 'admin' COMMENT '权限组：admin 管理员 / editor 编辑者 / viewer 只读',
+  `totp_secret` VARCHAR(64) NOT NULL DEFAULT '' COMMENT '2FA Base32 密钥',
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_username` (`username`)
@@ -59,7 +60,58 @@ CREATE TABLE IF NOT EXISTS `settings` (
   UNIQUE KEY `uk_config_name` (`config_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 默认设置（与安装向导 / 后台「恢复初始状态」保持一致，共 26 项）
+-- 额外表：custom_feeds / audit_logs / rate_limits / trusted_devices
+CREATE TABLE IF NOT EXISTS `custom_feeds` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `title` VARCHAR(100) NOT NULL,
+  `url` VARCHAR(1000) NOT NULL,
+  `sort` INT NOT NULL DEFAULT 0,
+  `enabled` TINYINT(1) NOT NULL DEFAULT 1,
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `audit_logs` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `action` VARCHAR(50) NOT NULL,
+  `target` VARCHAR(255) NOT NULL DEFAULT '',
+  `result` VARCHAR(20) NOT NULL DEFAULT 'success',
+  `actor` VARCHAR(50) NOT NULL DEFAULT '',
+  `actor_role` VARCHAR(20) NOT NULL DEFAULT '',
+  `ip` VARCHAR(64) NOT NULL DEFAULT '',
+  `user_agent` VARCHAR(500) NOT NULL DEFAULT '',
+  `detail` VARCHAR(255) NOT NULL DEFAULT '',
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_action` (`action`),
+  KEY `idx_created` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `rate_limits` (
+  `ip` VARCHAR(64) NOT NULL,
+  `endpoint` VARCHAR(50) NOT NULL,
+  `count` INT UNSIGNED NOT NULL DEFAULT 0,
+  `window_start` BIGINT UNSIGNED NOT NULL DEFAULT 0,
+  PRIMARY KEY (`ip`, `endpoint`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `trusted_devices` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id` INT UNSIGNED NOT NULL,
+  `token_hash` CHAR(64) NOT NULL,
+  `device_name` VARCHAR(100) NOT NULL DEFAULT '',
+  `ip_snippet` VARCHAR(45) NOT NULL DEFAULT '',
+  `user_agent` VARCHAR(255) NOT NULL DEFAULT '',
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `last_used_at` DATETIME DEFAULT NULL,
+  `expires_at` DATETIME NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_user` (`user_id`),
+  KEY `idx_hash` (`token_hash`),
+  KEY `idx_expires` (`expires_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 默认设置（与安装向导 / 后台「恢复初始状态」保持一致，共 37 项）
 INSERT INTO `settings` (`config_name`, `config_value`) VALUES
   ('site_title', 'SolarPanel'),
   ('site_logo', ''),
@@ -92,12 +144,17 @@ INSERT INTO `settings` (`config_name`, `config_value`) VALUES
   ('icp_link', ''),
   ('police_show', '0'),
   ('police_number', ''),
-  ('police_link', '')
+  ('police_link', ''),
+  ('wallpaper_source', ''),
+  ('guest_access_enabled', '0'),
+  ('guest_password_hash', ''),
+  ('search_bar_enabled', '1'),
+  ('card_filter_enabled', '1')
 ON DUPLICATE KEY UPDATE `config_value` = VALUES(`config_value`);
 
 -- 示例分组与卡片（与安装向导一致；@gid 兼容非空库导入时自增 ID 不为 1 的情况）
-INSERT INTO `item_groups` (`title`, `description`, `sort`, `is_visible`)
-VALUES ('常用推荐', '点击卡片即可跳转，可在后台管理', 0, 1);
+INSERT INTO `item_groups` (`title`, `description`, `sort`, `is_visible`, `user_id`)
+VALUES ('常用推荐', '点击卡片即可跳转，可在后台管理', 0, 1, 1);
 SET @gid = LAST_INSERT_ID();
 
 INSERT INTO `items` (`group_id`, `title`, `url`, `description`, `icon_type`, `icon_value`, `icon_bg`, `open_method`, `sort`) VALUES

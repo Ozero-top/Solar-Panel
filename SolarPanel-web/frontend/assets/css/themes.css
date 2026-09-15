@@ -25,18 +25,21 @@ body.has-wallpaper .style-fx {
   --surface: #e4f0e9;
   --surface-2: #eaf4ee;
   --text: #2e4a41;
-  --text-muted: #7b948a;
-  --accent: #2fa585;
-  --accent-soft: rgba(47, 165, 133, 0.15);
-  --accent-hover: #279172;
+  --text-muted: #5b6e66;
+  --accent: #2b987a;
+  --on-accent: #0c0d10;
+  --accent-soft: rgba(43, 152, 122, 0.15);
+  --accent-hover: #26866b;
   --danger: #d96a5f;
+  --on-danger: #0c0d10;
   --success: #3aa877;
+  --on-success: #0c0d10;
   --edge: rgba(255, 255, 255, 0.66);
   --edge-weak: rgba(46, 74, 65, 0.09);
   --overlay: rgba(30, 60, 52, 0.35);
   --sh-dark: rgba(140, 168, 155, 0.5);
   --sh-light: rgba(255, 255, 255, 0.92);
-  --accent-glow: rgba(47, 165, 133, 0.3);
+  --accent-glow: rgba(43, 152, 122, 0.3);
   --raised-sm: 2px 2px 5px rgba(140, 168, 155, 0.45), 5px 5px 12px rgba(140, 168, 155, 0.32),
     -2px -2px 5px rgba(255, 255, 255, 1), -5px -5px 12px rgba(255, 255, 255, 0.85),
     inset 0 1px 0 rgba(255, 255, 255, 0.85);
@@ -60,10 +63,13 @@ body.has-wallpaper .style-fx {
   --text: #d3e5dc;
   --text-muted: #7e968c;
   --accent: #43c39b;
+  --on-accent: #0c0d10;
   --accent-soft: rgba(67, 195, 155, 0.16);
   --accent-hover: #5bd3ac;
   --danger: #e57a6e;
+  --on-danger: #0c0d10;
   --success: #58c48e;
+  --on-success: #0c0d10;
   --edge: rgba(255, 255, 255, 0.06);
   --edge-weak: rgba(255, 255, 255, 0.07);
   --overlay: rgba(0, 0, 0, 0.55);
@@ -141,12 +147,15 @@ body.has-wallpaper .style-fx {
   --surface: #efeadb;
   --surface-2: #f3efe3;
   --text: #423d31;
-  --text-muted: #8f8875;
+  --text-muted: #6d6759;
   --accent: #6f8f5a;
+  --on-accent: #0c0d10;
   --accent-soft: rgba(111, 143, 90, 0.16);
   --accent-hover: #5e7c4b;
   --danger: #c26a52;
+  --on-danger: #0c0d10;
   --success: #5c8a4f;
+  --on-success: #0c0d10;
   --edge: rgba(255, 255, 255, 0.6);
   --edge-weak: rgba(66, 61, 49, 0.1);
   --overlay: rgba(60, 55, 42, 0.35);
@@ -176,10 +185,13 @@ body.has-wallpaper .style-fx {
   --text: #e4ded0;
   --text-muted: #998f7c;
   --accent: #8fae76;
+  --on-accent: #0c0d10;
   --accent-soft: rgba(143, 174, 118, 0.16);
   --accent-hover: #9fbe86;
   --danger: #d98066;
+  --on-danger: #0c0d10;
   --success: #79a862;
+  --on-success: #0c0d10;
   --edge: rgba(255, 255, 255, 0.055);
   --edge-weak: rgba(255, 255, 255, 0.06);
   --overlay: rgba(0, 0, 0, 0.55);
@@ -245,12 +257,15 @@ body.has-wallpaper .style-fx {
   --surface: rgba(255, 255, 255, 0.72);
   --surface-2: rgba(255, 255, 255, 0.6);
   --text: #3a3450;
-  --text-muted: #8d87a3;
+  --text-muted: #767189;
   --accent: #8b5cf6;
+  --on-accent: #0c0d10;
   --accent-soft: rgba(139, 92, 246, 0.14);
   --accent-hover: #7c4ee6;
   --danger: #e05a8a;
+  --on-danger: #0c0d10;
   --success: #2fb39b;
+  --on-success: #0c0d10;
   --edge: rgba(255, 255, 255, 0.75);
   --edge-weak: rgba(58, 52, 80, 0.09);
   --overlay: rgba(40, 32, 70, 0.35);
@@ -280,10 +295,13 @@ body.has-wallpaper .style-fx {
   --text: #ece7f8;
   --text-muted: #9b93b5;
   --accent: #b48cff;
+  --on-accent: #0c0d10;
   --accent-soft: rgba(180, 140, 255, 0.16);
   --accent-hover: #c5a3ff;
   --danger: #ef6f9c;
+  --on-danger: #0c0d10;
   --success: #45c9ae;
+  --on-success: #0c0d10;
   --edge: rgba(255, 255, 255, 0.08);
   --edge-weak: rgba(255, 255, 255, 0.07);
   --overlay: rgba(0, 0, 0, 0.55);
@@ -352,12 +370,15 @@ body.has-wallpaper .style-fx {
   --surface: #edeffa;
   --surface-2: #f1f3fb;
   --text: #333a55;
-  --text-muted: #8189a6;
+  --text-muted: #656b81;
   --accent: #5f6cf1;
+  --on-accent: #0c0d10;
   --accent-soft: rgba(95, 108, 241, 0.15);
   --accent-hover: #4f5ce4;
   --danger: #e05d5d;
+  --on-danger: #0c0d10;
   --success: #3aa887;
+  --on-success: #0c0d10;
   --edge: rgba(255, 255, 255, 0.65);
   --edge-weak: rgba(51, 58, 85, 0.09);
   --overlay: rgba(40, 45, 80, 0.35);
@@ -387,10 +408,13 @@ body.has-wallpaper .style-fx {
   --text: #dde1f5;
   --text-muted: #8a92b8;
   --accent: #8b96ff;
+  --on-accent: #0c0d10;
   --accent-soft: rgba(139, 150, 255, 0.16);
   --accent-hover: #a3abff;
   --danger: #ef7068;
+  --on-danger: #0c0d10;
   --success: #52bd92;
+  --on-success: #0c0d10;
   --edge: rgba(255, 255, 255, 0.07);
   --edge-weak: rgba(255, 255, 255, 0.065);
   --overlay: rgba(0, 0, 0, 0.55);
@@ -450,10 +474,13 @@ body.has-wallpaper .style-fx {
   --text: #1d2130;
   --text-muted: #5f6470;
   --accent: #6750a4;
+  --on-accent: #ffffff;
   --accent-soft: rgba(103, 80, 164, 0.12);
   --accent-hover: #5a4594;
   --danger: #b3261e;
+  --on-danger: #ffffff;
   --success: #2e7d5b;
+  --on-success: #ffffff;
   --edge: rgba(0, 0, 0, 0.08);
   --edge-weak: rgba(0, 0, 0, 0.06);
   --overlay: rgba(0, 0, 0, 0.4);
@@ -475,10 +502,13 @@ body.has-wallpaper .style-fx {
   --text: #e5e1ec;
   --text-muted: #9a94a8;
   --accent: #d0bcff;
+  --on-accent: #0c0d10;
   --accent-soft: rgba(208, 188, 255, 0.14);
   --accent-hover: #e2d4ff;
   --danger: #f2b8b5;
+  --on-danger: #0c0d10;
   --success: #7ddbaf;
+  --on-success: #0c0d10;
   --edge: rgba(255, 255, 255, 0.1);
   --edge-weak: rgba(255, 255, 255, 0.08);
   --overlay: rgba(0, 0, 0, 0.6);
@@ -514,12 +544,15 @@ body.has-wallpaper .style-fx {
   --surface: #efe9dc;
   --surface-2: #f3eee3;
   --text: #46403a;
-  --text-muted: #918a7d;
+  --text-muted: #6e695f;
   --accent: #b0713e;
+  --on-accent: #0c0d10;
   --accent-soft: rgba(176, 113, 62, 0.15);
   --accent-hover: #9c6134;
   --danger: #b8544a;
+  --on-danger: #ffffff;
   --success: #7a8a52;
+  --on-success: #0c0d10;
   --edge: rgba(255, 255, 255, 0.55);
   --edge-weak: rgba(70, 64, 58, 0.12);
   --overlay: rgba(50, 44, 36, 0.4);
@@ -549,10 +582,13 @@ body.has-wallpaper .style-fx {
   --text: #e9e2d5;
   --text-muted: #9b9284;
   --accent: #c98d5c;
+  --on-accent: #0c0d10;
   --accent-soft: rgba(201, 141, 92, 0.16);
   --accent-hover: #dba070;
   --danger: #d9796e;
+  --on-danger: #0c0d10;
   --success: #97a86c;
+  --on-success: #0c0d10;
   --edge: rgba(255, 255, 255, 0.06);
   --edge-weak: rgba(255, 255, 255, 0.07);
   --overlay: rgba(0, 0, 0, 0.55);
@@ -618,12 +654,15 @@ body.has-wallpaper .style-fx {
   --surface: rgba(255, 255, 255, 0.66);
   --surface-2: rgba(255, 255, 255, 0.5);
   --text: #1f3242;
-  --text-muted: #6c8294;
+  --text-muted: #617585;
   --accent: #0e9488;
+  --on-accent: #0c0d10;
   --accent-soft: rgba(14, 148, 136, 0.13);
   --accent-hover: #0b7f75;
   --danger: #d95b6a;
+  --on-danger: #0c0d10;
   --success: #12a67c;
+  --on-success: #0c0d10;
   --edge: rgba(255, 255, 255, 0.75);
   --edge-weak: rgba(31, 50, 66, 0.09);
   --overlay: rgba(15, 35, 50, 0.35);
@@ -653,10 +692,13 @@ body.has-wallpaper .style-fx {
   --text: #dce8f2;
   --text-muted: #7e93a8;
   --accent: #5eead4;
+  --on-accent: #0c0d10;
   --accent-soft: rgba(94, 234, 212, 0.13);
   --accent-hover: #8cf5e3;
   --danger: #f87e8c;
+  --on-danger: #0c0d10;
   --success: #4ade80;
+  --on-success: #0c0d10;
   --edge: rgba(140, 200, 230, 0.1);
   --edge-weak: rgba(140, 200, 230, 0.08);
   --overlay: rgba(0, 0, 0, 0.6);
@@ -735,12 +777,15 @@ body.has-wallpaper .style-fx {
   --surface: #faf9f6;
   --surface-2: #f2efe9;
   --text: #33363b;
-  --text-muted: #8f949b;
+  --text-muted: #707379;
   --accent: #6b93a8;
+  --on-accent: #0c0d10;
   --accent-soft: rgba(107, 147, 168, 0.13);
   --accent-hover: #5a8298;
   --danger: #c97c6e;
+  --on-danger: #0c0d10;
   --success: #7da88a;
+  --on-success: #0c0d10;
   --edge: rgba(51, 54, 59, 0.1);
   --edge-weak: rgba(51, 54, 59, 0.07);
   --overlay: rgba(40, 44, 48, 0.4);
@@ -765,10 +810,13 @@ body.has-wallpaper .style-fx {
   --text: #dcdde1;
   --text-muted: #8e939a;
   --accent: #8fb4c7;
+  --on-accent: #0c0d10;
   --accent-soft: rgba(143, 180, 199, 0.16);
   --accent-hover: #a5c4d4;
   --danger: #d99588;
+  --on-danger: #0c0d10;
   --success: #8fbea0;
+  --on-success: #0c0d10;
   --edge: rgba(255, 255, 255, 0.08);
   --edge-weak: rgba(255, 255, 255, 0.07);
   --overlay: rgba(0, 0, 0, 0.5);
@@ -846,18 +894,21 @@ body.has-wallpaper .style-fx {
   --surface: #f8ebe8;
   --surface-2: #f3e1e1;
   --text: #5c4744;
-  --text-muted: #a38884;
-  --accent: #ee8f7d;
-  --accent-soft: rgba(238, 143, 125, 0.16);
-  --accent-hover: #e67d68;
+  --text-muted: #7c6764;
+  --accent: #be7264;
+  --on-accent: #0c0d10;
+  --accent-soft: rgba(190, 114, 100, 0.16);
+  --accent-hover: #a76458;
   --danger: #d96f5f;
+  --on-danger: #0c0d10;
   --success: #7cb98a;
+  --on-success: #0c0d10;
   --edge: rgba(255, 255, 255, 0.7);
   --edge-weak: rgba(92, 71, 68, 0.08);
   --overlay: rgba(90, 60, 55, 0.35);
   --sh-dark: rgba(184, 124, 116, 0.42);
   --sh-light: rgba(255, 255, 255, 0.92);
-  --accent-glow: rgba(238, 143, 125, 0.3);
+  --accent-glow: rgba(190, 114, 100, 0.3);
   --raised-sm: 0 2px 4px rgba(184, 124, 116, 0.32), 0 5px 10px rgba(196, 146, 140, 0.3),
     inset 0 2px 0 rgba(255, 255, 255, 0.8), inset 0 -3px 6px rgba(184, 124, 116, 0.2);
   --raised: 0 4px 8px rgba(184, 124, 116, 0.3), 0 12px 24px rgba(196, 146, 140, 0.32),
@@ -878,10 +929,13 @@ body.has-wallpaper .style-fx {
   --text: #f0e2dd;
   --text-muted: #a89390;
   --accent: #f0a08c;
+  --on-accent: #0c0d10;
   --accent-soft: rgba(240, 160, 140, 0.16);
   --accent-hover: #f5b19f;
   --danger: #e58272;
+  --on-danger: #0c0d10;
   --success: #8fc79a;
+  --on-success: #0c0d10;
   --edge: rgba(255, 255, 255, 0.07);
   --edge-weak: rgba(255, 255, 255, 0.06);
   --overlay: rgba(0, 0, 0, 0.55);
@@ -964,18 +1018,21 @@ body.has-wallpaper .style-fx {
   --surface: #f0ece6;
   --surface-2: #e7e2da;
   --text: #2f2a24;
-  --text-muted: #8a8177;
-  --accent: #c98f3d;
-  --accent-soft: rgba(201, 143, 61, 0.15);
-  --accent-hover: #b57e2f;
+  --text-muted: #716a62;
+  --accent: #b17e36;
+  --on-accent: #0c0d10;
+  --accent-soft: rgba(177, 126, 54, 0.15);
+  --accent-hover: #9c6f30;
   --danger: #c05f4e;
+  --on-danger: #0c0d10;
   --success: #5f9c6b;
+  --on-success: #0c0d10;
   --edge: rgba(255, 255, 255, 0.65);
   --edge-weak: rgba(47, 42, 36, 0.08);
   --overlay: rgba(20, 16, 12, 0.45);
   --sh-dark: rgba(120, 100, 75, 0.35);
   --sh-light: rgba(255, 255, 255, 0.9);
-  --accent-glow: rgba(201, 143, 61, 0.32);
+  --accent-glow: rgba(177, 126, 54, 0.32);
   --raised-sm: 0 1px 3px rgba(120, 100, 75, 0.28), 0 4px 10px rgba(120, 100, 75, 0.24),
     inset 0 1px 0 rgba(255, 255, 255, 0.85), inset 0 -2px 5px rgba(120, 100, 75, 0.14);
   --raised: 0 2px 6px rgba(120, 100, 75, 0.26), 0 10px 22px rgba(120, 100, 75, 0.26),
@@ -996,10 +1053,13 @@ body.has-wallpaper .style-fx {
   --text: #f2ebe2;
   --text-muted: #97897d;
   --accent: #e6b25e;
+  --on-accent: #0c0d10;
   --accent-soft: rgba(230, 178, 94, 0.16);
   --accent-hover: #f0c276;
   --danger: #e07a66;
+  --on-danger: #0c0d10;
   --success: #7cbf8a;
+  --on-success: #0c0d10;
   --edge: rgba(255, 235, 200, 0.08);
   --edge-weak: rgba(255, 235, 200, 0.06);
   --overlay: rgba(0, 0, 0, 0.6);
@@ -1089,12 +1149,15 @@ body.has-wallpaper .style-fx {
   --surface: #e0e5ec;
   --surface-2: #e9edf2;
   --text: #333333;
-  --text-muted: #6b7280;
+  --text-muted: #606773;
   --accent: #6d5dfc;
+  --on-accent: #ffffff;
   --accent-soft: rgba(109, 93, 252, 0.16);
   --accent-hover: #5a49eb;
   --danger: #e05d5d;
+  --on-danger: #0c0d10;
   --success: #3db8a8;
+  --on-success: #0c0d10;
   --edge: rgba(255, 255, 255, 0.4);
   --edge-weak: rgba(184, 188, 194, 0.28);
   --overlay: rgba(80, 86, 100, 0.4);
@@ -1118,12 +1181,15 @@ body.has-wallpaper .style-fx {
   --surface: #2b2f37;
   --surface-2: #333843;
   --text: #d9dde5;
-  --text-muted: #8d93a0;
+  --text-muted: #9297a4;
   --accent: #8a7cff;
+  --on-accent: #0c0d10;
   --accent-soft: rgba(138, 124, 255, 0.18);
   --accent-hover: #9c8fff;
   --danger: #ef7a7a;
+  --on-danger: #0c0d10;
   --success: #55cfc0;
+  --on-success: #0c0d10;
   --edge: rgba(255, 255, 255, 0.06);
   --edge-weak: rgba(0, 0, 0, 0.3);
   --overlay: rgba(0, 0, 0, 0.6);
@@ -1189,12 +1255,15 @@ body.has-wallpaper .style-fx {
   --surface: #e8dfd1;
   --surface-2: #f0e9da;
   --text: #3a2f22;
-  --text-muted: #8b7355;
+  --text-muted: #725e46;
   --accent: #8b7355;
+  --on-accent: #000000;
   --accent-soft: rgba(139, 115, 85, 0.16);
   --accent-hover: #6b5b45;
   --danger: #b85c4e;
+  --on-danger: #000000;
   --success: #6f8f5f;
+  --on-success: #0c0d10;
   --edge: #a89880;
   --edge-weak: rgba(168, 152, 128, 0.5);
   --overlay: rgba(58, 47, 34, 0.45);
@@ -1224,10 +1293,13 @@ body.has-wallpaper .style-fx {
   --text: #f0e9da;
   --text-muted: #b8a88a;
   --accent: #c9a86a;
+  --on-accent: #0c0d10;
   --accent-soft: rgba(201, 168, 106, 0.18);
   --accent-hover: #d9bb80;
   --danger: #d97a6a;
+  --on-danger: #0c0d10;
   --success: #8faf7e;
+  --on-success: #0c0d10;
   --edge: rgba(184, 168, 138, 0.35);
   --edge-weak: rgba(0, 0, 0, 0.35);
   --overlay: rgba(0, 0, 0, 0.6);
@@ -1333,17 +1405,20 @@ body.has-wallpaper .style-fx {
   --surface-2: rgba(255, 255, 255, 0.82);
   --text: #16181d;
   --text-muted: #5c6068;
-  --accent: #d99a2b;
-  --accent-soft: rgba(217, 154, 43, 0.18);
-  --accent-hover: #c4891d;
+  --accent: #bb8425;
+  --on-accent: #0c0d10;
+  --accent-soft: rgba(187, 132, 37, 0.18);
+  --accent-hover: #a57421;
   --danger: #c05548;
+  --on-danger: #ffffff;
   --success: #4f8f68;
+  --on-success: #0c0d10;
   --edge: rgba(255, 255, 255, 0.7);
   --edge-weak: rgba(12, 13, 16, 0.1);
   --overlay: rgba(12, 13, 16, 0.5);
   --sh-dark: rgba(0, 0, 0, 0.28);
   --sh-light: rgba(0, 0, 0, 0.12);
-  --accent-glow: rgba(217, 154, 43, 0.32);
+  --accent-glow: rgba(187, 132, 37, 0.32);
   --raised-sm: 0 2px 8px rgba(0, 0, 0, 0.22);
   --raised: 0 8px 28px rgba(0, 0, 0, 0.28);
   --raised-lg: 0 24px 60px rgba(0, 0, 0, 0.34);
@@ -1361,10 +1436,13 @@ body.has-wallpaper .style-fx {
   --text: #ffffff;
   --text-muted: rgba(255, 255, 255, 0.64);
   --accent: #e8b04b;
+  --on-accent: #0c0d10;
   --accent-soft: rgba(232, 176, 75, 0.2);
   --accent-hover: #f2bc5f;
   --danger: #e07a6c;
+  --on-danger: #0c0d10;
   --success: #63b98a;
+  --on-success: #0c0d10;
   --edge: rgba(255, 255, 255, 0.28);
   --edge-weak: rgba(255, 255, 255, 0.18);
   --overlay: rgba(0, 0, 0, 0.7);
@@ -1410,7 +1488,7 @@ body.has-wallpaper .style-fx {
 }
 [data-style='immersive-photo'] .btn-primary {
   background: var(--accent);
-  color: #0c0d10;
+  color: var(--on-accent, #fff);
 }
 [data-style='immersive-photo'] .btn-primary:hover {
   background: var(--accent-hover);
@@ -1421,6 +1499,16 @@ body.has-wallpaper .style-fx {
 [data-style='immersive-photo'] .textarea {
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
+}
+/* immersive-photo 深色模式：select 必须给实色背景
+   原生 <option> 不支持半透明 + backdrop-filter，浏览器会降级成白色实色
+   导致选项白字白底看不清。skeuomorphism 等主题都有同样覆盖 */
+:root[data-theme='dark'][data-style='immersive-photo'] .select {
+  background: #1a1c20;
+}
+:root[data-theme='dark'][data-style='immersive-photo'] .select option {
+  background: #1a1c20;
+  color: #ffffff;
 }
 [data-style='immersive-photo'] .input:focus,
 [data-style='immersive-photo'] .select:focus,
@@ -1442,20 +1530,23 @@ body.has-wallpaper .style-fx {
   --surface: #f6ead0;
   --surface-2: #faf1dd;
   --text: #3a3226;
-  --text-muted: #8a7a6a;
-  --accent: #7cb9a8;
-  --accent-soft: rgba(124, 185, 168, 0.2);
-  --accent-hover: #67a794;
+  --text-muted: #746659;
+  --accent: #619083;
+  --on-accent: #0c0d10;
+  --accent-soft: rgba(97, 144, 131, 0.2);
+  --accent-hover: #557f73;
   --danger: #cf7a6a;
+  --on-danger: #0c0d10;
   --success: #8fb996;
+  --on-success: #0c0d10;
   --edge: rgba(124, 185, 168, 0.4);
   --edge-weak: rgba(124, 185, 168, 0.25);
   --overlay: rgba(90, 74, 58, 0.45);
   --sh-dark: rgba(124, 185, 168, 0.3);
   --sh-light: rgba(255, 252, 240, 0.8);
-  --accent-glow: rgba(124, 185, 168, 0.35);
+  --accent-glow: rgba(97, 144, 131, 0.35);
   --raised-sm: 0 2px 8px rgba(124, 185, 168, 0.15);
-  --raised: 0 4px 16px rgba(124, 185, 168, 0.2);
+  --raised: 0 4px 16px rgba(97, 144, 131, 0.2);
   --raised-lg: 0 8px 32px rgba(124, 185, 168, 0.25);
   --pressed-sm: 0 2px 8px rgba(124, 185, 168, 0.18), inset 0 1px 2px rgba(90, 74, 58, 0.08);
   --inset: inset 1px 2px 4px rgba(124, 185, 168, 0.25);
@@ -1472,10 +1563,13 @@ body.has-wallpaper .style-fx {
   --text: #f2ecdc;
   --text-muted: #a8b5a0;
   --accent: #8fcab9;
+  --on-accent: #0c0d10;
   --accent-soft: rgba(143, 202, 185, 0.18);
   --accent-hover: #a5d8c8;
   --danger: #e0917f;
+  --on-danger: #0c0d10;
   --success: #9cc7a3;
+  --on-success: #0c0d10;
   --edge: rgba(143, 202, 185, 0.3);
   --edge-weak: rgba(143, 202, 185, 0.18);
   --overlay: rgba(10, 20, 18, 0.6);
@@ -1575,10 +1669,13 @@ body.has-wallpaper .style-fx {
   --text: #323130;
   --text-muted: #605e5c;
   --accent: #0078d4;
+  --on-accent: #ffffff;
   --accent-soft: rgba(0, 120, 212, 0.12);
   --accent-hover: #106ebe;
   --danger: #e81123;
+  --on-danger: #ffffff;
   --success: #00cc6a;
+  --on-success: #0c0d10;
   --edge: #e1e1e1;
   --edge-weak: rgba(225, 225, 225, 0.6);
   --overlay: rgba(0, 0, 0, 0.42);
@@ -1603,10 +1700,13 @@ body.has-wallpaper .style-fx {
   --text: #ffffff;
   --text-muted: #c8c6c4;
   --accent: #0078d4;
+  --on-accent: #ffffff;
   --accent-soft: rgba(0, 120, 212, 0.22);
   --accent-hover: #106ebe;
   --danger: #f2545b;
+  --on-danger: #0c0d10;
   --success: #26d07c;
+  --on-success: #0c0d10;
   --edge: #3d3d3d;
   --edge-weak: rgba(255, 255, 255, 0.06);
   --overlay: rgba(0, 0, 0, 0.6);
@@ -1683,12 +1783,15 @@ body.has-wallpaper .style-fx {
   --surface: #faf8f5;
   --surface-2: #ffffff;
   --text: #374151;
-  --text-muted: #6b7280;
+  --text-muted: #606773;
   --accent: #4a9d9a;
+  --on-accent: #0c0d10;
   --accent-soft: rgba(74, 157, 154, 0.18);
   --accent-hover: #3d8a87;
   --danger: #c17767;
+  --on-danger: #0c0d10;
   --success: #4a9d9a;
+  --on-success: #0c0d10;
   --edge: rgba(193, 135, 109, 0.18);
   --edge-weak: rgba(55, 65, 81, 0.07);
   --overlay: rgba(193, 122, 103, 0.45);
@@ -1718,10 +1821,13 @@ body.has-wallpaper .style-fx {
   --text: #f0e4d8;
   --text-muted: #b9a898;
   --accent: #5fbfbb;
+  --on-accent: #0c0d10;
   --accent-soft: rgba(95, 191, 187, 0.18);
   --accent-hover: #75cfcb;
   --danger: #d48a78;
+  --on-danger: #0c0d10;
   --success: #5fbfbb;
+  --on-success: #0c0d10;
   --edge: rgba(255, 255, 255, 0.06);
   --edge-weak: rgba(255, 255, 255, 0.05);
   --overlay: rgba(0, 0, 0, 0.55);
@@ -1787,7 +1893,7 @@ body.has-wallpaper .style-fx {
 /* warm-dashboard 按钮：青绿主按钮 + 柔和光晕 hover */
 [data-style='warm-dashboard'] .btn-primary {
   background: #4a9d9a;
-  color: #ffffff;
+  color: var(--on-accent, #fff);
   border-radius: 14px;
   box-shadow: 0 4px 12px rgba(74, 157, 154, 0.3);
   transition: all 200ms ease-out;
@@ -1830,6 +1936,268 @@ body.has-wallpaper .style-fx {
   background: rgba(232, 184, 109, 0.12);
   color: #e8b86d;
 }
+
+/* ============================================================
+   22) blueprint 工程蓝图 —— 蓝底白线 · 网格坐标 · 标注线
+   氰版蓝图印刷工艺灵感，深蓝底 + 白色线条 + 网格背景 + 工程橙标注；
+   直角、等宽字体感、虚线辅助线；动效精准干脆（100ms 级）；
+   绝对禁止：暖色调 / 圆角 / 渐变 / 发光 / 衬线字体
+   ============================================================ */
+:root[data-theme='light'][data-style='blueprint'] {
+  --bg-grad: linear-gradient(180deg, #f0f4f8 0%, #e4eaf0 100%);
+  --surface: #f7f9fb;
+  --surface-2: #eef1f5;
+  --text: #1e3a5f;
+  --text-muted: #4a6b8a;
+  --accent: #1e3a5f;
+  --accent-soft: rgba(30, 58, 95, 0.12);
+  --accent-hover: #152a47;
+  --danger: #d94f3f;
+  --success: #2d7a5a;
+  --annotation: #ff6b35;
+  --edge: rgba(30, 58, 95, 0.35);
+  --edge-weak: rgba(30, 58, 95, 0.18);
+  --overlay: rgba(30, 58, 95, 0.5);
+  --sh-dark: rgba(30, 58, 95, 0.15);
+  --sh-light: rgba(255, 255, 255, 0.7);
+  --accent-glow: transparent;
+  --raised-sm: 0 1px 4px rgba(30, 58, 95, 0.12);
+  --raised: 0 2px 10px rgba(30, 58, 95, 0.18);
+  --raised-lg: 0 4px 18px rgba(30, 58, 95, 0.22);
+  --pressed-sm: inset 0 1px 2px rgba(30, 58, 95, 0.15);
+  --inset: inset 0 1px 2px rgba(30, 58, 95, 0.12);
+  --hover-bg: rgba(30, 58, 95, 0.08);
+  --scroll-thumb: rgba(30, 58, 95, 0.35);
+  --tr: 100ms;
+  --ease: linear;
+}
+:root[data-theme='dark'][data-style='blueprint'] {
+  --bg-grad: linear-gradient(180deg, #1e3a5f 0%, #162c4a 100%);
+  --surface: rgba(255, 255, 255, 0.06);
+  --surface-2: rgba(255, 255, 255, 0.1);
+  --text: #ffffff;
+  --text-muted: #a0c4e8;
+  --accent: #ffffff;
+  --accent-soft: rgba(255, 255, 255, 0.15);
+  --accent-hover: #d0e4f5;
+  --danger: #ff8a7a;
+  --success: #7fcfaf;
+  --annotation: #ff6b35;
+  --edge: rgba(255, 255, 255, 0.3);
+  --edge-weak: rgba(255, 255, 255, 0.15);
+  --overlay: rgba(0, 0, 0, 0.55);
+  --sh-dark: rgba(0, 0, 0, 0.4);
+  --sh-light: rgba(255, 255, 255, 0.04);
+  --accent-glow: transparent;
+  --raised-sm: 0 1px 4px rgba(0, 0, 0, 0.4);
+  --raised: 0 2px 10px rgba(0, 0, 0, 0.45);
+  --raised-lg: 0 4px 18px rgba(0, 0, 0, 0.5);
+  --pressed-sm: inset 0 1px 2px rgba(0, 0, 0, 0.5);
+  --inset: inset 0 1px 2px rgba(0, 0, 0, 0.4);
+  --hover-bg: rgba(255, 255, 255, 0.1);
+  --scroll-thumb: rgba(255, 255, 255, 0.3);
+  --tr: 100ms;
+  --ease: linear;
+}
+
+/* blueprint 装饰：深蓝网格背景 + 虚线辅助线 */
+[data-style='blueprint'] .style-fx::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(rgba(30, 58, 95, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(30, 58, 95, 0.06) 1px, transparent 1px);
+  background-size: 20px 20px;
+  pointer-events: none;
+}
+[data-style='blueprint'] .style-fx::after { content: none; }
+:root[data-theme='dark'][data-style='blueprint'] .style-fx::before {
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* blueprint 卡片：直角、细描边、半透明玻璃面 */
+[data-style='blueprint'] .card {
+  border-radius: 0;
+  border: 1px solid var(--edge);
+  background: var(--surface);
+  box-shadow: none;
+  transition: border-color 100ms linear, background 100ms linear;
+}
+[data-style='blueprint'] .card:hover {
+  border-color: var(--accent);
+  box-shadow: var(--raised);
+}
+[data-style='blueprint'] .card .icon {
+  border-radius: 0;
+  border: 1px solid var(--edge-weak);
+  box-shadow: none;
+}
+[data-style='blueprint'] .card .icon.has-img { box-shadow: none; }
+
+/* blueprint 按钮：直角、虚线可选、无圆角 */
+[data-style='blueprint'] .btn {
+  border-radius: 0;
+  border: 1px solid var(--accent);
+  background: transparent;
+  color: var(--text);
+  font-family: ui-monospace, 'SF Mono', Consolas, Menlo, monospace;
+  letter-spacing: 0.05em;
+  transition: background 100ms linear, border-color 100ms linear, color 100ms linear;
+}
+[data-style='blueprint'] .btn:hover {
+  background: var(--accent);
+  color: #ffffff;
+  box-shadow: none;
+}
+[data-style='blueprint'] .btn:active {
+  transform: none;
+  background: var(--annotation);
+  color: #fff;
+}
+[data-style='blueprint'] .btn-primary {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #ffffff;
+}
+:root[data-theme='dark'][data-style='blueprint'] .btn:hover {
+  background: var(--accent);
+  color: #1e3a5f;
+}
+:root[data-theme='dark'][data-style='blueprint'] .btn-primary {
+  background: var(--accent);
+  color: #1e3a5f;
+}
+
+/* blueprint 输入框：直角、细描边、等宽字体感 */
+[data-style='blueprint'] .input,
+[data-style='blueprint'] .select,
+[data-style='blueprint'] .textarea {
+  border-radius: 0;
+  border: 1px solid var(--edge);
+  background: transparent;
+  color: var(--text);
+  font-family: ui-monospace, 'SF Mono', Consolas, Menlo, monospace;
+  box-shadow: none;
+}
+[data-style='blueprint'] .input:focus,
+[data-style='blueprint'] .select:focus,
+[data-style='blueprint'] .textarea:focus {
+  border-color: var(--annotation);
+  box-shadow: none;
+}
+:root[data-theme='dark'][data-style='blueprint'] .select,
+:root[data-theme='dark'][data-style='blueprint'] .select option {
+  background: #142840;
+  color: #ffffff;
+}
+
+/* blueprint 顶栏 / 分组头 */
+[data-style='blueprint'] .topbar,
+[data-style='blueprint'] .group-header {
+  border-bottom: 1px dashed var(--edge);
+}
+
+/* blueprint 等宽字体装饰：标题 */
+[data-style='blueprint'] h1,
+[data-style='blueprint'] h2,
+[data-style='blueprint'] h3,
+[data-style='blueprint'] .section-title,
+[data-style='blueprint'] .group-title {
+  font-family: ui-monospace, 'SF Mono', Consolas, Menlo, monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* blueprint 虚线装饰：分割线 */
+[data-style='blueprint'] .divider,
+[data-style='blueprint'] hr {
+  border: none;
+  border-top: 1px dashed var(--edge-weak);
+  background: none;
+}
+
+/* blueprint 高亮标注色 */
+[data-style='blueprint'] .annotation,
+[data-style='blueprint'] .accent-tag,
+[data-style='blueprint'] .badge-accent {
+  color: var(--annotation);
+}
+[data-style='blueprint'] .badge {
+  border-radius: 0;
+  border: 1px solid var(--edge);
+  font-family: ui-monospace, 'SF Mono', Consolas, Menlo, monospace;
+}
+
+/* blueprint 角落标记装饰（伪元素） */
+[data-style='blueprint'] .card::before,
+[data-style='blueprint'] .card::after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-color: var(--annotation);
+  border-style: solid;
+  pointer-events: none;
+  opacity: 0.4;
+}
+[data-style='blueprint'] .card::before {
+  top: 3px;
+  left: 3px;
+  border-width: 1px 0 0 1px;
+}
+[data-style='blueprint'] .card::after {
+  bottom: 3px;
+  right: 3px;
+  border-width: 0 1px 1px 0;
+}
+[data-style='blueprint'] .card { position: relative; }
+
+/* blueprint 表格：直角 + 细描边 + 虚线行分隔 */
+[data-style='blueprint'] table {
+  border-collapse: collapse;
+}
+[data-style='blueprint'] table th,
+[data-style='blueprint'] table td {
+  border: 1px solid var(--edge-weak);
+  font-family: ui-monospace, 'SF Mono', Consolas, Menlo, monospace;
+}
+[data-style='blueprint'] table th {
+  border-bottom: 1px solid var(--accent);
+}
+
+/* blueprint admin 面板 */
+[data-style='blueprint'] .admin-panel {
+  border-radius: 0;
+  border: 1px solid var(--edge);
+  background: var(--surface);
+}
+[data-style='blueprint'] .admin-panel .btn {
+  border-radius: 0;
+}
+
+/* blueprint 禁止圆角覆盖 */
+[data-style='blueprint'] * {
+  border-radius: 0 !important;
+}
+[data-style='blueprint'] .avatar,
+[data-style='blueprint'] .avatar img,
+[data-style='blueprint'] .profile-avatar {
+  border-radius: 0 !important;
+  border: 1px solid var(--edge);
+}
+
+/* blueprint 选中态（工程橙点亮） */
+[data-style='blueprint'] .selected,
+[data-style='blueprint'] .active-tab,
+[data-style='blueprint'] .nav-item.active {
+  border-left: 2px solid var(--annotation);
+  padding-left: 10px;
+}
+
 
 /* ============================================================
    可访问性：偏好减少动效时停用所有装饰动画
