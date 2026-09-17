@@ -1,7 +1,9 @@
 <div align=center>
-<img src="https://updates.ozero.top/SolarPanel.ico" width="256" height="256"> 
+<img src="https://updates.ozero.top/SolarPanel.png" width="256" height="256"> 
 </div>
+
 # SolarPanel —— 柔软而精致的个人导航面板。
+---
 
 [SolarPanel演示站](https://test.ozero.top/)  
 
