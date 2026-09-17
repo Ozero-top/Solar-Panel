@@ -1,5 +1,5 @@
 <div align=center>
-<img src="https://updates.ozero.top/SolarPanel.png" width="256" height="256"> 
+<img src="https://updates.ozero.top/SolarPanel.ico" width="64" height="64"> 
 </div>
 
 # SolarPanel —— 柔软而精致的个人导航面板。
@@ -10,7 +10,7 @@
 ---
 
 [Solarpanel 自托管导航面板的安卓客户端](https://github.com/qiancheng817/Solarpanel) - 作者:[qiancheng817](https://github.com/qiancheng817) 
-###### 这是一个用 WebView 封装的轻量外壳，把你部署在飞牛 / NAS 上的 Solarpanel 变成手机上可以一键打开的独立应用。
+###### 用 WebView 封装的轻量外壳 APP，把你部署在飞牛 / NAS 上的 Solarpanel 变成手机上可以一键打开的独立应用。
 
 ---
 > 一款可自托管的个人导航 / 起始页面板。前端与后端完全分离，主页显示的**一切内容均由后台设置**——站点标题、Logo、壁纸、公告、时钟、天气、搜索引擎、分组与卡片，全部无需改动一行代码即可配置。
