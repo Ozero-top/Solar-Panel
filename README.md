@@ -15,6 +15,10 @@
 
 ---
 
+## 版本 2.1.08 · 2026-09-18
+
+- 🖼️ **细节优化**：前端 添加卡片/编辑卡片 弹窗新增手动上传图标
+
 ## 版本 2.1.07 · 2026-09-18
 
 - 🎨 **主题优化**：Claymorphism、Natural Organic、Glassmorphism、Material、Scandinavian、Holographic 六套深度重绘 + Soft UI 基线校准
