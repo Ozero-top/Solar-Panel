@@ -60,41 +60,41 @@ func Close() {
 func seedIfEmpty() {
 	// 默认设置（26 + 3 新 = 29 项）
 	defaults := map[string]string{
-		"site_title":         "SolarPanel",
-		"site_logo":          "",
-		"wallpaper":          "",
-		"mask_opacity":       "0.35",
-		"wallpaper_blur":     "6",
-		"announcement":       "欢迎使用 SolarPanel！所有展示内容均可在后台设置。",
-		"announcement_show":  "0",
-		"footer":             "Powered by SolarPanel",
-		"clock_show":         "1",
-		"default_theme":      "dark",
-		"theme_style":        "soft",
-		"card_style":         "detail",
-		"default_lan_mode":   "public",
-		"site_url":           "",
-		"content_maxwidth":   "1200",
-		"content_pad_lr":     "20",
-		"content_pad_top":    "0",
-		"content_pad_bottom": "40",
-		"weather_show":       "1",
-		"weather_city":       "",
-		"search_width":       "640",
-		"home_view":          "both",
-		"news_sources":       "",
-		"news_order":         "",
-		"icp_show":           "0",
-		"icp_number":         "",
-		"icp_link":           "",
-		"police_show":        "0",
-		"police_number":      "",
-		"police_link":        "",
-		"wallpaper_source":      "",  // 每日壁纸源：空=禁用，bing=开启
-		"guest_access_enabled":  "0", // 访客密码开关：0=关闭，1=开启
-		"guest_password_hash":   "",  // 访客密码 bcrypt hash
-		"search_bar_enabled":    "1", // 主页搜索引擎搜索栏开关：1=显示
-		"card_filter_enabled":   "1", // 主页卡片筛选搜索栏开关：1=显示
+		"site_title":           "SolarPanel",
+		"site_logo":            "",
+		"wallpaper":            "",
+		"mask_opacity":         "0.35",
+		"wallpaper_blur":       "6",
+		"announcement":         "欢迎使用 SolarPanel！所有展示内容均可在后台设置。",
+		"announcement_show":    "0",
+		"footer":               "Powered by SolarPanel",
+		"clock_show":           "1",
+		"default_theme":        "dark",
+		"theme_style":          "soft",
+		"card_style":           "detail",
+		"default_lan_mode":     "auto",
+		"lan_hostnames":        "",
+		"site_url":             "",
+		"content_maxwidth":     "1200",
+		"content_pad_lr":       "20",
+		"content_pad_top":      "0",
+		"content_pad_bottom":   "40",
+		"weather_show":         "1",
+		"weather_city":         "",
+		"search_width":         "640",
+		"home_view":            "both",
+		"news_sources":         "",
+		"news_order":           "",
+		"icp_show":             "0",
+		"icp_number":           "",
+		"icp_link":             "",
+		"police_show":          "0",
+		"police_number":        "",
+		"police_link":          "",
+		"wallpaper_source":     "",  // 每日壁纸源：空=禁用，bing=开启
+		"guest_access_enabled": "0", // 访客密码开关：0=关闭，1=开启
+		"guest_password_hash":  "",  // 访客密码 bcrypt hash
+		"search_bar_enabled":   "1", // 主页搜索引擎搜索栏开关：1=显示
 	}
 
 	// 搜索引擎（长文本单独处理）

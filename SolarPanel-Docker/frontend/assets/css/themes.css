@@ -1,4 +1,4 @@
-﻿/* ============================================================
+/* ============================================================
    风格主题包：html[data-style] 驱动，16 种风格 × 深浅双态
    soft（柔和浮雕）为默认基线，定义于 common.css，此处不覆盖
    其余 15 风格各自覆盖变量 + .style-fx 装饰层（壁纸启用时隐藏）
@@ -143,76 +143,65 @@ body.has-wallpaper .style-fx {
    2) natural 自然大地 —— 苔绿/沙米/岩灰/湖蓝 · 温暖纸感
    ============================================================ */
 :root[data-theme='light'][data-style='natural'] {
-  --bg-grad: linear-gradient(170deg, #f3efe4 0%, #ede7d8 45%, #e7e2d3 100%);
-  --surface: #efeadb;
-  --surface-2: #f3efe3;
-  --text: #423d31;
-  --text-muted: #6d6759;
-  --accent: #6f8f5a;
-  --on-accent: #0c0d10;
-  --accent-soft: rgba(111, 143, 90, 0.16);
-  --accent-hover: #5e7c4b;
-  --danger: #c26a52;
-  --on-danger: #0c0d10;
-  --success: #5c8a4f;
-  --on-success: #0c0d10;
-  --edge: rgba(255, 255, 255, 0.6);
-  --edge-weak: rgba(66, 61, 49, 0.1);
-  --overlay: rgba(60, 55, 42, 0.35);
-  --sh-dark: rgba(168, 158, 132, 0.5);
-  --sh-light: rgba(255, 255, 255, 0.9);
-  --accent-glow: rgba(111, 143, 90, 0.3);
-  --raised-sm: 2px 2px 5px rgba(168, 158, 132, 0.46), 5px 5px 12px rgba(168, 158, 132, 0.32),
-    -2px -2px 5px rgba(255, 255, 255, 1), -5px -5px 12px rgba(255, 255, 255, 0.82),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8);
-  --raised: 4px 4px 9px rgba(168, 158, 132, 0.42), 10px 10px 24px rgba(168, 158, 132, 0.34),
-    -4px -4px 9px rgba(255, 255, 255, 1), -10px -10px 24px rgba(255, 255, 255, 0.85),
-    inset 0 1px 0 rgba(255, 255, 255, 0.85);
-  --raised-lg: 6px 6px 14px rgba(168, 158, 132, 0.38), 18px 18px 40px rgba(168, 158, 132, 0.32),
-    -6px -6px 14px rgba(255, 255, 255, 1), -18px -18px 40px rgba(255, 255, 255, 0.88),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
-  --pressed-sm: inset 1px 1px 3px rgba(168, 158, 132, 0.52), inset 3px 3px 9px rgba(168, 158, 132, 0.34),
-    inset -1px -1px 3px rgba(255, 255, 255, 0.92), inset -3px -3px 9px rgba(255, 255, 255, 0.66);
-  --inset: inset 2px 2px 5px rgba(168, 158, 132, 0.48), inset 5px 5px 12px rgba(168, 158, 132, 0.3),
-    inset -2px -2px 5px rgba(255, 255, 255, 0.92), inset -5px -5px 12px rgba(255, 255, 255, 0.62);
-  --hover-bg: rgba(111, 143, 90, 0.1);
-  --scroll-thumb: rgba(168, 158, 132, 0.6);
+  --bg-grad: linear-gradient(170deg, #faf6f1 0%, #f3efe4 45%, #ece6d8 100%);
+  --surface: #faf6f1;
+  --surface-2: #ffffff;
+  --text: #5c4033;
+  --text-muted: #7c6a5a;
+  --accent: #8b9d77;
+  --on-accent: #ffffff;
+  --accent-soft: rgba(139, 157, 119, 0.15);
+  --accent-hover: #758763;
+  --danger: #b8544a;
+  --on-danger: #ffffff;
+  --success: #6f8f5f;
+  --on-success: #ffffff;
+  --edge: rgba(92, 64, 51, 0.1);
+  --edge-weak: rgba(92, 64, 51, 0.06);
+  --overlay: rgba(92, 64, 51, 0.35);
+  --sh-dark: rgba(92, 64, 51, 0.12);
+  --sh-light: rgba(255, 255, 255, 0.85);
+  --accent-glow: rgba(139, 157, 119, 0.15);
+  /* Natural Organic: 极轻平面阴影（shadow-sm / md / lg），绝无浮雕 */
+  --raised-sm: 0 1px 2px rgba(92, 64, 51, 0.06), 0 2px 4px rgba(92, 64, 51, 0.06);
+  --raised: 0 2px 4px rgba(92, 64, 51, 0.08), 0 4px 8px rgba(92, 64, 51, 0.08);
+  --raised-lg: 0 4px 8px rgba(92, 64, 51, 0.08), 0 8px 16px rgba(92, 64, 51, 0.1);
+  --pressed-sm: inset 0 1px 2px rgba(92, 64, 51, 0.1);
+  --inset: inset 0 1px 3px rgba(92, 64, 51, 0.08);
+  --hover-bg: rgba(139, 157, 119, 0.1);
+  --scroll-thumb: rgba(92, 64, 51, 0.28);
+  --tr: 300ms;
+  --ease: ease-in-out;
 }
 :root[data-theme='dark'][data-style='natural'] {
-  --bg-grad: linear-gradient(170deg, #262521 0%, #211f1c 45%, #1d1c19 100%);
-  --surface: #26241f;
-  --surface-2: #2b2924;
-  --text: #e4ded0;
-  --text-muted: #998f7c;
-  --accent: #8fae76;
-  --on-accent: #0c0d10;
-  --accent-soft: rgba(143, 174, 118, 0.16);
-  --accent-hover: #9fbe86;
-  --danger: #d98066;
-  --on-danger: #0c0d10;
-  --success: #79a862;
-  --on-success: #0c0d10;
-  --edge: rgba(255, 255, 255, 0.055);
-  --edge-weak: rgba(255, 255, 255, 0.06);
+  --bg-grad: linear-gradient(170deg, #1e1c17 0%, #1a1814 45%, #161410 100%);
+  --surface: #1e1c17;
+  --surface-2: #25221c;
+  --text: #e8e0d0;
+  --text-muted: #a89a82;
+  --accent: #a5b68b;
+  --on-accent: #161410;
+  --accent-soft: rgba(165, 182, 139, 0.18);
+  --accent-hover: #b5c69b;
+  --danger: #e08676;
+  --on-danger: #ffffff;
+  --success: #8bb075;
+  --on-success: #ffffff;
+  --edge: rgba(255, 255, 255, 0.06);
+  --edge-weak: rgba(255, 255, 255, 0.04);
   --overlay: rgba(0, 0, 0, 0.55);
-  --sh-dark: rgba(0, 0, 0, 0.5);
-  --sh-light: rgba(255, 240, 210, 0.03);
-  --accent-glow: rgba(143, 174, 118, 0.25);
-  --raised-sm: 2px 2px 5px rgba(0, 0, 0, 0.5), 5px 5px 12px rgba(0, 0, 0, 0.32),
-    -2px -2px 5px rgba(255, 255, 255, 0.05), -5px -5px 12px rgba(255, 255, 255, 0.025),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  --raised: 4px 4px 9px rgba(0, 0, 0, 0.45), 10px 10px 24px rgba(0, 0, 0, 0.35),
-    -4px -4px 9px rgba(255, 255, 255, 0.05), -10px -10px 24px rgba(255, 255, 255, 0.028),
-    inset 0 1px 0 rgba(255, 255, 255, 0.055);
-  --raised-lg: 6px 6px 14px rgba(0, 0, 0, 0.45), 18px 18px 40px rgba(0, 0, 0, 0.4),
-    -6px -6px 14px rgba(255, 255, 255, 0.045), -18px -18px 40px rgba(255, 255, 255, 0.028),
-    inset 0 1px 0 rgba(255, 255, 255, 0.055);
-  --pressed-sm: inset 1px 1px 3px rgba(0, 0, 0, 0.55), inset 3px 3px 9px rgba(0, 0, 0, 0.35),
-    inset -1px -1px 3px rgba(255, 255, 255, 0.05), inset -3px -3px 9px rgba(255, 255, 255, 0.02);
-  --inset: inset 2px 2px 5px rgba(0, 0, 0, 0.5), inset 5px 5px 12px rgba(0, 0, 0, 0.3),
-    inset -2px -2px 5px rgba(255, 255, 255, 0.05), inset -5px -5px 12px rgba(255, 255, 255, 0.02);
-  --hover-bg: rgba(143, 174, 118, 0.12);
-  --scroll-thumb: rgba(0, 0, 0, 0.45);
+  --sh-dark: rgba(0, 0, 0, 0.35);
+  --sh-light: rgba(255, 255, 255, 0.03);
+  --accent-glow: rgba(165, 182, 139, 0.15);
+  --raised-sm: 0 1px 2px rgba(0, 0, 0, 0.2), 0 2px 4px rgba(0, 0, 0, 0.2);
+  --raised: 0 2px 4px rgba(0, 0, 0, 0.25), 0 4px 8px rgba(0, 0, 0, 0.25);
+  --raised-lg: 0 4px 8px rgba(0, 0, 0, 0.3), 0 8px 16px rgba(0, 0, 0, 0.3);
+  --pressed-sm: inset 0 1px 2px rgba(0, 0, 0, 0.35);
+  --inset: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+  --hover-bg: rgba(165, 182, 139, 0.12);
+  --scroll-thumb: rgba(0, 0, 0, 0.4);
+  --tr: 300ms;
+  --ease: ease-in-out;
 }
 /* natural 装饰：右上暖阳光斑 + 左下湖蓝水汽，极缓慢漂移 */
 [data-style='natural'] .style-fx::before,
@@ -240,6 +229,36 @@ body.has-wallpaper .style-fx {
 }
 :root[data-theme='dark'][data-style='natural'] .style-fx::before { opacity: 0.4; }
 :root[data-theme='dark'][data-style='natural'] .style-fx::after { opacity: 0.3; }
+/* natural 组件：大圆角 32px（rounded-[2rem]）+ 轻阴影 + 柔和 hover 下沉 */
+[data-style='natural'] .card,
+[data-style='natural'] .admin-panel {
+  border-radius: 32px;
+}
+[data-style='natural'] .btn {
+  border-radius: 20px;
+}
+[data-style='natural'] .card .icon {
+  border-radius: 16px;
+}
+[data-style='natural'] .input,
+[data-style='natural'] .textarea,
+[data-style='natural'] .select {
+  border-radius: 16px;
+  border-color: rgba(92, 64, 51, 0.12);
+  background: rgba(255, 255, 255, 0.6);
+}
+[data-style='natural'] .btn:hover {
+  transform: translateY(1px);
+  box-shadow: var(--raised);
+  background: rgba(139, 157, 119, 0.08);
+}
+[data-style='natural'] .btn:active {
+  transform: translateY(1px);
+  box-shadow: var(--pressed-sm);
+}
+[data-style='natural'] .card:hover {
+  box-shadow: var(--raised);
+}
 @keyframes fx-drift-a {
   0%, 100% { transform: translate(0, 0); }
   50% { transform: translate(-4vw, 3vw); }
@@ -527,13 +546,13 @@ body.has-wallpaper .style-fx {
 [data-style='material'] .card,
 [data-style='material'] .glass,
 [data-style='material'] .btn {
-  border-radius: 14px;
+  border-radius: 16px;
 }
 [data-style='material'] .topbar {
   border-radius: 18px;
 }
 [data-style='material'] .card .icon {
-  border-radius: 10px;
+  border-radius: 12px;
 }
 
 /* ============================================================
@@ -758,6 +777,25 @@ body.has-wallpaper .style-fx {
   backdrop-filter: blur(16px) saturate(1.35);
   -webkit-backdrop-filter: blur(16px) saturate(1.35);
 }
+/* aurora 组件：Glassmorphism 无 hover 位移 + duration 500ms */
+[data-style='aurora'] .card,
+[data-style='aurora'] .admin-panel {
+  border-radius: 24px;
+  backdrop-filter: blur(16px) saturate(1.35);
+  -webkit-backdrop-filter: blur(16px) saturate(1.35);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+[data-style='aurora'] .btn {
+  border-radius: 18px;
+}
+[data-style='aurora'] .btn:hover {
+  transform: none;
+  box-shadow: var(--raised);
+}
+[data-style='aurora'] .card:hover {
+  transform: none;
+  box-shadow: var(--raised);
+}
 @keyframes fx-aurora-a {
   0%, 100% { transform: skewY(-7deg) translateX(-4%); opacity: 0.85; }
   50% { transform: skewY(-5deg) translateX(5%); opacity: 1; }
@@ -869,10 +907,10 @@ body.has-wallpaper .style-fx {
 /* scandi 组件：柔和圆角、纸感平面（克制，不追求浮雕厚度） */
 [data-style='scandi'] .card,
 [data-style='scandi'] .btn {
-  border-radius: 14px;
+  border-radius: 16px;
 }
 [data-style='scandi'] .card .icon {
-  border-radius: 10px;
+  border-radius: 12px;
 }
 @keyframes fx-scandi-a {
   0%, 100% { transform: translate(0, 0) rotate(0deg); }
@@ -890,70 +928,82 @@ body.has-wallpaper .style-fx {
    交互模拟物理按压——按下时外部投影塌陷、内部阴影加深（--pressed-sm）
    ============================================================ */
 :root[data-theme='light'][data-style='clay'] {
-  --bg-grad: linear-gradient(165deg, #f9edea 0%, #f5e5e4 45%, #f2e3ea 100%);
-  --surface: #f8ebe8;
-  --surface-2: #f3e1e1;
-  --text: #5c4744;
-  --text-muted: #7c6764;
-  --accent: #be7264;
-  --on-accent: #0c0d10;
-  --accent-soft: rgba(190, 114, 100, 0.16);
-  --accent-hover: #a76458;
-  --danger: #d96f5f;
-  --on-danger: #0c0d10;
-  --success: #7cb98a;
-  --on-success: #0c0d10;
-  --edge: rgba(255, 255, 255, 0.7);
-  --edge-weak: rgba(92, 71, 68, 0.08);
-  --overlay: rgba(90, 60, 55, 0.35);
-  --sh-dark: rgba(184, 124, 116, 0.42);
-  --sh-light: rgba(255, 255, 255, 0.92);
-  --accent-glow: rgba(190, 114, 100, 0.3);
-  --raised-sm: 0 2px 4px rgba(184, 124, 116, 0.32), 0 5px 10px rgba(196, 146, 140, 0.3),
-    inset 0 2px 0 rgba(255, 255, 255, 0.8), inset 0 -3px 6px rgba(184, 124, 116, 0.2);
-  --raised: 0 4px 8px rgba(184, 124, 116, 0.3), 0 12px 24px rgba(196, 146, 140, 0.32),
-    inset 0 2px 0 rgba(255, 255, 255, 0.85), inset 0 -4px 8px rgba(184, 124, 116, 0.2);
-  --raised-lg: 0 6px 12px rgba(184, 124, 116, 0.28), 0 20px 40px rgba(196, 146, 140, 0.34),
-    inset 0 2px 0 rgba(255, 255, 255, 0.9), inset 0 -5px 10px rgba(184, 124, 116, 0.18);
-  --pressed-sm: inset 0 3px 6px rgba(184, 124, 116, 0.4), inset 0 6px 12px rgba(196, 146, 140, 0.3),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.6);
-  --inset: inset 0 3px 6px rgba(184, 124, 116, 0.34), inset 0 8px 16px rgba(196, 146, 140, 0.26),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.55);
-  --hover-bg: rgba(238, 143, 125, 0.12);
-  --scroll-thumb: rgba(184, 124, 116, 0.55);
+  --bg-grad: linear-gradient(165deg, #fdf2f8 0%, #fce7f3 45%, #fbcfe8 100%);
+  --surface: #fdf2f8;
+  --surface-2: #fce7f3;
+  --text: #831843;
+  --text-muted: #9d174d;
+  --accent: #db2777;
+  --on-accent: #ffffff;
+  --accent-soft: rgba(219, 39, 119, 0.16);
+  --accent-hover: #be185d;
+  --danger: #dc2626;
+  --on-danger: #ffffff;
+  --success: #16a34a;
+  --on-success: #ffffff;
+  --edge: rgba(190, 24, 93, 0.08);
+  --edge-weak: rgba(190, 24, 93, 0.05);
+  --overlay: rgba(131, 24, 67, 0.35);
+  --sh-dark: rgba(190, 24, 93, 0.14);
+  --sh-light: rgba(255, 255, 255, 0.9);
+  --accent-glow: rgba(219, 39, 119, 0.22);
+  --raised-sm: 4px 4px 8px rgba(190, 24, 93, 0.12),
+    inset 2px 2px 4px rgba(255, 255, 255, 0.7),
+    inset -1px -1px 2px rgba(190, 24, 93, 0.08);
+  --raised: 8px 8px 16px rgba(190, 24, 93, 0.14),
+    inset 4px 4px 8px rgba(255, 255, 255, 0.6),
+    inset -2px -2px 4px rgba(190, 24, 93, 0.1);
+  --raised-lg: 12px 12px 24px rgba(190, 24, 93, 0.16),
+    inset 6px 6px 12px rgba(255, 255, 255, 0.65),
+    inset -3px -3px 6px rgba(190, 24, 93, 0.12);
+  --pressed-sm: 2px 2px 4px rgba(190, 24, 93, 0.1),
+    inset 4px 4px 8px rgba(190, 24, 93, 0.2),
+    inset -2px -2px 4px rgba(255, 255, 255, 0.8);
+  --inset: inset 4px 4px 8px rgba(190, 24, 93, 0.12),
+    inset -4px -4px 8px rgba(255, 255, 255, 0.9);
+  --hover-bg: rgba(219, 39, 119, 0.12);
+  --scroll-thumb: rgba(190, 24, 93, 0.4);
+  --tr: 200ms;
+  --ease: ease-out;
 }
 :root[data-theme='dark'][data-style='clay'] {
-  --bg-grad: linear-gradient(165deg, #2e2427 0%, #2a2125 45%, #261e22 100%);
-  --surface: #342930;
-  --surface-2: #3a2e36;
-  --text: #f0e2dd;
-  --text-muted: #a89390;
-  --accent: #f0a08c;
-  --on-accent: #0c0d10;
-  --accent-soft: rgba(240, 160, 140, 0.16);
-  --accent-hover: #f5b19f;
-  --danger: #e58272;
-  --on-danger: #0c0d10;
-  --success: #8fc79a;
-  --on-success: #0c0d10;
-  --edge: rgba(255, 255, 255, 0.07);
-  --edge-weak: rgba(255, 255, 255, 0.06);
+  --bg-grad: linear-gradient(165deg, #2b1f26 0%, #241a21 45%, #1f151a 100%);
+  --surface: #2b1f26;
+  --surface-2: #35252e;
+  --text: #fce7f3;
+  --text-muted: #f9a8d4;
+  --accent: #f472b6;
+  --on-accent: #1f151a;
+  --accent-soft: rgba(244, 114, 182, 0.18);
+  --accent-hover: #f9a8d4;
+  --danger: #ef4444;
+  --on-danger: #ffffff;
+  --success: #22c55e;
+  --on-success: #ffffff;
+  --edge: rgba(255, 255, 255, 0.08);
+  --edge-weak: rgba(244, 114, 182, 0.1);
   --overlay: rgba(0, 0, 0, 0.55);
-  --sh-dark: rgba(0, 0, 0, 0.5);
-  --sh-light: rgba(255, 190, 170, 0.05);
-  --accent-glow: rgba(240, 160, 140, 0.26);
-  --raised-sm: 0 2px 4px rgba(0, 0, 0, 0.4), 0 5px 10px rgba(0, 0, 0, 0.32),
-    inset 0 2px 0 rgba(255, 255, 255, 0.07), inset 0 -3px 6px rgba(0, 0, 0, 0.35);
-  --raised: 0 4px 8px rgba(0, 0, 0, 0.4), 0 12px 24px rgba(0, 0, 0, 0.36),
-    inset 0 2px 0 rgba(255, 255, 255, 0.075), inset 0 -4px 8px rgba(0, 0, 0, 0.35);
-  --raised-lg: 0 6px 12px rgba(0, 0, 0, 0.4), 0 20px 40px rgba(0, 0, 0, 0.4),
-    inset 0 2px 0 rgba(255, 255, 255, 0.08), inset 0 -5px 10px rgba(0, 0, 0, 0.32);
-  --pressed-sm: inset 0 3px 6px rgba(0, 0, 0, 0.5), inset 0 6px 12px rgba(0, 0, 0, 0.4),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.05);
-  --inset: inset 0 3px 6px rgba(0, 0, 0, 0.45), inset 0 8px 16px rgba(0, 0, 0, 0.35),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.04);
-  --hover-bg: rgba(240, 160, 140, 0.12);
+  --sh-dark: rgba(0, 0, 0, 0.45);
+  --sh-light: rgba(255, 200, 220, 0.06);
+  --accent-glow: rgba(244, 114, 182, 0.25);
+  --raised-sm: 4px 4px 8px rgba(0, 0, 0, 0.4),
+    inset 2px 2px 4px rgba(255, 200, 220, 0.12),
+    inset -1px -1px 2px rgba(0, 0, 0, 0.35);
+  --raised: 8px 8px 16px rgba(0, 0, 0, 0.45),
+    inset 4px 4px 8px rgba(255, 200, 220, 0.1),
+    inset -2px -2px 4px rgba(0, 0, 0, 0.4);
+  --raised-lg: 12px 12px 24px rgba(0, 0, 0, 0.5),
+    inset 6px 6px 12px rgba(255, 200, 220, 0.12),
+    inset -3px -3px 6px rgba(0, 0, 0, 0.45);
+  --pressed-sm: 2px 2px 4px rgba(0, 0, 0, 0.35),
+    inset 4px 4px 8px rgba(0, 0, 0, 0.5),
+    inset -2px -2px 4px rgba(255, 200, 220, 0.08);
+  --inset: inset 4px 4px 8px rgba(0, 0, 0, 0.4),
+    inset -4px -4px 8px rgba(255, 200, 220, 0.1);
+  --hover-bg: rgba(244, 114, 182, 0.12);
   --scroll-thumb: rgba(0, 0, 0, 0.45);
+  --tr: 200ms;
+  --ease: ease-out;
 }
 /* clay 装饰：两颗柔焦黏土球，缓慢漂浮（像捏好的橡皮泥球散落在桌面上） */
 [data-style='clay'] .style-fx::before,
@@ -984,18 +1034,36 @@ body.has-wallpaper .style-fx {
 }
 :root[data-theme='dark'][data-style='clay'] .style-fx::before { opacity: 0.3; }
 :root[data-theme='dark'][data-style='clay'] .style-fx::after { opacity: 0.26; }
-/* clay 组件：极致圆润的大圆角，凸显「捏出来」的软胖体量 */
+/* clay 组件：32px 大圆角 + 按钮胶囊形 + hover 下沉模拟软泥按压 */
 [data-style='clay'] .card,
 [data-style='clay'] .admin-panel {
-  border-radius: 28px;
+  border-radius: 32px;
+}
+[data-style='clay'] .btn {
+  border-radius: 999px;
 }
 [data-style='clay'] .card .icon {
-  border-radius: 19px;
+  border-radius: 22px;
 }
 [data-style='clay'] .input,
 [data-style='clay'] .textarea,
 [data-style='clay'] .select {
   border-radius: 16px;
+}
+/* Claymorphism 交互：hover 下沉（translateY）模拟软泥被按下，active 更深凹陷 */
+[data-style='clay'] .btn:hover {
+  transform: translateY(2px);
+  box-shadow: var(--raised);
+}
+[data-style='clay'] .btn:active {
+  transform: translateY(2px);
+  box-shadow: var(--pressed-sm);
+}
+[data-style='clay'] .card {
+  transition: box-shadow 200ms ease-out;
+}
+[data-style='clay'] .card:hover {
+  box-shadow: var(--raised-lg);
 }
 @keyframes fx-clay-a {
   0%, 100% { transform: translate(0, 0) scale(1); }

@@ -1,5 +1,5 @@
 # ===== Stage 1: Go builder =====
-FROM golang:1.21-alpine AS builder
+FROM golang:1.26-alpine AS builder
 
 # 纯 Go SQLite 驱动不需要 CGO，跨架构零依赖
 ENV CGO_ENABLED=0
@@ -21,7 +21,7 @@ COPY . .
 RUN go build -ldflags="-s -w" -o /solarpanel .
 
 # ===== Stage 2: 最小运行时 =====
-FROM alpine:3.19
+FROM alpine:3.22
 
 # 证书 + 时区（天气/新闻 API 需要）
 RUN apk add --no-cache ca-certificates tzdata \

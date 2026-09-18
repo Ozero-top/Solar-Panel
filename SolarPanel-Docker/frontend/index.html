@@ -7,13 +7,13 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="mobile-web-app-capable" content="yes">
-  <link rel="icon" href="favicon.ico?v=20260915" type="image/x-icon">
+  <link rel="icon" href="favicon.ico?v=20260917c" type="image/x-icon">
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="assets/img/icon.svg">
   <title>SolarPanel</title>
-  <link rel="stylesheet" href="assets/css/common.css?v=20270114">
-  <link rel="stylesheet" href="assets/css/index.css?v=20270114">
-  <link rel="stylesheet" href="assets/css/themes.css?v=20270114">
+  <link rel="stylesheet" href="assets/css/common.css?v=20260917c">
+  <link rel="stylesheet" href="assets/css/index.css?v=20260917c">
+  <link rel="stylesheet" href="assets/css/themes.css?v=20260917c">
 </head>
 <body>
   <div class="bg-layer" id="bgLayer"></div>
@@ -36,6 +36,7 @@
         <button class="icon-btn" id="pwaInstallBtn" hidden title="安装为应用" aria-label="安装为应用">📥</button>
         <button class="icon-btn" id="shortcutsBtn" title="键盘快捷键（?）" aria-label="键盘快捷键">⌨️</button>
         <button class="icon-btn" id="themeBtn" title="切换主题">🌙</button>
+        <button class="icon-btn" id="lanBtn" title="外网/内网切换" aria-label="外网内网切换">外网</button>
       </div>
     </header>
 
@@ -90,20 +91,10 @@
       <button class="vs-btn" id="vsNews" type="button">📰 热点新闻</button>
     </nav>
 
-    <!-- 卡片筛选栏（导航视图下，按标题/地址/描述实时过滤） -->
-    <section class="card-filter glass" id="cardFilter" hidden>
-      <input id="cardFilterInput" type="text" placeholder="筛选卡片（按标题 / 地址 / 描述）…" autocomplete="off">
-      <button class="cf-clear" id="cardFilterClear" type="button" hidden>✕</button>
-    </section>
-
-    <!-- 最近常用（frecency 排序，上限 12 条） -->
-    <section class="recent-section" id="recentSection" hidden>
-      <div class="recent-head">
-        <span class="recent-title">🕒 最近常用</span>
-        <button class="recent-clear" id="recentClear" type="button">清空</button>
-      </div>
-      <div class="recent-chips" id="recentChips"></div>
-    </section>
+    <!-- 导航栏模式：搜索栏下横向分组标签栏（card_style=nav 时显示） -->
+    <nav class="navbar-tabs" id="navbarTabs" hidden aria-label="分组标签"></nav>
+    <!-- 移动端下拉框替代横向标签栏 -->
+    <select class="navbar-select" id="navbarSelect" hidden aria-label="选择分组"></select>
 
     <!-- 分组与卡片（全部由后端数据渲染） -->
     <main id="groupsWrap"></main>
@@ -142,7 +133,6 @@
       </div>
       <div class="shortcuts-list">
         <div class="sc-row"><kbd>/</kbd> 或 <kbd>Ctrl</kbd>+<kbd>K</kbd><span>聚焦搜索框</span></div>
-        <div class="sc-row"><kbd>f</kbd><span>聚焦卡片筛选</span></div>
         <div class="sc-row"><kbd>t</kbd><span>切换深浅主题</span></div>
         <div class="sc-row"><kbd>n</kbd><span>切到热点新闻视图</span></div>
         <div class="sc-row"><kbd>b</kbd> / <kbd>h</kbd><span>切到导航站视图</span></div>
@@ -199,7 +189,7 @@
     <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>
   </button>
 
-  <script src="assets/js/api.js?v=20270114"></script>
-  <script src="assets/js/index.js?v=20270114"></script>
+  <script src="assets/js/api.js?v=20260917c"></script>
+  <script src="assets/js/index.js?v=20260917c"></script>
 </body>
 </html>

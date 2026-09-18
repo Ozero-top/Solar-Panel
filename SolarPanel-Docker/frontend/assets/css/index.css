@@ -110,8 +110,8 @@
   transform: translateY(-2px);
   box-shadow: var(--raised);
 }
-/* 主题三态按钮：带文字（如 🌙 深色），自适应宽度，与图标按钮同高对齐 */
-#themeBtn {
+/* 主题三态按钮 + 内外网切换：带文字（如 🌙 深色 / 外网），自适应宽度 */
+#themeBtn, #lanBtn {
   width: auto;
   padding: 0 14px;
   gap: 6px;
@@ -123,6 +123,124 @@
 .icon-btn:active {
   transform: translateY(0);
   box-shadow: var(--pressed-sm);
+}
+
+/* ================= 导航栏模式：横向分组标签栏 ================= */
+.navbar-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  width: 100%;
+  max-width: 100%;
+  margin: 16px auto 12px;
+  padding: 0;
+  border-radius: 0;
+  justify-content: center;
+  overflow: visible;
+}
+.navbar-tabs[hidden] { display: none; }
+
+.ntab-btn {
+  flex: 0 0 auto;
+  border: 1px solid var(--edge-weak);
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-size: 13.5px;
+  font-weight: 600;
+  font-family: inherit;
+  padding: 7px 18px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  box-shadow: var(--raised-sm);
+}
+.ntab-btn:hover {
+  color: var(--text);
+  background: var(--surface);
+  box-shadow: var(--raised);
+}
+.ntab-btn.active {
+  background: var(--accent);
+  color: var(--on-accent);
+  border-color: transparent;
+  box-shadow: var(--raised-sm);
+}
+.ntab-btn.ntab-hidden:not(.active) { opacity: 0.6; }
+
+/* 移动端下拉框替代横向标签栏 */
+.navbar-select {
+  display: none;
+  width: 100%;
+  max-width: 320px;
+  margin: 16px auto 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--edge);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+}
+.navbar-select:hover { border-color: var(--accent); }
+.navbar-select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-weak, rgba(0,0,0,0.08));
+}
+.navbar-select[hidden] { display: none; }
+
+@media (max-width: 640px) {
+  .navbar-tabs { display: none; }
+  .navbar-tabs[hidden] { display: none; }
+  .navbar-select { display: block; }
+  .ntab-btn {
+    font-size: 12.5px;
+    padding: 5px 14px;
+  }
+}
+
+/* ================= 右键卡片菜单 ================= */
+.card-context-menu {
+  min-width: 180px;
+  padding: 6px;
+  border-radius: 12px;
+  box-shadow: var(--raised-lg);
+  border: 1px solid var(--edge);
+  animation: ccmIn 0.12s ease-out;
+}
+@keyframes ccmIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+.ccm-item {
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.ccm-item:hover {
+  background: var(--hover-bg);
+  color: var(--accent);
+}
+.ccm-item.danger:hover {
+  color: #dc3545;
+}
+.ccm-sep {
+  height: 1px;
+  background: var(--edge-weak);
+  margin: 4px 6px;
 }
 
 /* ---------- 时钟 + 天气（横向并排，浮雕文字 + 玻璃胶囊） ---------- */
@@ -571,31 +689,10 @@
   text-decoration: none !important;
   cursor: pointer;
   position: relative;
-  overflow: visible !important;   /* 允许 × 删除按钮溢出 */
+  overflow: visible !important;
   box-shadow: var(--raised-sm);
   transition: box-shadow var(--tr) var(--ease), transform var(--tr) var(--ease);
 }
-/* × 删除按钮（仅 editor+admin 显示；hover 时显现，排序态常驻） */
-.card-del {
-  position: absolute;
-  top: -10px; right: -10px;
-  width: 22px; height: 22px;
-  border-radius: 50%;
-  background: var(--danger, #e74c3c);
-  color: #fff;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 14px; font-weight: 700; line-height: 1;
-  cursor: pointer;
-  opacity: 0;
-  transform: scale(0.7);
-  transition: opacity 0.2s, transform 0.2s;
-  pointer-events: auto;
-  z-index: 2;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-}
-.card:hover .card-del,
-.group.sorting .card .card-del { opacity: 1; transform: scale(1); }
-
 /* + 快速添加按钮 —— 放在 .group-sort 容器内 flex 排列 */
 .group-add-btn {
   display: inline-flex;
@@ -1508,77 +1605,6 @@
   font-size: 13px;
   padding: 20px 8px;
 }
-
-/* ============ P1: 卡片筛选栏 ============ */
-/* 卡片筛选栏：居中 540px，与参考站 nav.ozero.top 一致 */
-.card-filter {
-  max-width: 540px;
-  margin: 10px auto 14px;
-  padding: 8px 14px;
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-.card-filter[hidden] { display: none !important; }
-.card-filter input {
-  flex: 1;
-  border: none;
-  background: transparent;
-  color: var(--text);
-  font-size: 14px;
-  padding: 6px 0;
-  outline: none;
-}
-.card-filter input::placeholder { color: var(--text-muted); }
-.cf-clear {
-  border: none;
-  background: transparent;
-  color: var(--text-muted);
-  cursor: pointer;
-  font-size: 16px;
-  padding: 0 4px;
-}
-.cf-clear:hover { color: var(--text); }
-.card.match-hit { box-shadow: 0 0 0 2px var(--accent); }
-
-/* ============ P2: 最近常用 ============ */
-.recent-section {
-  margin-top: 12px;
-  padding: 10px 14px;
-  background: rgba(255,255,255,0.04);
-  border-radius: 12px;
-  border: 1px solid rgba(255,255,255,0.06);
-}
-.recent-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 6px;
-}
-.recent-title { font-size: 13px; color: var(--text-muted); }
-.recent-clear {
-  border: none;
-  background: transparent;
-  color: var(--text-muted);
-  cursor: pointer;
-  font-size: 12px;
-}
-.recent-clear:hover { color: var(--danger); }
-.recent-chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.recent-chips .chip {
-  padding: 4px 10px;
-  background: rgba(255,255,255,0.08);
-  border-radius: 14px;
-  color: var(--text);
-  text-decoration: none;
-  font-size: 12.5px;
-  max-width: 200px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  transition: background 0.15s;
-}
-.recent-chips .chip:hover { background: var(--accent); color: var(--on-accent, #fff); }
 
 /* ============ P0: 访客锁屏 ============ */
 .guest-lock {
