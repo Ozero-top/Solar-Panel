@@ -4,7 +4,9 @@
 
 <h1 align=center>SolarPanel - 柔软而精致的个人导航面板</h1>
 
-[SolarPanel 演示站](https://test.ozero.top) ｜ [DockerHub 镜像](https://hub.docker.com/r/ovitor/solarpanel) ｜ [📱 SolarPanel安卓客户端](https://github.com/qiancheng817/Solarpanel)：部署在 NAS / VPS 上的 SolarPanel 面板，变手机上的独立 App
+[SolarPanel 演示站](https://test.ozero.top) ｜ [DockerHub 镜像](https://hub.docker.com/r/ovitor/solarpanel) 
+
+[📱 SolarPanel安卓客户端](https://github.com/qiancheng817/Solarpanel)：部署在 NAS / VPS 上的 SolarPanel 面板，在手机的独立 App
 
 > 一款可自托管的个人导航 / 主站页面板。前端与后端完全分离，主页显示的**一切内容均由后台设置**——站点标题、Logo、壁纸、公告、时钟、天气、搜索引擎、分组与卡片，全部无需改动一行代码即可配置。
 
