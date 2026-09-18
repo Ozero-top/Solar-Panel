@@ -93,6 +93,8 @@ function sp_upgrade_path_allowed(string $rel): bool
         'frontend/favicon.ico',
         'frontend/.htaccess',
         'frontend/offline.html',       // v2.0.04+ PWA 离线兜底
+        'frontend/manifest.json',      // PWA manifest（frontend/ 子目录）
+        'frontend/sw.js',              // PWA Service Worker（frontend/ 子目录）
         'frontend/uploads/index.html',
         'frontend/uploads/weather/',  // 程序预置默认天气背景图（build_upgrade.php 同步放行）
         'sql/',                        // 数据库初始化脚本（build_upgrade.php 同步放行）

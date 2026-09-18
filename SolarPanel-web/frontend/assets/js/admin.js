@@ -69,6 +69,7 @@ const ROLE_LABEL = { admin: '管理员', editor: '编辑者', viewer: '只读' }
   bindVersionCheck();   // 🔍 在线检测更新 + 一键下载升级
   applyRoleUI();
 
+  // —— 2MD: 新增 5 个功能模块 ——
   bindAudit();          // 审计日志（仅 admin）
   bindFeeds();          // 自定义 RSS 源
   bindImportBookmarks();// 书签导入
@@ -954,7 +955,8 @@ function fillSettingsForm(s) {
   document.getElementById('v_wallpaper_blur').textContent = String(blurVal);
   document.getElementById('s_announcement').value = s.announcement || '';
   document.getElementById('s_announcement_show').value = s.announcement_show === '1' ? '1' : '0';
-  document.getElementById('s_default_lan_mode').value = s.default_lan_mode === 'lan' ? 'lan' : 'public';
+  document.getElementById('s_default_lan_mode').value = s.default_lan_mode === 'lan' ? 'lan' : (s.default_lan_mode === 'auto' ? 'auto' : 'public');
+  document.getElementById('s_lan_hostnames').value = s.lan_hostnames || '';
   document.getElementById('s_site_url').value = s.site_url || '';
   document.getElementById('s_footer').value = s.footer || '';
   document.getElementById('s_clock_show').value = s.clock_show === '0' ? '0' : '1';
@@ -966,9 +968,8 @@ function fillSettingsForm(s) {
   document.getElementById('s_theme_style').value = SP_STYLES.includes(s.theme_style) ? s.theme_style : 'soft';
   document.getElementById('s_default_theme_note').textContent =
     s.default_theme === 'system' ? '跟随系统：访客未手动切换主题时，随其系统深浅自动变化' : '';
-  document.getElementById('s_card_style').value = s.card_style === 'app' ? 'app' : 'detail';
+  document.getElementById('s_card_style').value = ['app', 'nav'].includes(s.card_style) ? s.card_style : 'detail';
   document.getElementById('s_search_bar_enabled').value = s.search_bar_enabled === '0' ? '0' : '1';
-  document.getElementById('s_card_filter_enabled').value = s.card_filter_enabled === '0' ? '0' : '1';
 
   // 内容区域滑条
   document.getElementById('s_content_maxwidth').value = s.content_maxwidth || '1200';
@@ -994,6 +995,7 @@ function fillSettingsForm(s) {
   updateSettingPreview('s_wallpaper');
   syncGalleryActive(s.wallpaper || '');
 
+  // —— 2MD: 访客密码开关 / 每日壁纸源 回填 ——
   const gaEl = document.getElementById('s_guest_access_enabled');
   if (gaEl) gaEl.value = s.guest_access_enabled === '1' ? '1' : '0';
   const wsEl = document.getElementById('s_wallpaper_source');
@@ -1371,8 +1373,8 @@ function refreshEngineDefaults() {
 /* 分区定义：每个分区独立保存，只提交自己的设置项（后端白名单兼容部分提交）
    原「Logo 与壁纸」分区已并入「外观布局」；原「时钟与天气」分区已并入「基础信息」 */
 const SETTING_SECTIONS = {
-  basic:    { label: '基础信息', keys: ['site_title', 'site_url', 'footer', 'default_lan_mode', 'home_view', 'announcement_show', 'announcement', 'clock_show', 'weather_show', 'weather_city', 'icp_show', 'icp_number', 'icp_link', 'police_show', 'police_number', 'police_link', 'guest_access_enabled', 'guest_password_hash'] },
-  theme:    { label: '外观布局', keys: ['default_theme', 'theme_style', 'content_maxwidth', 'content_pad_lr', 'content_pad_top', 'content_pad_bottom', 'card_style', 'search_bar_enabled', 'card_filter_enabled', 'site_logo', 'wallpaper', 'mask_opacity', 'wallpaper_blur', 'wallpaper_source'] },
+  basic:    { label: '基础信息', keys: ['site_title', 'site_url', 'footer', 'default_lan_mode', 'lan_hostnames', 'home_view', 'announcement_show', 'announcement', 'clock_show', 'weather_show', 'weather_city', 'icp_show', 'icp_number', 'icp_link', 'police_show', 'police_number', 'police_link', 'guest_access_enabled', 'guest_password_hash'] },
+  theme:    { label: '外观布局', keys: ['default_theme', 'theme_style', 'content_maxwidth', 'content_pad_lr', 'content_pad_top', 'content_pad_bottom', 'card_style', 'search_bar_enabled', 'site_logo', 'wallpaper', 'mask_opacity', 'wallpaper_blur', 'wallpaper_source'] },
   search:   { label: '搜索引擎', keys: ['search_engines', 'search_default', 'search_width'] },
   news:     { label: '热点新闻', keys: ['news_sources', 'news_order'] },
 };

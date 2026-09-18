@@ -44,7 +44,7 @@ if ($action === 'save') {
             if ($value !== '' && !preg_match('/^(0(\.\d+)?|1(\.0+)?)$/', $value)) fail('遮罩透明度需为 0~1 的数字');
         }
         if ($key === 'announcement_show' && !in_array($value, ['0', '1'], true)) $value = '0';
-        if ($key === 'default_lan_mode' && !in_array($value, ['public', 'lan'], true)) $value = 'public';
+        if ($key === 'default_lan_mode' && !in_array($value, ['public', 'lan', 'auto'], true)) $value = 'auto';
         if ($key === 'site_url' && $value !== '') {
             if (!preg_match('#^https?://#i', $value)) fail('站点地址需以 http:// 或 https:// 开头');
             if (mb_strlen($value) > 500) fail('站点地址过长');
@@ -68,10 +68,9 @@ if ($action === 'save') {
         }
         if ($key === 'clock_show' && !in_array($value, ['0', '1'], true)) $value = '1';
         if ($key === 'search_bar_enabled' && !in_array($value, ['0', '1'], true)) $value = '1';
-        if ($key === 'card_filter_enabled' && !in_array($value, ['0', '1'], true)) $value = '1';
         if ($key === 'default_theme' && !in_array($value, ['light', 'dark', 'system'], true)) $value = 'dark';
         if ($key === 'theme_style' && !in_array($value, ['soft', 'nature', 'natural', 'holo', 'gradient', 'material', 'fabric', 'aurora', 'scandi', 'clay', 'spotlight', 'neumorphism', 'skeuomorphism', 'immersive-photo', 'ghibli', 'fluent', 'warm-dashboard', 'blueprint'], true)) $value = 'soft';
-        if ($key === 'card_style' && !in_array($value, ['detail', 'app'], true)) $value = 'detail';
+        if ($key === 'card_style' && !in_array($value, ['detail', 'app', 'nav'], true)) $value = 'detail';
         if ($key === 'search_engines' && $value !== '') {
             $engines = json_decode($value, true);
             if (!is_array($engines)) fail('搜索引擎数据格式错误');

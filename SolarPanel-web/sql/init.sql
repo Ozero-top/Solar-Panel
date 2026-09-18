@@ -125,7 +125,8 @@ INSERT INTO `settings` (`config_name`, `config_value`) VALUES
   ('default_theme', 'dark'),
   ('theme_style', 'soft'),
   ('card_style', 'detail'),
-  ('default_lan_mode', 'public'),
+  ('default_lan_mode', 'auto'),
+  ('lan_hostnames', ''),
   ('site_url', ''),
   ('content_maxwidth', '1200'),
   ('content_pad_lr', '20'),
@@ -148,8 +149,7 @@ INSERT INTO `settings` (`config_name`, `config_value`) VALUES
   ('wallpaper_source', ''),
   ('guest_access_enabled', '0'),
   ('guest_password_hash', ''),
-  ('search_bar_enabled', '1'),
-  ('card_filter_enabled', '1')
+  ('search_bar_enabled', '1')
 ON DUPLICATE KEY UPDATE `config_value` = VALUES(`config_value`);
 
 -- 示例分组与卡片（与安装向导一致；@gid 兼容非空库导入时自增 ID 不为 1 的情况）

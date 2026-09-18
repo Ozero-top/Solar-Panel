@@ -11,7 +11,7 @@ function sp_allowed_settings(): array
         'site_title', 'site_logo', 'wallpaper', 'mask_opacity', 'wallpaper_blur',
         'announcement', 'announcement_show', 'footer',
         'clock_show', 'default_theme', 'theme_style', 'card_style',
-        'default_lan_mode', 'search_engines', 'search_default',
+        'default_lan_mode', 'lan_hostnames', 'search_engines', 'search_default',
         'site_url',
         'content_maxwidth', 'content_pad_lr', 'content_pad_top', 'content_pad_bottom',
         'weather_show', 'weather_city',
@@ -20,7 +20,7 @@ function sp_allowed_settings(): array
         'icp_show', 'icp_number', 'icp_link',
         'police_show', 'police_number', 'police_link',
         'wallpaper_source', 'guest_access_enabled', 'guest_password_hash',
-        'search_bar_enabled', 'card_filter_enabled',
+        'search_bar_enabled',
     ];
 }
 

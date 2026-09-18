@@ -4,10 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>管理后台 - SolarPanel</title>
-  <link rel="icon" href="favicon.ico?v=20260915" type="image/x-icon">
-  <link rel="stylesheet" href="assets/css/common.css?v=20270114">
-  <link rel="stylesheet" href="assets/css/auth-admin.css?v=20270114">
-  <link rel="stylesheet" href="assets/css/themes.css?v=20270114">
+  <link rel="icon" href="favicon.ico?v=20260917c" type="image/x-icon">
+  <link rel="stylesheet" href="assets/css/common.css?v=20260917c">
+  <link rel="stylesheet" href="assets/css/auth-admin.css?v=20260917c">
+  <link rel="stylesheet" href="assets/css/themes.css?v=20260917c">
 </head>
 <body>
   <div class="style-fx" aria-hidden="true"></div>
@@ -118,12 +118,25 @@
               <label>页脚文字</label>
               <input class="input" id="s_footer" type="text" maxlength="100">
             </div>
-            <div class="form-item">
-              <label>默认地址模式（原「外网/内网」切换按钮已移至此处）</label>
-              <select class="select" id="s_default_lan_mode">
-                <option value="public">外网地址模式</option>
-                <option value="lan">内网地址模式</option>
-              </select>
+          </div>
+          <div class="form-item">
+            <label>卡片打开地址模式</label>
+            <select class="select" id="s_default_lan_mode">
+              <option value="public">外网地址模式（始终打开卡片公网域名）</option>
+              <option value="lan">内网地址模式（始终打开卡片内网 IP）</option>
+              <option value="auto">🌐 自动识别（按当前访问网络自动切换）</option>
+            </select>
+            <div class="form-hint">
+              每张卡片可单独填「内网地址」（编辑卡片 → 内网地址）。此设置决定点卡片时打开哪一个。
+            </div>
+          </div>
+          <div class="form-item">
+            <label>自动识别补充域名（Split DNS 场景）</label>
+            <input type="text" class="input" id="s_lan_hostnames" placeholder="如 home.local, nas, 192.168.1.10">
+            <div class="form-hint">
+              仅 auto 模式生效。填写你在内网访问面板时用的域名或 IP，多个用英文逗号分隔。<br>
+              支持<strong>精确匹配</strong>（如 <code>test.yourdomain.com</code>）和<strong>后缀通配</strong>（如 <code>.yourdomain.com</code> 匹配所有子域名）。<br>
+              内置已识别 <code>localhost</code>、<code>.local/.lan/.home</code>、私网 IP 段（<code>10.x.x.x</code>、<code>192.168.x.x</code>、<code>172.16-31.x.x</code>），这些不用填。
             </div>
           </div>
 
@@ -274,19 +287,13 @@
               <select class="select" id="s_card_style">
                 <option value="detail">详细（图标+标题+描述）</option>
                 <option value="app">应用（小图标+标题）</option>
+                <option value="nav">导航栏（分组标签切换）</option>
               </select>
             </div>
             <div class="form-item">
               <label>搜索引擎搜索栏</label>
               <select class="select" id="s_search_bar_enabled">
                 <option value="1">显示（主页顶部）</option>
-                <option value="0">隐藏</option>
-              </select>
-            </div>
-            <div class="form-item">
-              <label>卡片筛选搜索栏（导航视图下）</label>
-              <select class="select" id="s_card_filter_enabled">
-                <option value="1">显示</option>
                 <option value="0">隐藏</option>
               </select>
             </div>
@@ -858,7 +865,7 @@
   </div>
 
   <script src="assets/js/qrcode.min.js"></script>
-  <script src="assets/js/api.js?v=20270114"></script>
-  <script src="assets/js/admin.js?v=20270114"></script>
+  <script src="assets/js/api.js?v=20260917c"></script>
+  <script src="assets/js/admin.js?v=20260917c"></script>
 </body>
 </html>
