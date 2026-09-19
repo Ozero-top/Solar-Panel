@@ -159,8 +159,9 @@ if ($action === 'apply') {
                 }
             }
         }
-        // 清 OPcache 避免旧缓存干扰
+        // 清 OPcache + 版本检查缓存，避免升级后还显示旧 latest
         if (function_exists('opcache_reset')) @opcache_reset();
+        @unlink(__DIR__ . '/updates_cache.json');
 
         json_out(2, [
             'failed'  => $failed,
@@ -169,8 +170,9 @@ if ($action === 'apply') {
         ], '部分文件升级失败，已自动回滚到原版本，站点未受影响。');
     }
 
-    // 全成功
+    // 全成功：清 OPcache + 更新检测缓存
     if (function_exists('opcache_reset')) @opcache_reset();
+    @unlink(__DIR__ . '/updates_cache.json');
     $newVer = sp_upgrade_version_from_apijs($root);
     ok([
         'updated' => $updated,

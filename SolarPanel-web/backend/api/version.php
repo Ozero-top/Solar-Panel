@@ -14,10 +14,11 @@ require_roles('admin');
 
 $action = str_param('action');
 if ($action === 'check') {
-    // 读更新源 versions.json（带 1h 服务端缓存）
+    // 读更新源 versions.json（带 1h 服务端缓存；手动检查 nocache=1 跳过）
     $cacheTtl = 3600;
     $cacheKey = __DIR__ . '/../updates_cache.json';
-    $cacheOk = is_file($cacheKey) && (time() - @filemtime($cacheKey)) < $cacheTtl;
+    $forceFresh = (str_param('nocache') === '1');
+    $cacheOk = !$forceFresh && is_file($cacheKey) && (time() - @filemtime($cacheKey)) < $cacheTtl;
     $raw = $cacheOk ? @file_get_contents($cacheKey) : false;
 
     if (!$raw) {

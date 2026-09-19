@@ -3,8 +3,28 @@
  */
 
 /* ================= 应用版本与更新日志（每次更新只需改这里） ================= */
-const APP_VERSION = 'v2.1.07';
+const APP_VERSION = 'v2.1.13';
 const APP_CHANGELOG = [
+  { ver: 'v2.1.13', date: '2026-09-19', items: [
+    '🖐 Neumorphism 新拟物派主题精确对齐 StyleKit showcase：阴影四档尺寸 1:1、Dark 模式表面色/阴影色重做、accent/danger/success 换 StyleKit 标准色',
+  ]},
+  { ver: 'v2.1.12', date: '2026-09-19', items: [
+    '🎨 Soft 柔和浮雕主题全面优化：阴影带彩色 tint、Halo Focus ring+glow、Cloud Float 悬浮光晕、Pillow Press 软按压、新增 soft style-fx 装饰层',
+  ]},
+  { ver: 'v2.1.11', date: '2026-09-19', items: [
+    '🔍 自动获取站点信息：抓取完整 URL（含 path/query）、标题/描述链扩展到 twitter:meta、图标候选加 og:image/twitter:image',
+  ]},
+  { ver: 'v2.1.10', date: '2026-09-19', items: [
+    '🖱️ 快速添加卡片：图标自动获取三态分支、删除后强制刷新无缓存',
+    '🐳 Docker Go 版 public 端点补 Cache-Control: no-store',
+  ]},
+  { ver: 'v2.1.09', date: '2026-09-19', items: [
+    '🖱️ 快速添加卡片弹窗：分组选中修复、获取站点图标按钮、布局对齐后台',
+    '🧹 在线更新检测：手动检查跳过缓存、升级后自动清缓存',
+  ]},
+  { ver: 'v2.1.08', date: '2026-09-18', items: [
+    '🖼️ 快速添加卡片弹窗支持上传图标',
+  ]},
   { ver: 'v2.1.07', date: '2026-09-17', items: [
     '🎨 优化 7 套风格主题视觉表现',
     '📝 更新日志简洁化',

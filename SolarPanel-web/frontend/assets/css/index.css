@@ -794,12 +794,13 @@
   letter-spacing: -0.3px !important;
 }
 
+/* Cloud Float: hover 上浮 + 阴影扩散带彩色光晕，Pillow Press: active 按入枕面 */
 .card:hover {
   transform: translateY(-3px);
-  box-shadow: var(--raised);
+  box-shadow: var(--raised-lg), 0 0 18px var(--accent-glow);
 }
 .card:active {
-  transform: translateY(0);
+  transform: translateY(0) scale(0.98);
   box-shadow: var(--pressed-sm);
 }
 .card .icon {

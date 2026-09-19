@@ -18,6 +18,60 @@ body.has-wallpaper .style-fx {
 }
 
 /* ============================================================
+   0) soft 柔和浮雕（默认基线）—— indigo 柔光斑 · 呼吸起伏 · 友好氛围
+   其余 15 风格均覆盖变量 + style-fx；soft 为默认无 data-style 属性
+   ============================================================ */
+:root:not([data-style]) .style-fx::before,
+:root:not([data-style]) .style-fx::after,
+:root[data-style='soft'] .style-fx::before,
+:root[data-style='soft'] .style-fx::after {
+  content: '';
+  position: absolute;
+  filter: blur(72px);
+  border-radius: 50%;
+  animation: fx-soft-a 32s ease-in-out infinite;
+}
+:root:not([data-style]) .style-fx::before,
+:root[data-style='soft'] .style-fx::before {
+  width: 48vw;
+  height: 48vw;
+  left: -14vw;
+  top: -16vw;
+  background: radial-gradient(circle at 42% 42%, rgba(92, 124, 250, 0.38), transparent 65%);
+  opacity: 0.55;
+}
+:root:not([data-style]) .style-fx::after,
+:root[data-style='soft'] .style-fx::after {
+  width: 44vw;
+  height: 44vw;
+  right: -12vw;
+  bottom: -16vw;
+  background: radial-gradient(circle at 55% 45%, rgba(139, 92, 246, 0.3), transparent 62%);
+  border-radius: 55% 45% 42% 58% / 50% 55% 45% 50%;
+  animation: fx-soft-b 36s ease-in-out infinite;
+  opacity: 0.45;
+}
+:root[data-theme='dark']:not([data-style]) .style-fx::before,
+:root[data-theme='dark'][data-style='soft'] .style-fx::before { opacity: 0.28; }
+:root[data-theme='dark']:not([data-style]) .style-fx::after,
+:root[data-theme='dark'][data-style='soft'] .style-fx::after { opacity: 0.24; }
+/* soft 组件：圆角 18-20px，保留 common.css 的胶囊形按钮 */
+:root:not([data-style]) .card,
+:root:not([data-style]) .admin-panel,
+:root[data-style='soft'] .card,
+:root[data-style='soft'] .admin-panel {
+  border-radius: 20px;
+}
+@keyframes fx-soft-a {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(3vw, 2vw) scale(1.06); }
+}
+@keyframes fx-soft-b {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-3vw, -2vw) scale(0.96); }
+}
+
+/* ============================================================
    1) nature 自然拟态 —— 翡翠水色 · 有机 blob · 治愈流动
    ============================================================ */
 :root[data-theme='light'][data-style='nature'] {
@@ -1206,109 +1260,204 @@ body.has-wallpaper .style-fx {
 
 /* ============================================================
    12) neumorphism 新拟物派 —— 双光影浮雕 · 同色系软塑
-   固定光源：左上亮阴影 (-X,-Y) / 右下暗阴影 (+X,+Y)，双色成对；
-   元素与背景同色系，凸起表示可交互，凹陷表示输入区 / 已激活。
-   交互三定律：Hover Shadowing（悬停阴影缩小，禁止增大）
-   · Extrude to Intrude（按下外凸转内凹，禁止 translate 位移）
-   · 输入框 focus 内阴影变浅（通道打开而非加压）。
-   过渡统一 300ms ease-in-out（Smooth Molding 软塑料韧性）
+   参考 StyleKit neumorphism showcase：
+   · 固定左上光源：亮阴影 -X,-Y / 暗阴影 +X,+Y，纯同色系双影
+   · 背景纯色 #e0e5ec（禁止渐变）；元素与背景同 hue
+   · 交互三定律：Hover Shadowing（阴影缩小禁止增大）
+   · Extrude to Intrude（按下外凸转内凹，禁止 translate）
+   · 焦点 = 内凹 shadow（通道打开），禁用 ring+glow
+   · accent 仅用于文字 / 激活态，按钮不填底色（禁用 color fill）
+   · 过渡统一 300ms ease-in-out
    ============================================================ */
 :root[data-theme='light'][data-style='neumorphism'] {
-  --bg-grad: linear-gradient(160deg, #e0e5ec 0%, #e0e5ec 50%, #dde2e9 100%);
+  --bg-grad: none;
   --surface: #e0e5ec;
-  --surface-2: #e9edf2;
+  --surface-2: #e0e5ec;
   --text: #333333;
   --text-muted: #606773;
   --accent: #6d5dfc;
-  --on-accent: #ffffff;
+  --on-accent: #333333;
   --accent-soft: rgba(109, 93, 252, 0.16);
   --accent-hover: #5a49eb;
-  --danger: #e05d5d;
-  --on-danger: #0c0d10;
-  --success: #3db8a8;
-  --on-success: #0c0d10;
-  --edge: rgba(255, 255, 255, 0.4);
-  --edge-weak: rgba(184, 188, 194, 0.28);
+  --danger: #ff6b6b;
+  --on-danger: #ffffff;
+  --success: #4ecdc4;
+  --on-success: #ffffff;
+  --edge: transparent;
+  --edge-weak: transparent;
   --overlay: rgba(80, 86, 100, 0.4);
   --sh-dark: #b8bcc2;
   --sh-light: #ffffff;
-  --accent-glow: rgba(109, 93, 252, 0.24);
+  --accent-glow: transparent;
+  /* 精确对齐 StyleKit showcase 阴影四档 */
   --raised-sm: 4px 4px 8px #b8bcc2, -4px -4px 8px #ffffff;
-  --raised: 6px 6px 12px #b8bcc2, -6px -6px 12px #ffffff;
-  --raised-lg: 10px 10px 20px #b8bcc2, -10px -10px 20px #ffffff;
+  --raised: 8px 8px 16px #b8bcc2, -8px -8px 16px #ffffff;
+  --raised-lg: 12px 12px 24px #b8bcc2, -12px -12px 24px #ffffff;
   --pressed-sm: inset 4px 4px 8px #b8bcc2, inset -4px -4px 8px #ffffff;
-  --inset: inset 5px 5px 10px #b8bcc2, inset -5px -5px 10px #ffffff;
-  --hover-bg: rgba(109, 93, 252, 0.08);
+  --inset: inset 8px 8px 16px #b8bcc2, inset -8px -8px 16px #ffffff;
+  --hover-bg: transparent;
   --scroll-thumb: #c2c7cf;
   --tr: 300ms;
   --ease: ease-in-out;
-  --neu-hover: 3px 3px 6px #b8bcc2, -3px -3px 6px #ffffff;
-  --neu-focus: inset 2px 2px 4px #b8bcc2, inset -2px -2px 4px #ffffff;
+  --neu-hover: 4px 4px 8px #b8bcc2, -4px -4px 8px #ffffff;
+  --neu-focus: inset 4px 4px 8px #b8bcc2, inset -4px -4px 8px #ffffff;
 }
 :root[data-theme='dark'][data-style='neumorphism'] {
-  --bg-grad: linear-gradient(160deg, #2b2f37 0%, #2b2f37 50%, #292d34 100%);
-  --surface: #2b2f37;
-  --surface-2: #333843;
+  --bg-grad: none;
+  --surface: #1e2430;
+  --surface-2: #1e2430;
   --text: #d9dde5;
-  --text-muted: #9297a4;
+  --text-muted: #8a93a3;
   --accent: #8a7cff;
-  --on-accent: #0c0d10;
+  --on-accent: #1e2430;
   --accent-soft: rgba(138, 124, 255, 0.18);
   --accent-hover: #9c8fff;
-  --danger: #ef7a7a;
-  --on-danger: #0c0d10;
-  --success: #55cfc0;
-  --on-success: #0c0d10;
-  --edge: rgba(255, 255, 255, 0.06);
-  --edge-weak: rgba(0, 0, 0, 0.3);
+  --danger: #ff8888;
+  --on-danger: #1e2430;
+  --success: #5fd8cd;
+  --on-success: #1e2430;
+  --edge: transparent;
+  --edge-weak: transparent;
   --overlay: rgba(0, 0, 0, 0.6);
-  --sh-dark: #1e222a;
-  --sh-light: #383f4a;
-  --accent-glow: rgba(138, 124, 255, 0.25);
-  --raised-sm: 4px 4px 8px #1e222a, -4px -4px 8px #383f4a;
-  --raised: 6px 6px 12px #1e222a, -6px -6px 12px #383f4a;
-  --raised-lg: 10px 10px 20px #1e222a, -10px -10px 20px #383f4a;
-  --pressed-sm: inset 4px 4px 8px #1e222a, inset -4px -4px 8px #383f4a;
-  --inset: inset 5px 5px 10px #1e222a, inset -5px -5px 10px #383f4a;
-  --hover-bg: rgba(138, 124, 255, 0.1);
-  --scroll-thumb: #444b58;
+  --sh-dark: #131820;
+  --sh-light: #293040;
+  --accent-glow: transparent;
+  --raised-sm: 4px 4px 8px #131820, -4px -4px 8px #293040;
+  --raised: 8px 8px 16px #131820, -8px -8px 16px #293040;
+  --raised-lg: 12px 12px 24px #131820, -12px -12px 24px #293040;
+  --pressed-sm: inset 4px 4px 8px #131820, inset -4px -4px 8px #293040;
+  --inset: inset 8px 8px 16px #131820, inset -8px -8px 16px #293040;
+  --hover-bg: transparent;
+  --scroll-thumb: #384050;
   --tr: 300ms;
   --ease: ease-in-out;
-  --neu-hover: 3px 3px 6px #1e222a, -3px -3px 6px #383f4a;
-  --neu-focus: inset 2px 2px 4px #1e222a, inset -2px -2px 4px #383f4a;
+  --neu-hover: 4px 4px 8px #131820, -4px -4px 8px #293040;
+  --neu-focus: inset 4px 4px 8px #131820, inset -4px -4px 8px #293040;
 }
-/* 新拟物克制装饰：无背景装饰层（同色系表面即全部层次） */
-[data-style='neumorphism'] .style-fx {
-  display: none;
+/* =============== neumorphism 组件覆盖（清理 common.css 的 Soft UI 继承） =============== */
+/* 新拟物克制装饰：同色系表面即全部层次 */
+[data-style='neumorphism'] .style-fx { display: none; }
+
+/* 背景纯色，去 common.css 的 fixed 渐变 */
+[data-style='neumorphism'] body { background: var(--surface); }
+
+/* 通用：禁止 border */
+[data-style='neumorphism'] .card,
+[data-style='neumorphism'] .btn,
+[data-style='neumorphism'] .glass,
+[data-style='neumorphism'] .glass-strong,
+[data-style='neumorphism'] .admin-panel,
+[data-style='neumorphism'] .toast,
+[data-style='neumorphism'] .input,
+[data-style='neumorphism'] .select,
+[data-style='neumorphism'] .textarea {
+  border: none !important;
+  background: var(--surface) !important;
 }
-/* 按钮：hover 阴影缩小且禁止位移；active 外凸转内凹 */
+
+/* 新拟物通用 hover：阴影缩小（手挡光），禁止 translate，禁止 accent-glow */
+[data-style='neumorphism'] .card,
+[data-style='neumorphism'] .glass,
+[data-style='neumorphism'] .glass-strong,
+[data-style='neumorphism'] .admin-panel {
+  border-radius: 22px;
+  box-shadow: var(--raised);
+  transition: box-shadow var(--tr) var(--ease);
+}
+[data-style='neumorphism'] .card:hover,
+[data-style='neumorphism'] .glass:hover,
+[data-style='neumorphism'] .glass-strong:hover,
+[data-style='neumorphism'] .admin-panel:hover {
+  transform: none !important;
+  box-shadow: var(--neu-hover) !important;
+}
+[data-style='neumorphism'] .card:active {
+  transform: none !important;
+  box-shadow: var(--pressed-sm) !important;
+}
+
+/* 按钮：convex→hover缩小→active concave 内凹，全程禁止 translate */
+[data-style='neumorphism'] .btn {
+  border-radius: 16px;
+  box-shadow: var(--raised-sm);
+  transition: box-shadow var(--tr) var(--ease);
+}
 [data-style='neumorphism'] .btn:hover {
-  transform: none;
-  box-shadow: var(--neu-hover);
+  transform: none !important;
+  box-shadow: var(--neu-hover) !important;
+  background: var(--surface) !important;
+  color: var(--text) !important;
 }
 [data-style='neumorphism'] .btn:active {
-  transform: none;
+  transform: none !important;
+  box-shadow: var(--pressed-sm) !important;
 }
+
+/* 主按钮：新拟物规则——accent 只用于文字 + 左侧 accent border stripe，不做填色 */
 [data-style='neumorphism'] .btn-primary {
-  box-shadow: 4px 4px 8px var(--sh-dark), -4px -4px 8px var(--sh-light);
+  box-shadow: var(--raised-sm);
+  border-left: 3px solid var(--accent) !important;
+  color: var(--accent) !important;
+  font-weight: 600;
+  background: var(--surface) !important;
 }
 [data-style='neumorphism'] .btn-primary:hover {
-  transform: none;
-  box-shadow: 2px 2px 4px var(--sh-dark), -2px -2px 4px var(--sh-light);
+  box-shadow: var(--neu-hover) !important;
+  background: var(--surface) !important;
+  color: var(--accent-hover) !important;
+  border-left-color: var(--accent-hover) !important;
 }
 [data-style='neumorphism'] .btn-primary:active {
-  transform: none;
-  box-shadow: inset 3px 3px 6px var(--sh-dark), inset -3px -3px 6px var(--sh-light);
+  box-shadow: var(--pressed-sm) !important;
+  background: var(--surface) !important;
 }
-/* 输入框：focus 时内阴影变浅（通道开放） */
+
+/* 输入框：concave inset（通道打开），禁用 Halo Focus 的 ring+glow */
+[data-style='neumorphism'] .input,
+[data-style='neumorphism'] .select,
+[data-style='neumorphism'] .textarea {
+  border-radius: 14px;
+  box-shadow: var(--inset);
+  background: var(--surface) !important;
+  color: var(--text);
+}
 [data-style='neumorphism'] .input:focus,
 [data-style='neumorphism'] .select:focus,
 [data-style='neumorphism'] .textarea:focus {
-  box-shadow: var(--neu-focus);
+  box-shadow: var(--neu-focus) !important;
+  border-color: transparent !important;
+  outline: none !important;
 }
-[data-style='neumorphism'] .card,
-[data-style='neumorphism'] .admin-panel {
-  border-radius: 22px;
+[data-style='neumorphism'] :focus-visible {
+  box-shadow: var(--neu-focus) !important;
+  outline: none !important;
+  border-radius: 14px;
+}
+
+/* 图标容器：保持同色系，不用 accent 填色 */
+[data-style='neumorphism'] .card .icon {
+  border-radius: 15px;
+  box-shadow: var(--raised-sm);
+  background: var(--surface) !important;
+  color: var(--accent);
+}
+
+/* toast 按钮化 */
+[data-style='neumorphism'] .toast {
+  border-radius: 16px;
+  box-shadow: var(--raised);
+}
+[data-style='neumorphism'] .toast.error,
+[data-style='neumorphism'] .toast.success {
+  background: var(--surface) !important;
+  color: var(--accent);
+  border-left: 3px solid var(--accent) !important;
+}
+
+/* 表格 hover 背景透明（新拟物不用色填） */
+[data-style='neumorphism'] .table tbody tr:hover td {
+  background: var(--surface);
+  box-shadow: var(--neu-hover);
 }
 
 /* ============================================================

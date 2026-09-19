@@ -264,78 +264,94 @@ if ($action === 'favicon' || $action === 'fetch_meta') {
     $scheme = parse_url($url, PHP_URL_SCHEME);
     if (!in_array($scheme, ['http', 'https'], true)) $scheme = 'https';
 
-    // 内网 / 本机 / 保留地址不发起服务端抓取（SSRF 防护）：
-    // 基于主机名解析后的真实 IP 判定，覆盖十进制 IP、解析到内网的域名、
-    // 云元数据 169.254.169.254、CGNAT 100.64/10、代理 fake-ip 198.18/15、IPv6 本地段等绕过手法
+    // 完整抓取用户给的 URL（含 path + query）—— 标题/描述解析才精准
     $isLan = !sp_host_is_public($host);
     $html = '';
     $pageErr = '';
     if (!$isLan) {
-        $html = sp_http_fetch($scheme . '://' . $host . '/', 6, true);
+        $fetchURL = $scheme . '://' . $host;
+        $path = parse_url($url, PHP_URL_PATH);
+        if ($path) $fetchURL .= $path;
+        $query = parse_url($url, PHP_URL_QUERY);
+        if ($query !== null && $query !== '') $fetchURL .= '?' . $query;
+        $html = sp_http_fetch($fetchURL, 8, true);
         if ($html === '') $pageErr = sp_http_last_error();
     }
 
-    // 解析页面声明的图标
+    // 从已抓 HTML 解析页面声明的图标候选（不额外 HTTP）
     $pageIcons = [];
-    if ($html !== '' && preg_match_all('/<link[^>]+rel=[^>]*icon[^>]*>/i', $html, $mm)) {
-        foreach ($mm[0] as $linkTag) {
-            if (preg_match('/href=["\']([^"\']+)["\']/i', $linkTag, $m2)) {
-                $abs = sp_absolutize($m2[1], $scheme, $host);
+    $siteHostIcon = $scheme . '://' . $host . '/favicon.ico';
+    if ($html !== '') {
+        // 1. <link rel="icon|shortcut icon|apple-touch-icon" href="...">
+        if (preg_match_all('/<link[^>]+rel=["\']([^"\']*icon[^"\']*)["\'][^>]*href=["\']([^"\']+)["\']/i', $html, $mm)) {
+            foreach ($mm[2] as $href) {
+                $abs = sp_absolutize($href, $scheme, $host);
                 if ($abs !== '') $pageIcons[] = $abs;
             }
         }
+        // 2. og:image / twitter:image（比 favicon 更清晰的首选）
+        $ogImg = sp_meta_content($html, 'property', 'og:image');
+        if ($ogImg !== '') {
+            $abs = sp_absolutize($ogImg, $scheme, $host);
+            if ($abs !== '') $pageIcons[] = $abs;
+        }
+        $twImg = sp_meta_content($html, 'name', 'twitter:image');
+        if ($twImg !== '') {
+            $abs = sp_absolutize($twImg, $scheme, $host);
+            if ($abs !== '') $pageIcons[] = $abs;
+        }
     }
+    // 3. 兜底站点根 favicon.ico
+    $pageIcons[] = $siteHostIcon;
+    $pageIcons = array_values(array_unique($pageIcons));
 
     if ($action === 'favicon') {
         if ($isLan) fail('不支持从内网 / 本机地址获取图标，请手动填写图标地址或使用文字图标');
-        // 服务端抓取并缓存；失败时回退公共图标服务地址（交给访客浏览器加载），前端不再报错
         $local = sp_try_cache_icon($host, $scheme, $pageIcons);
         if ($local !== '') {
             ok(['url' => $local, 'cached' => strpos($local, '/frontend/uploads/') === 0, 'fallback' => false]);
         }
-        // 附带失败原因，便于排查服务器网络/权限问题
         ok(['url' => sp_favicon_services($host)[0], 'cached' => false, 'fallback' => true,
             'diag' => sp_http_last_error() ?: ($pageErr !== '' ? $pageErr : '各图标源均未取到有效图片')]);
     }
 
-    /* ---- action=fetch_meta：标题 / 描述 / 图标，部分成功也返回 ---- */
+    /* ---- action=fetch_meta：完整 URL 抓取 + 标题/描述/图标一体解析 ---- */
     $result = ['title' => '', 'description' => '', 'icon' => '', 'fallback_icon' => false];
 
     if ($html !== '') {
+        // 标题链：og:title → twitter:title → <title>
         $title = sp_meta_content($html, 'property', 'og:title');
+        if ($title === '') $title = sp_meta_content($html, 'name', 'twitter:title');
         if ($title === '' && preg_match('/<title[^>]*>(.*?)<\/title>/is', $html, $m)) {
             $title = trim(html_entity_decode($m[1], ENT_QUOTES));
         }
         $result['title'] = sp_substr(trim(preg_replace('/\s+/u', ' ', $title)), 50);
 
+        // 描述链：og:description → twitter:description → meta description → 正文截取
         $desc = sp_meta_content($html, 'property', 'og:description');
+        if ($desc === '') $desc = sp_meta_content($html, 'name', 'twitter:description');
         if ($desc === '') $desc = sp_meta_content($html, 'name', 'description');
         if ($desc === '') {
-            // 智能兜底：去脚本/样式后截取正文纯文本
-            $text = preg_replace('/<(script|style)[^>]*>.*?<\/\1>/is', ' ', $html);
+            $text = preg_replace('/<(script|style|noscript)[^>]*>.*?<\/\1>/is', ' ', $html);
             $text = trim(preg_replace('/\s+/u', ' ', strip_tags($text)));
-            $desc = sp_substr($text, 80);
+            $desc = sp_substr($text, 200);
         }
         $result['description'] = sp_substr(trim($desc), 200);
     }
 
+    // 图标：用已解析的 $pageIcons 列表一次性缓存，不再独立拉 HTML
     if (!$isLan) {
         $local = sp_try_cache_icon($host, $scheme, $pageIcons, 8.0);
         if ($local !== '') {
             $result['icon'] = $local;
         } else {
-            // 服务端抓不到：回退公共图标服务 URL，由浏览器加载
             $result['icon'] = sp_favicon_services($host)[0];
             $result['fallback_icon'] = true;
-            $iconErr = sp_http_last_error();
         }
     }
 
-    // 页面没抓到（标题/描述为空）：告知具体原因，便于区分"站点无信息"与"服务器网络受限"
     if (!$isLan && $result['title'] === '' && $result['description'] === '') {
         $result['warn'] = '页面内容抓取失败：' . ($pageErr !== '' ? $pageErr : '站点无标题/描述信息');
-    } elseif (!empty($iconErr)) {
-        $result['warn'] = '图标未能缓存到本地（' . $iconErr . '），已改用公共图标源';
     }
 
     if ($result['title'] === '' && $result['description'] === '' && $result['icon'] === '') {
