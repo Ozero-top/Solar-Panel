@@ -693,6 +693,7 @@
   box-shadow: var(--raised-sm);
   transition: box-shadow var(--tr) var(--ease), transform var(--tr) var(--ease);
 }
+
 /* + 快速添加按钮 —— 放在 .group-sort 容器内 flex 排列 */
 .group-add-btn {
   display: inline-flex;
@@ -712,7 +713,9 @@
 }
 .group-add-btn:hover { opacity: 1; transform: scale(1.1); }
 
-/* 主页 quick-add modal 专用样式（从 auth-admin.css 移植） */
+/* ============================================================
+   主页 quick-add modal 专用样式（从 auth-admin.css 移植 + 主页作用域）
+   ============================================================ */
 .radio-group {
   display: flex;
   gap: 16px;
@@ -748,6 +751,8 @@
   flex-shrink: 0;
 }
 .icon-preview img { width: 100%; height: 100%; object-fit: cover; }
+
+/* 文字图标 grid 通用层 */
 .icon-grid-cn {
   display: grid !important;
   grid-template-columns: 1fr 1fr !important;
@@ -766,6 +771,8 @@
   justify-content: center !important;
   line-height: 1 !important;
 }
+
+/* icon-preview 特异度层（覆盖自身 display:flex） */
 .icon-preview.icon-grid-cn {
   display: grid !important;
   grid-template-columns: 1fr 1fr !important;
@@ -786,12 +793,14 @@
   font-weight: 500 !important;
   letter-spacing: -0.3px !important;
 }
+
+/* Cloud Float: hover 上浮 + 阴影扩散带彩色光晕，Pillow Press: active 按入枕面 */
 .card:hover {
   transform: translateY(-3px);
-  box-shadow: var(--raised);
+  box-shadow: var(--raised-lg), 0 0 18px var(--accent-glow);
 }
 .card:active {
-  transform: translateY(0);
+  transform: translateY(0) scale(0.98);
   box-shadow: var(--pressed-sm);
 }
 .card .icon {

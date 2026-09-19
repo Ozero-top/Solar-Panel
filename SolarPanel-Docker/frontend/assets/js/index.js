@@ -1841,7 +1841,7 @@ function uiConfirm(message, opts) {
 /** 重新拉 public.php 并全量重绘 — 新增/删除卡片后调用 */
 async function reloadPublic() {
   try {
-    const data = await API.get(API_BASE + 'public.php');
+    const data = await API.get(API_BASE + 'public.php?_t=' + Date.now());
     state.settings = data.settings || {};
     state.groups = data.groups || [];
     const container = document.getElementById('groupsWrap');
@@ -1859,16 +1859,23 @@ function openQuickAddCard(groupId, item) {
   const isEdit = !!item;
   m.dataset.groupId = String(groupId);
 
+  // 先 reset——必须在填分组选项之前，否则 form.reset() 会清掉动态设置的 selected
+  document.getElementById('qaForm').reset();
+
   const groupSel = document.getElementById('qa_group');
   groupSel.innerHTML = '';
-  (state.groups || []).forEach(g => {
+  const groups = state.groups || [];
+  let matched = false;
+  groups.forEach(g => {
     const opt = document.createElement('option');
     opt.value = String(g.id);
     opt.textContent = g.title;
     const matchGid = isEdit ? item.group_id : groupId;
-    if (String(g.id) === String(matchGid)) opt.selected = true;
+    if (String(g.id) === String(matchGid)) { opt.selected = true; matched = true; }
     groupSel.appendChild(opt);
   });
+  // 兜底：没匹配到当前分组时默认选第一个
+  if (!matched && groups.length) groupSel.value = String(groups[0].id);
 
   // 标题 + 按钮文字
   const h3 = m.querySelector('.modal-head h3');
@@ -1878,8 +1885,6 @@ function openQuickAddCard(groupId, item) {
     : (('向「' + (state.groups.find(g => g.id === groupId)?.title || '') + '」添加卡片') || '添加卡片');
   saveBtn.textContent = isEdit ? '保存' : '添加卡片';
 
-  // 每次打开都重置
-  document.getElementById('qaForm').reset();
   document.getElementById('qa_group_id').value = isEdit ? item.id : 0;
   document.getElementById('qa_title').value = isEdit ? (item.title || '') : '';
   document.getElementById('qa_url').value = isEdit ? (item.url || '') : '';
@@ -1936,9 +1941,9 @@ function ensureQuickAddModal() {
   m.className = 'modal';
   m.id = 'quickAddModal';
   m.innerHTML = `
-    <div class="modal-box glass-strong quick-add" style="max-width:560px">
+    <div class="modal-box glass-strong quick-add">
       <div class="modal-head">
-        <h3>快速添加卡片</h3>
+        <h3>添加卡片</h3>
         <button class="btn btn-sm" type="button" id="qaCloseX">✕</button>
       </div>
       <form id="qaForm" autocomplete="off">
@@ -1962,13 +1967,13 @@ function ensureQuickAddModal() {
           <input class="input" id="qa_title" type="text" maxlength="50" required>
         </div>
         <div class="form-item">
-          <label>地址
+          <label>地址（鼠标点击此处可自动获取标题/描述/图标）
             <button class="btn btn-sm" type="button" id="qa_fetchMeta" style="float:right">自动获取信息</button>
           </label>
           <input class="input" id="qa_url" type="text" placeholder="https://…">
         </div>
         <div class="form-item">
-          <label>内网地址（可选）</label>
+          <label>内网地址（可选，用于主页「内网模式」）</label>
           <input class="input" id="qa_lan" type="text" placeholder="http://192.168.x.x:port">
         </div>
         <div class="form-item">
@@ -1979,7 +1984,7 @@ function ensureQuickAddModal() {
           <label>图标类型</label>
           <div class="radio-group" id="qa_itype">
             <label><input type="radio" name="qaitype" value="favicon" checked> 自动获取站点图标</label>
-            <label><input type="radio" name="qaitype" value="image"> 图片地址</label>
+            <label><input type="radio" name="qaitype" value="image"> 图片地址 / 上传</label>
             <label><input type="radio" name="qaitype" value="text"> 文字图标</label>
           </div>
         </div>
@@ -1987,11 +1992,13 @@ function ensureQuickAddModal() {
           <label>图标</label>
           <div class="upload-row">
             <span class="icon-preview" id="qa_preview"></span>
-            <input class="input" id="qa_icon" type="text" placeholder="图片地址（选「图片」类型时）">
+            <input class="input" id="qa_icon" type="text" placeholder="图标图片地址（选择「图片」类型时使用）">
+            <button class="btn" type="button" id="qa_uploadIcon">上传图标</button>
+            <button class="btn" type="button" id="qa_useFavicon" hidden>获取站点图标</button>
           </div>
           <div class="form-item" style="margin-top:10px" id="qa_textWrap">
             <label>手动文字（留空自动取卡片标题）</label>
-            <input class="input" id="qa_iconText" type="text" maxlength="12" placeholder="中文 4 字 / 英文 12 字母">
+            <input class="input" id="qa_iconText" type="text" maxlength="12" placeholder="支持中文 4 字 / 英文 12 字母">
           </div>
           <div class="form-item" style="margin-top:10px" id="qa_bgWrap">
             <label>图标背景色</label>
@@ -2076,12 +2083,50 @@ function ensureQuickAddModal() {
       btn.disabled = false;
     }
   });
+
+  // 上传图标按钮
+  const uploadBtn = document.getElementById('qa_uploadIcon');
+  const fileInput = document.createElement('input');
+  fileInput.type = 'file';
+  fileInput.accept = 'image/*';
+  fileInput.style.display = 'none';
+  uploadBtn.parentNode.appendChild(fileInput);
+  uploadBtn.addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', async () => {
+    const file = fileInput.files[0];
+    if (!file) return;
+    const form = new FormData();
+    form.append('file', file);
+    form.append('type', 'icon');
+    uploadBtn.disabled = true;
+    try {
+      const res = await API.postForm(API_BASE + 'upload.php', form);
+      document.getElementById('qa_icon').value = res.url;
+      // 自动切到图片类型
+      const imgRadio = document.querySelector('#qa_itype input[value="image"]');
+      if (imgRadio && !imgRadio.checked) {
+        imgRadio.checked = true;
+        onQAIconTypeChange();
+      }
+      updateQAIconPreview();
+      toast('图标上传成功', 'success');
+    } catch (e) {
+      toast('上传失败：' + e.message, 'error');
+    } finally {
+      uploadBtn.disabled = false;
+      fileInput.value = '';
+    }
+  });
+
+  // 获取站点图标按钮（仅 image 类型显示）
+  document.getElementById('qa_useFavicon').addEventListener('click', fetchQAFavicon);
 }
 
 function onQAIconTypeChange() {
   const type = document.querySelector('#qa_itype input:checked').value;
   document.getElementById('qa_textWrap').style.display = type === 'text' ? '' : 'none';
   document.getElementById('qa_bgWrap').style.display = (type === 'text' || type === 'image') ? '' : 'none';
+  document.getElementById('qa_useFavicon').hidden = type !== 'image';
   updateQAIconPreview();
 }
 
@@ -2162,27 +2207,72 @@ function syncQAColorPanel(source) {
 
 async function fetchQAMeta() {
   const url = document.getElementById('qa_url').value.trim();
-  if (!url) return;
+  if (!url || !/^https?:\/\//i.test(url)) { toast('请先填写 http(s):// 开头的地址', 'error'); return; }
   try {
     const btn = document.getElementById('qa_fetchMeta');
     btn.disabled = true; btn.textContent = '获取中…';
-    const data = await API.get(API_BASE + 'items.php?action=fetch_meta&url=' + encodeURIComponent(url));
-    if (data.title) document.getElementById('qa_title').value = data.title;
-    if (data.description) document.getElementById('qa_desc').value = data.description;
-    window.__qaMetaIcon = (data.icon || '').trim();
+    const res = await API.get(API_BASE + 'items.php?action=fetch_meta&url=' + encodeURIComponent(url));
+
+    const got = [];
+    const emptyTitle = !document.getElementById('qa_title').value.trim();
+    const emptyDesc  = !document.getElementById('qa_desc').value.trim();
     const curType = document.querySelector('#qa_itype input:checked').value;
-    if (curType === 'favicon' && !data.icon && (data.title || url)) {
-      document.querySelector('#qa_itype input[value="text"]').checked = true;
-      document.getElementById('qa_iconText').value = smartIconText(data.title || url);
-      window.__qaIconTextManual = true;
-      onQAIconTypeChange();
+
+    if (res.title && emptyTitle) { document.getElementById('qa_title').value = res.title; got.push('标题'); }
+    if (res.description && emptyDesc) { document.getElementById('qa_desc').value = res.description; got.push('描述'); }
+
+    // 图标处理：与 admin.js 对齐的三态分支
+    if (curType === 'favicon') {
+      if (res.icon) {
+        if (res.fallback_icon) {
+          // 公共图标源 → 切 image + 填 URL
+          document.querySelector('#qa_itype input[value="image"]').checked = true;
+          document.getElementById('qa_icon').value = res.icon;
+          got.push('图标(浏览器加载)');
+          onQAIconTypeChange();
+        } else {
+          got.push('图标');
+        }
+      } else {
+        // favicon 拿不到 → 自动降级为文字图标
+        document.querySelector('#qa_itype input[value="text"]').checked = true;
+        document.getElementById('qa_iconText').value = smartIconText(res.title || url);
+        onQAIconTypeChange();
+        got.push('图标(文字降级)');
+      }
     } else {
       updateQAIconPreview();
     }
+
+    toast(got.length ? ('已获取：' + got.join(' / ')) : '没获取到新信息', got.length ? 'success' : 'info');
   } catch (err) { toast('自动获取失败：' + err.message, 'error'); }
   finally {
     const btn = document.getElementById('qa_fetchMeta');
     btn.disabled = false; btn.textContent = '自动获取信息';
+  }
+}
+
+/** 获取站点图标（items.php?action=favicon）—— 写入 qa_icon 并自动切到 image 类型 */
+async function fetchQAFavicon() {
+  const url = document.getElementById('qa_url').value.trim();
+  if (!url) { toast('请先填写卡片地址', 'error'); return; }
+  const btn = document.getElementById('qa_useFavicon');
+  btn.disabled = true; btn.textContent = '获取中…';
+  try {
+    const res = await API.get(API_BASE + 'items.php?action=favicon&url=' + encodeURIComponent(url));
+    document.querySelector('#qa_itype input[value="image"]').checked = true;
+    document.getElementById('qa_icon').value = res.url;
+    onQAIconTypeChange();
+    updateQAIconPreview();
+    if (res.fallback) {
+      toast('服务器未能缓存图标' + (res.diag ? '：' + res.diag : '') + '，已改用公共图标源', 'info');
+    } else {
+      toast(res.cached ? '已获取（本地缓存）' : '获取成功', 'success');
+    }
+  } catch (e) {
+    toast(e.message, 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = '获取站点图标';
   }
 }
 

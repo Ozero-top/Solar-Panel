@@ -20,6 +20,7 @@ type GroupWithItems struct {
 }
 
 func (h *PublicHandler) Public(c *gin.Context) {
+	c.Header("Cache-Control", "no-store, max-age=0")
 	var settingsRows []model.Setting
 	if err := db.DB.Find(&settingsRows).Error; err != nil {
 		Fail(c, http.StatusInternalServerError, "读取设置失败")

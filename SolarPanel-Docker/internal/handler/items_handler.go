@@ -59,10 +59,18 @@ var (
 	reTitle        = regexp.MustCompile(`(?is)<title[^>]*>(.*?)</title>`)
 	reOGTitle      = regexp.MustCompile(`(?is)<meta[^>]+(?:property|name)\s*=\s*["']og:title["'][^>]*content\s*=\s*["']([^"']+)["'][^>]*>`)
 	reOGTitle2     = regexp.MustCompile(`(?is)<meta[^>]+content\s*=\s*["']([^"']+)["'][^>]*(?:property|name)\s*=\s*["']og:title["'][^>]*>`)
+	reTwTitle      = regexp.MustCompile(`(?is)<meta[^>]+name\s*=\s*["']twitter:title["'][^>]*content\s*=\s*["']([^"']+)["'][^>]*>`)
+	reTwTitle2     = regexp.MustCompile(`(?is)<meta[^>]+content\s*=\s*["']([^"']+)["'][^>]*name\s*=\s*["']twitter:title["'][^>]*>`)
 	reMetaDesc     = regexp.MustCompile(`(?is)<meta[^>]+(?:name|property)\s*=\s*["']description["'][^>]*content\s*=\s*["']([^"']+)["'][^>]*>`)
 	reMetaDesc2    = regexp.MustCompile(`(?is)<meta[^>]+content\s*=\s*["']([^"']+)["'][^>]*(?:name|property)\s*=\s*["']description["'][^>]*>`)
 	reOGDesc       = regexp.MustCompile(`(?is)<meta[^>]+(?:property|name)\s*=\s*["']og:description["'][^>]*content\s*=\s*["']([^"']+)["'][^>]*>`)
 	reOGDesc2      = regexp.MustCompile(`(?is)<meta[^>]+content\s*=\s*["']([^"']+)["'][^>]*(?:property|name)\s*=\s*["']og:description["'][^>]*>`)
+	reTwDesc       = regexp.MustCompile(`(?is)<meta[^>]+name\s*=\s*["']twitter:description["'][^>]*content\s*=\s*["']([^"']+)["'][^>]*>`)
+	reTwDesc2      = regexp.MustCompile(`(?is)<meta[^>]+content\s*=\s*["']([^"']+)["'][^>]*name\s*=\s*["']twitter:description["'][^>]*>`)
+	reOGImage      = regexp.MustCompile(`(?is)<meta[^>]+(?:property|name)\s*=\s*["']og:image["'][^>]*content\s*=\s*["']([^"']+)["'][^>]*>`)
+	reOGImage2     = regexp.MustCompile(`(?is)<meta[^>]+content\s*=\s*["']([^"']+)["'][^>]*(?:property|name)\s*=\s*["']og:image["'][^>]*>`)
+	reTwImage      = regexp.MustCompile(`(?is)<meta[^>]+name\s*=\s*["']twitter:image["'][^>]*content\s*=\s*["']([^"']+)["'][^>]*>`)
+	reTwImage2     = regexp.MustCompile(`(?is)<meta[^>]+content\s*=\s*["']([^"']+)["'][^>]*name\s*=\s*["']twitter:image["'][^>]*>`)
 	reKeywords     = regexp.MustCompile(`(?is)<meta[^>]+name\s*=\s*["']keywords["'][^>]*content\s*=\s*["']([^"']+)["'][^>]*>`)
 	reKeywords2    = regexp.MustCompile(`(?is)<meta[^>]+content\s*=\s*["']([^"']+)["'][^>]*name\s*=\s*["']keywords["'][^>]*>`)
 	reLinkIcon     = regexp.MustCompile(`(?is)<link\b([^>]*)>`)
@@ -570,6 +578,10 @@ func extractMeta(html string) (title, description, favicon string) {
 		title = strings.TrimSpace(htmlDecodeReplacer.Replace(m[1]))
 	} else if m := reOGTitle2.FindStringSubmatch(html); m != nil {
 		title = strings.TrimSpace(htmlDecodeReplacer.Replace(m[1]))
+	} else if m := reTwTitle.FindStringSubmatch(html); m != nil {
+		title = strings.TrimSpace(htmlDecodeReplacer.Replace(m[1]))
+	} else if m := reTwTitle2.FindStringSubmatch(html); m != nil {
+		title = strings.TrimSpace(htmlDecodeReplacer.Replace(m[1]))
 	}
 
 	if title == "" {
@@ -582,6 +594,10 @@ func extractMeta(html string) (title, description, favicon string) {
 	if m := reOGDesc.FindStringSubmatch(html); m != nil {
 		description = strings.TrimSpace(htmlDecodeReplacer.Replace(m[1]))
 	} else if m := reOGDesc2.FindStringSubmatch(html); m != nil {
+		description = strings.TrimSpace(htmlDecodeReplacer.Replace(m[1]))
+	} else if m := reTwDesc.FindStringSubmatch(html); m != nil {
+		description = strings.TrimSpace(htmlDecodeReplacer.Replace(m[1]))
+	} else if m := reTwDesc2.FindStringSubmatch(html); m != nil {
 		description = strings.TrimSpace(htmlDecodeReplacer.Replace(m[1]))
 	}
 
@@ -737,7 +753,6 @@ func (h *ItemsHandler) FetchMeta(c *gin.Context) {
 		return
 	}
 
-	// PHP 原版：ok(['title'=>'', 'description'=>'', 'icon'=>'', 'fallback_icon'=>false, 'warn'=>''])
 	resp := gin.H{
 		"title":         "",
 		"description":   "",
@@ -746,26 +761,49 @@ func (h *ItemsHandler) FetchMeta(c *gin.Context) {
 		"warn":          "",
 	}
 
+	scheme := u.Scheme
+	if scheme != "http" && scheme != "https" {
+		scheme = "https"
+	}
+
 	cached := checkFaviconCache(h.cfg, host)
 	if cached != "" {
 		resp["icon"] = cached
 	}
 
-	// PHP 原版：$scheme = parse_url($url, PHP_URL_SCHEME); 非 http/https 归一为 https
-	scheme := u.Scheme
-	if scheme != "http" && scheme != "https" {
-		scheme = "https"
-	}
+	// 完整抓取用户给的 URL（含 path + query）—— 标题/描述解析才精准
 	var candidates []string
 
-	// PHP 原版：抓取站点根页面 scheme://host/（而非完整 URL），获取首页标题/描述/图标
-	html, pageScheme, pageHost, err := fetchPageHTML(scheme + "://" + host + "/")
+	// 用原始 rawURL 而非 scheme://host/ 根路径
+	html, pageScheme, pageHost, err := fetchPageHTML(rawURL)
 	if err == nil {
 		title, desc, _ := extractMeta(html)
 		resp["title"] = title
 		resp["description"] = desc
 		scheme = pageScheme
 		candidates = extractIconLinks(html, pageScheme, pageHost)
+
+		// 扩展图标候选：og:image / twitter:image（比 favicon 更清晰）
+		addMetaImg := func(patterns ...*regexp.Regexp) {
+			for _, re := range patterns {
+				if m := re.FindStringSubmatch(html); m != nil {
+					abs := absolutize(strings.TrimSpace(htmlDecodeReplacer.Replace(m[1])), scheme, host)
+					if abs != "" {
+						seen := false
+						for _, c := range candidates {
+							if c == abs {
+								seen = true
+								break
+							}
+						}
+						if !seen {
+							candidates = append(candidates, abs)
+						}
+					}
+				}
+			}
+		}
+		addMetaImg(reOGImage, reOGImage2, reTwImage, reTwImage2)
 	} else {
 		resp["warn"] = "无法访问目标站点：" + err.Error()
 	}

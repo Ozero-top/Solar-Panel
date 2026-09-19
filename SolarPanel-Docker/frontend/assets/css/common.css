@@ -5,14 +5,14 @@
    ============================================================ */
 :root,
 :root[data-theme='light'] {
-  --bg-grad: linear-gradient(160deg, #eef1f7 0%, #e7ecf4 45%, #dde4ee 100%);
-  --surface: #e9edf5;
-  --surface-2: #edf0f7;
+  --bg-grad: linear-gradient(160deg, #eef0f8 0%, #e6eaf6 45%, #dce1f1 100%);
+  --surface: #e8ecf6;
+  --surface-2: #edf0f8;
   --text: #3b4354;
   --text-muted: #646b78;
   --accent: #5c7cfa;
   --on-accent: #0c0d10;
-  --accent-soft: rgba(92, 124, 250, 0.14);
+  --accent-soft: rgba(92, 124, 250, 0.16);
   --accent-hover: #4a6bf0;
   --danger: #e05d5d;
   --on-danger: #0c0d10;
@@ -21,27 +21,28 @@
   --edge: rgba(255, 255, 255, 0.62);
   --edge-weak: rgba(59, 67, 84, 0.08);
   --overlay: rgba(60, 70, 90, 0.35);
-  --sh-dark: rgba(163, 175, 198, 0.52);
+  /* Cloud Float: 阴影带 accent 紫灰 tint，避免脏灰硬影 */
+  --sh-dark: rgba(148, 156, 200, 0.5);
   --sh-light: rgba(255, 255, 255, 0.92);
   --accent-glow: rgba(92, 124, 250, 0.32);
-  /* 双层阴影：近处紧致贴地 + 远处柔和弥散，顶部 1px 高光烘焙其中 */
-  --raised-sm: 2px 2px 5px rgba(163, 175, 198, 0.42), 5px 5px 12px rgba(163, 175, 198, 0.3),
+  --raised-sm: 2px 2px 5px rgba(148, 156, 200, 0.42), 5px 5px 12px rgba(148, 156, 200, 0.3),
     -2px -2px 5px rgba(255, 255, 255, 1), -5px -5px 12px rgba(255, 255, 255, 0.82),
     inset 0 1px 0 rgba(255, 255, 255, 0.85);
-  --raised: 4px 4px 9px rgba(163, 175, 198, 0.38), 10px 10px 24px rgba(163, 175, 198, 0.32),
+  --raised: 4px 4px 9px rgba(148, 156, 200, 0.38), 10px 10px 24px rgba(148, 156, 200, 0.32),
     -4px -4px 9px rgba(255, 255, 255, 1), -10px -10px 24px rgba(255, 255, 255, 0.85),
     inset 0 1px 0 rgba(255, 255, 255, 0.9);
-  --raised-lg: 6px 6px 14px rgba(163, 175, 198, 0.34), 18px 18px 40px rgba(163, 175, 198, 0.3),
+  --raised-lg: 6px 6px 14px rgba(148, 156, 200, 0.34), 18px 18px 40px rgba(148, 156, 200, 0.3),
     -6px -6px 14px rgba(255, 255, 255, 1), -18px -18px 40px rgba(255, 255, 255, 0.9),
     inset 0 1px 0 rgba(255, 255, 255, 0.95);
-  --pressed-sm: inset 1px 1px 3px rgba(163, 175, 198, 0.5), inset 3px 3px 9px rgba(163, 175, 198, 0.32),
+  --pressed-sm: inset 1px 1px 3px rgba(148, 156, 200, 0.5), inset 3px 3px 9px rgba(148, 156, 200, 0.32),
     inset -1px -1px 3px rgba(255, 255, 255, 0.95), inset -3px -3px 9px rgba(255, 255, 255, 0.7);
-  --inset: inset 2px 2px 5px rgba(163, 175, 198, 0.45), inset 5px 5px 12px rgba(163, 175, 198, 0.28),
+  --inset: inset 2px 2px 5px rgba(148, 156, 200, 0.45), inset 5px 5px 12px rgba(148, 156, 200, 0.28),
     inset -2px -2px 5px rgba(255, 255, 255, 0.95), inset -5px -5px 12px rgba(255, 255, 255, 0.65);
   --hover-bg: rgba(92, 124, 250, 0.08);
-  --scroll-thumb: rgba(163, 175, 198, 0.6);
-  --tr: 200ms;
-  --ease: cubic-bezier(0.33, 1, 0.68, 1);
+  --scroll-thumb: rgba(148, 156, 200, 0.58);
+  /* Friendly Viscosity: 260ms + ease-in-out，软糯不拖沓 */
+  --tr: 260ms;
+  --ease: ease-in-out;
 }
 
 :root[data-theme='dark'] {
@@ -62,7 +63,7 @@
   --edge-weak: rgba(255, 255, 255, 0.06);
   --overlay: rgba(0, 0, 0, 0.55);
   --sh-dark: rgba(0, 0, 0, 0.5);
-  --sh-light: rgba(255, 255, 255, 0.045);
+  --sh-light: rgba(140, 160, 255, 0.055);
   --accent-glow: rgba(113, 137, 255, 0.28);
   --raised-sm: 2px 2px 5px rgba(0, 0, 0, 0.5), 5px 5px 12px rgba(0, 0, 0, 0.32),
     -2px -2px 5px rgba(255, 255, 255, 0.055), -5px -5px 12px rgba(255, 255, 255, 0.028),
@@ -79,8 +80,8 @@
     inset -2px -2px 5px rgba(255, 255, 255, 0.05), inset -5px -5px 12px rgba(255, 255, 255, 0.02);
   --hover-bg: rgba(113, 137, 255, 0.12);
   --scroll-thumb: rgba(0, 0, 0, 0.45);
-  --tr: 200ms;
-  --ease: cubic-bezier(0.33, 1, 0.68, 1);
+  --tr: 260ms;
+  --ease: ease-in-out;
 }
 
 * {
@@ -112,10 +113,11 @@ a:hover {
   text-decoration: underline;
 }
 
+/* Halo Focus: 大半径低不透明度 ring + 柔光阴影，不依赖硬边框 */
 :focus-visible {
-  outline: 2px solid var(--accent-soft);
-  outline-offset: 2px;
-  border-radius: 8px;
+  outline: none;
+  border-radius: 12px;
+  box-shadow: 0 0 0 3px var(--accent-soft), 0 0 14px var(--accent-glow);
 }
 
 /* ---------- 浮雕表面（柔和卡片） ---------- */
@@ -124,13 +126,22 @@ a:hover {
   border: 1px solid var(--edge);
   border-radius: 24px;
   box-shadow: var(--raised);
+  transition: box-shadow var(--tr) var(--ease), transform var(--tr) var(--ease);
 }
-
+.glass:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--raised-lg), 0 0 18px var(--accent-glow);
+}
 .glass-strong {
   background: var(--surface-2);
   border: 1px solid var(--edge);
   border-radius: 26px;
   box-shadow: var(--raised-lg);
+  transition: box-shadow var(--tr) var(--ease), transform var(--tr) var(--ease);
+}
+.glass-strong:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--raised-lg), 0 0 22px var(--accent-glow);
 }
 
 /* ---------- 胶囊按钮 ---------- */
@@ -153,13 +164,14 @@ a:hover {
   transition: box-shadow var(--tr) var(--ease), transform var(--tr) var(--ease),
     color var(--tr) var(--ease), background var(--tr) var(--ease);
 }
+/* Cloud Float: hover 上浮 + 阴影扩散带彩色光晕，Pillow Press: active 按入枕面 */
 .btn:hover {
   color: var(--accent);
   transform: translateY(-2px);
-  box-shadow: var(--raised);
+  box-shadow: var(--raised), 0 0 16px var(--accent-glow);
 }
 .btn:active {
-  transform: translateY(0);
+  transform: translateY(0) scale(0.98);
   box-shadow: var(--pressed-sm);
 }
 .btn-primary {
@@ -174,10 +186,11 @@ a:hover {
   color: var(--on-accent, #fff);
   transform: translateY(-2px);
   box-shadow: 3px 3px 7px var(--sh-dark), 10px 10px 24px var(--accent-glow),
+    0 0 18px var(--accent-glow),
     inset 0 1px 0 rgba(255, 255, 255, 0.32);
 }
 .btn-primary:active {
-  transform: translateY(1px);
+  transform: translateY(1px) scale(0.98);
   box-shadow: 1px 1px 3px var(--sh-dark), 3px 3px 10px var(--accent-glow),
     inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
@@ -223,10 +236,12 @@ a:hover {
   box-shadow: var(--inset);
   transition: border-color var(--tr) var(--ease), box-shadow var(--tr) var(--ease);
 }
+/* Halo Focus: 大半径低不透明度 ring + 柔光阴影 */
 .input:focus,
 .select:focus,
 .textarea:focus {
   border-color: var(--accent-soft);
+  box-shadow: 0 0 0 3px var(--accent-soft), 0 0 14px var(--accent-glow);
 }
 /* 下拉选项背景跟随主题（避免深色主题下展开为白底白字） */
 .select option {
