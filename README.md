@@ -16,6 +16,8 @@
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 ---
+#### ⬇️web版后台更新 | 🐳Docker版运行： docker compose pull && docker compose up -d
+
 ### 版本 2.1.14 · 2026-09-20
 
 - 🎛️ **细节优化**：修复主题闪烁
