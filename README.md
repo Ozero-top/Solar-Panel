@@ -31,19 +31,3 @@ V3 不自动迁移 V2.1 的数据库，请按「先导出、后导入」的顺�
 - 备份中的上传文件（图标 / Logo / 壁纸）随备份一起导入，无需单独拷贝 `uploads`
 - 升级后立即修改默认管理员密码；旧版浏览器缓存建议强制刷新一次
 
-## ✨ 特性
-
-- **零依赖单二进制** — Go + `modernc.org/sqlite`（纯 Go SQLite 实现），无 CGO、无外部数据库、无 PHP
-- **空库启动** — 首次启动只建表 + 写入默认设置 + 管理员账号，**不注入任何预置分组与卡片**，内容完全由用户自建
-- **两级分组导航** — 支持父子嵌套，侧边栏自动展开/折叠，实时搜索过滤
-- **九主题** — `soft` 柔和浮雕（默认）· `blueprint` 工程蓝图 · `clarity` 清透极简 · `soft-utility` 柔和工具 · `aurora` 动态极光 · `iris` 深空 HUD · 铅笔手绘 · `retro-vintage` 复古怀旧（羊皮纸 · 粗棕框 · 衬线大写）· `corporate-clean` 企业简洁（白卡细边 · 蓝主色 · 焦点环）
-- **热点新闻聚合** — 24 个内置源（微博 / 知乎 / B站 / GitHub Trending / IT之家 / V2EX / 少数派 / 掘金 等）+ 自定义 RSS
-- **天气 + 每日壁纸** — 顶部时钟、天气组件；壁纸源支持 `bing_cn`（默认）/ `nasa` / `picsum`
-- **卡片图标智能获取** — 手输域名自动抓取 favicon，也可上传本地图标
-- **favicon 三级缓存** — 内存 inflight 去重 → 磁盘 MD5 缓存 → 三源并发抓取（主站 `favicon.ico` / Google s2 / DuckDuckGo），响应 `ETag` + `Cache-Control: immutable`，二次访问 304 零 body
-- **安全** — Session + CSRF 双令牌 + 接口限流 + 角色权限 + TOTP 双因子 + 受信设备 + 审计日志
-- **PWA** — Service Worker 离线缓存，可安装为应用
-- **有序幂等迁移** — `schema_versions` 表追踪，新增 schema 变更只需在迁移列表末尾追加
-- **备份迁移** — 一键导出/导入 JSON（含上传文件 base64），分组按 `parent_id` 排序 + 新旧 ID 重映射
-- **浏览器书签导入** — 直接上传 Chrome/Edge 导出的 `bookmarks.html`
-
